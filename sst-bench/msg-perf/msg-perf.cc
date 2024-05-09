@@ -69,6 +69,9 @@ namespace SST::MsgPerf{
 
         std::vector<uint8_t> dummy;
         uint64_t id = (uint64_t)(iFace->getEndpointID());
+        output.verbose(CALL_INFO, 10, 0,
+                       "Broadcasting endpoint id=%" PRIu64 "\n",
+                       id);
         dummy.push_back( (uint8_t)(id&0b11111111) );
         dummy.push_back( (uint8_t)((id>>8)&0b11111111) );
         dummy.push_back( (uint8_t)((id>>16)&0b11111111) );
@@ -101,6 +104,9 @@ namespace SST::MsgPerf{
         endP |= ((uint64_t)(data[i]) << shift);
         shift += 8;
       }
+      output.verbose(CALL_INFO, 10, 0,
+                     "Receiving endpoint id=%" PRIu64 "\n",
+                     endP);
 
       endPoints.push_back(endP);
     }
@@ -214,9 +220,9 @@ namespace SST::MsgPerf{
     clockDelay = params.find<uint64_t>("clockDelay", 100);
 
     // error checking
-    if( endSize >= startSize ){
+    if( endSize <= startSize ){
       output.fatal(
-        CALL_INFO, -1, "Error : endSize >= startSize" );
+        CALL_INFO, -1, "Error : endSize <= startSize" );
     }
 
     // setup the network
@@ -280,6 +286,11 @@ namespace SST::MsgPerf{
 
     // step 3: send the payload
     nicEvent *ev = new nicEvent(payload);
+    output.verbose( CALL_INFO, 5, 0,
+                    "Sending message of %d bytes from %" PRIu64 " to %" PRIu64 "\n",
+                    (int)(payload.size()),
+                    (uint64_t)(Nic->getAddress()),
+                    dest );
     Nic->send(ev,dest);
 
     // TODO: record statistics
@@ -294,6 +305,10 @@ namespace SST::MsgPerf{
   bool MsgPerfCPU::clockTick( SST::Cycle_t currentCycle ) {
     // see if we're ready to finish
     if( curMsg == (uint64_t)(steps.size()) ){
+      output.verbose( CALL_INFO, 1, 0,
+                      "%s ready to end simulation\n",
+                      getName().c_str());
+      primaryComponentOKToEndSim();
       return true;
     }
 
@@ -302,7 +317,7 @@ namespace SST::MsgPerf{
     lastCycle = (uint64_t)(currentCycle);
     if( clockCount >= clockDelay ){
       sendMsg();
-      clockCount = 0 ;
+      clockCount = 0;
     }
     // -- end main event loop
 
