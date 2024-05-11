@@ -8,5 +8,6 @@
 #
 
 add_subdirectory(msg-perf)
+add_subdirectory(micro-comp)
 
 # EOF
