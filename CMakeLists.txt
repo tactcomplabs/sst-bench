@@ -27,6 +27,8 @@ if(NOT (EXISTS "${SST_INSTALL_DIR}"))
 endif()
 include_directories(SST_SRC ${SST_INSTALL_DIR})
 
+message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+
 # SST Configuration Sanity Check
 find_program(SST sst)
 
