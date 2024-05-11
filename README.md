@@ -2,6 +2,16 @@
 
 ## Getting Started
 
+The *sst-bench* infrastructure contains a set of specifically crafted 
+SST components, subcomponents, links and associated APIs designed to 
+exercise specific aspects of the Structural Simulation Toolkit.  The current 
+set of benchmarks includes:
+
+* *msg-perf* : Tests the performance of sending incrementally sized messages 
+over `simpleNetwork` links in a ring-network pattern.
+* *micro-comp* : Tests the performance of loading a large number of small components 
+using the various loading methodologies
+
 ## Prerequisites
 
 Given that this is an SST external component, the primary prerequisite is a
