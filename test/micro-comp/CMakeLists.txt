@@ -16,7 +16,7 @@ if(SSTBENCH_ENABLE_TESTING)
     get_filename_component(testName ${testSrc} NAME_WE)
     add_test(NAME ${testName}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND ${testSrc})
+      COMMAND sst ${testSrc})
     set_tests_properties(${testName}
       PROPERTIES
       TIMEOUT 30
