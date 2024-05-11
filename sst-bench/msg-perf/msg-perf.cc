@@ -196,6 +196,7 @@ namespace SST::MsgPerf{
     SST::Component( id ),
     startSize(8), endSize(16), stepSize(8), iters(1), clockDelay(100),
     curMsg(0), msgIter(0), clockCount(0), lastCycle(0),
+    sendStatPtr(0), recvStatPtr(0),
     timeConverter(nullptr), clockHandler(nullptr), Nic(nullptr){
 
     const int Verbosity = params.find< int >( "verbose", 0 );
@@ -259,6 +260,8 @@ namespace SST::MsgPerf{
     nicEvent* event = static_cast< nicEvent* >( ev );
     delete event;
     // TODO: record statistics
+    //RecvClock[recvStatPtr]->addData((uint64_t)(currentCycle));
+    recvStatPtr++;
   }
 
   void MsgPerfCPU::setupSteps(){
@@ -267,6 +270,25 @@ namespace SST::MsgPerf{
       steps.push_back(cur);
       cur += stepSize;
     }while( cur <= endSize );
+
+    // setup all the statistics
+    BitsSent = registerStatistic<uint64_t>("BitsSent");
+    for( unsigned i=0; i<steps.size(); i++ ){
+      for( uint64_t j=0; j<iters; j++ ){
+        // step i; iter j statistics
+        std::string post = std::to_string(steps[i]) + "_" + std::to_string(j);
+        ByteSize.push_back(
+          registerStatistic<uint64_t>(
+            "ByteSize", post));
+        SentClock.push_back(
+          registerStatistic<uint64_t>(
+            "SentClock", post));
+        RecvClock.push_back(
+          registerStatistic<uint64_t>(
+            "RecvClock", post));
+      }
+    }
+
     output.verbose( CALL_INFO,
                     2,
                     0,
@@ -293,7 +315,7 @@ namespace SST::MsgPerf{
                     dest );
     Nic->send(ev,dest);
 
-    // TODO: record statistics
+    BitsSent->addData(payload.size()*8);
 
     msgIter++;
     if( msgIter == iters ){
@@ -316,7 +338,10 @@ namespace SST::MsgPerf{
     clockCount += (uint64_t)(currentCycle) - lastCycle;
     lastCycle = (uint64_t)(currentCycle);
     if( clockCount >= clockDelay ){
+      ByteSize[sendStatPtr]->addData(steps[curMsg]);
+      SentClock[sendStatPtr]->addData((uint64_t)(currentCycle));
       sendMsg();
+      sendStatPtr++;
       clockCount = 0;
     }
     // -- end main event loop

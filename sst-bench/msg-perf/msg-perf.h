@@ -244,7 +244,12 @@ public:
   // -------------------------------------------------------
   // MsgPerfCPU Component Statistics Data
   // -------------------------------------------------------
-  SST_ELI_DOCUMENT_STATISTICS()
+  SST_ELI_DOCUMENT_STATISTICS(
+    {"BitsSent",  "Number of bits sent",  "count",  1},
+    {"ByteSize",  "Byte size of payload", "size",   1},
+    {"SentClock", "Sent clock cycle",     "cycle",  1},
+    {"RecvClock", "Recv clock cycle",     "cycle",  1},
+  )
 
 private:
   // -- parameters
@@ -259,12 +264,21 @@ private:
   uint64_t clockCount;      ///< clock counter
   uint64_t lastCycle;       ///< last encountered cycle
 
+  unsigned sendStatPtr;     ///< sent current statistic pointer
+  unsigned recvStatPtr;     ///< recv current statistic pointer
+
   SST::Output    output;          ///< SST output handler
   TimeConverter* timeConverter;   ///< SST time conversion handler
   SST::Clock::Handler< MsgPerfCPU >* clockHandler;  ///< Clock Handler
   MsgPerfAPI* Nic;                ///< Network interface controller
 
   std::vector<uint64_t> steps;    ///< size of each step
+
+  // -- statistics
+  Statistic<uint64_t>* BitsSent;
+  std::vector<Statistic<uint64_t>*> ByteSize;
+  std::vector<Statistic<uint64_t>*> SentClock;
+  std::vector<Statistic<uint64_t>*> RecvClock;
 
   // -- private methods
   /// MsgPerfCPU : setup each simulation step

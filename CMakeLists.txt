@@ -104,7 +104,8 @@ if(SSTBENCH_ENABLE_TESTING)
 endif()
 
 #-- Custom Commands
-add_custom_target(uninstall COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/uninstall.sh")
+add_custom_target(uninstall COMMAND
+  "${CMAKE_CURRENT_SOURCE_DIR}/scripts/uninstall.sh")
 
 #-- Subdirectories
 add_subdirectory(sst-bench)
