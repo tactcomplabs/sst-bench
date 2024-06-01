@@ -54,6 +54,12 @@ execute_process(COMMAND sst-config SST_ELEMENT_LIBRARY SST_ELEMENT_LIBRARY_LIBDI
                 OUTPUT_VARIABLE SST_ELEMENT_LIBRARY_LIBDIR
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/sst-major-version.sh
+                OUTPUT_VARIABLE SST_MAJOR_VERSION
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                )
+
+message(STATUS "SST MAJOR VERSION=${SST_MAJOR_VERSION}")
 
 #-- Compiler Options
 # Compiler Options
@@ -73,7 +79,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++17 ${FP_MODE_FLAG} -g -pg 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
 
 #-- SST-Bench Paths
-set(SSTBENCH_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sstdata/include" CACHE PATH "SST-Data include path")
+#set(SSTBENCH_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sstdata/include" CACHE PATH "SST-Data include path")
 
 #---------------------------------------------
 # TARGET OPTIONS
