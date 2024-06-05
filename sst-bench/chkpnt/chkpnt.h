@@ -14,6 +14,7 @@
 // -- Standard Headers
 #include <vector>
 #include <queue>
+#include <random>
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -30,6 +31,9 @@
 #include <sst/core/subcomponent.h>
 #include <sst/core/timeConverter.h>
 #include <sst/core/model/element_python.h>
+#include <sst/core/rng/distrib.h>
+#include <sst/core/rng/rng.h>
+#include <sst/core/rng/mersenne.h>
 
 namespace SST::Chkpnt{
 
@@ -43,6 +47,8 @@ public:
 
   /// ChkpntEvent: constructor
   ChkpntEvent(std::vector<unsigned> d) : SST::Event(), data(d) {}
+
+  /// ChkpntEvent: destructor
   ~ChkpntEvent();
 
   /// ChkpntEvent: retrieve the data
@@ -74,10 +80,10 @@ public:
   ~Chkpnt();
 
   /// Chkpnt: standard SST component 'setup' function
-  void setup();
+  void setup() override;
 
   /// Chkpnt: standard SST component 'finish' function
-  void finish();
+  void finish() override;
 
   /// Chkpnt: standard SST component init function
   void init( unsigned int phase );
@@ -103,6 +109,7 @@ public:
     {"maxData",         "Maximum number of unsigned values",    "2" },
     {"clockDelay",      "Clock delay between sends",            "1" },
     {"clocks",          "Clock cycles to execute",              "1000"},
+    {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
     {"clockFreq",       "Clock frequency",                      "1GHz"},
   )
 
@@ -144,11 +151,29 @@ private:
   TimeConverter* timeConverter;                   ///< SST time conversion handler
   SST::Clock::HandlerBase* clockHandler;          ///< Clock Handler
 
+  // -- parameters
+  unsigned numPorts;                              ///< number of ports to configure
+  uint64_t minData;                               ///< minimum number of data elements
+  uint64_t maxData;                               ///< maxmium number of data elements
+  uint64_t clockDelay;                            ///< clock delay between sends
+  uint64_t clocks;                                ///< number of clocks to execute
+  uint64_t curCycle;                              ///< current cycle delay
+
+  // -- rng objects
+  SST::RNG::Random* mersenne;                     ///< mersenne twister object
+
   std::vector<SST::Link *> linkHandlers;          ///< LinkHandler objects
+
+  // -- private methods
+  /// event handler
+  void handleEvent(SST::Event *ev);
+
+  /// sends data to adjacent links
+  void sendData();
 
 };  // class Chkpnt
 }   // namespace SST::Chkpnt
 
-#endif  // _SST_MICROCOMP_H_
+#endif  // _SST_CHKPNT_H_
 
 // EOF
