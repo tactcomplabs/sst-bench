@@ -93,13 +93,12 @@ void Chkpnt::handleEvent(SST::Event *ev){
 }
 
 void Chkpnt::sendData(){
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distr(minData, maxData);
   for( unsigned i=0; i<numPorts; i++ ){
     // generate a new payload
     std::vector<unsigned> data;
-    for( unsigned i=0; i<distr(gen); i++ ){
+    unsigned range = maxData - minData + 1;
+    unsigned r = rand() % range + minData;
+    for( unsigned i=0; i<r; i++ ){
       data.push_back((unsigned)(mersenne->generateNextUInt32()));
     }
     output.verbose(CALL_INFO, 5, 0,
@@ -113,6 +112,7 @@ void Chkpnt::sendData(){
 
 bool Chkpnt::clockTick( SST::Cycle_t currentCycle ){
 
+  // check to see whether we need to send data over the links
   curCycle++;
   if( curCycle >= clockDelay ){
     sendData();
