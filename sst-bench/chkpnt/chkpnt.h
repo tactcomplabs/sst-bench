@@ -49,10 +49,10 @@ public:
   ChkpntEvent(std::vector<unsigned> d) : SST::Event(), data(d) {}
 
   /// ChkpntEvent: destructor
-  ~ChkpntEvent();
+  ~ChkpntEvent() {}
 
   /// ChkpntEvent: retrieve the data
-  std::vector<unsigned> getData() { return data; }
+  std::vector<unsigned> const getData() { return data; }
 
 private:
   std::vector<unsigned> data;     ///< ChkpntEvent: data payload
