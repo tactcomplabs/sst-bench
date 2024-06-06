@@ -19,13 +19,13 @@ Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
   curCycle(0) {
+
   const int Verbosity = params.find< int >( "verbose", 0 );
   output.init(
     "Chkpnt[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
   const std::string cpuClock = params.find< std::string >("clockFreq", "1GHz");
-  clockHandler  = new SST::Clock::Handler<Chkpnt>(this,
-                                                  &Chkpnt::clockTick);
+  clockHandler  = new SST::Clock::Handler2<Chkpnt,&Chkpnt::clockTick>(this);
   timeConverter = registerClock(cpuClock, clockHandler);
   registerAsPrimaryComponent();
   primaryComponentDoNotEndSim();
@@ -68,6 +68,9 @@ void Chkpnt::finish(){
 }
 
 void Chkpnt::init( unsigned int phase ){
+}
+
+void Chkpnt::printStatus( Output& out ){
 }
 
 void Chkpnt::serialize_order(SST::Core::Serialization::serializer& ser){

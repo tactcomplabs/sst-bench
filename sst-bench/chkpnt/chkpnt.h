@@ -60,7 +60,7 @@ private:
   /// ChkpntEvent: serialization method
   void serialize_order(SST::Core::Serialization::serializer& ser) override{
     Event::serialize_order(ser);
-    SST_SER(data);
+    SST_SER(data)
   }
 
   /// ChkpntEvent: serialization implementor
@@ -86,7 +86,10 @@ public:
   void finish() override;
 
   /// Chkpnt: standard SST component init function
-  void init( unsigned int phase );
+  void init( unsigned int phase ) override;
+
+  /// Chkpnt: standard SST component printStatus
+  void printStatus(Output& out) override;
 
   /// Chkpnt: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );
