@@ -257,8 +257,7 @@ namespace SST::MsgPerf{
   }
 
   void MsgPerfCPU::handleMessage( Event *ev ){
-    nicEvent* event = static_cast< nicEvent* >( ev );
-    delete event;
+    delete ev;
     // TODO: record statistics
     //RecvClock[recvStatPtr]->addData((uint64_t)(currentCycle));
     recvStatPtr++;

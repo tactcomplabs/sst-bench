@@ -7,7 +7,15 @@
 # See LICENSE in the top level directory for licensing details
 #
 
+message(STATUS "[SST-BENCH] Enabling MSG-PERF micro-benchmark")
 add_subdirectory(msg-perf)
+
+message(STATUS "[SST-BENCH] Enabling MICRO-COMP micro-benchmark")
 add_subdirectory(micro-comp)
+
+if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
+  message(STATUS "[SST-BENCH] Enabling CHKPNT micro-benchmark")
+  add_subdirectory(chkpnt)
+endif()
 
 # EOF
