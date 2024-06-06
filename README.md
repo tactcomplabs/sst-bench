@@ -11,6 +11,10 @@ set of benchmarks includes:
 over `simpleNetwork` links in a ring-network pattern.
 * *micro-comp* : Tests the performance of loading a large number of small components 
 using the various loading methodologies
+* *chkpnt* : Tests the performance of the checkpoint/restart functionality 
+present in SST-14.0.0+.  Note that this test is currently only built when SST 
+14.0.0 is detected and can be only run in sequential execution mode.  Threading 
+and MPI are not currently supported for checkpoint/restart in SST 14.0.0.
 
 ## Prerequisites
 
@@ -45,7 +49,15 @@ run with `make test`
 ## Testing
 
 Utilize the included test harness to test and ensure all tests are passing 
-before opening new pull requests
+before opening new pull requests.  The test harness can be enabled when 
+you run the CMake configuration step as follows:
+
+```
+cmake -DSSTBENCH_ENABLE_TESTING=ON ../
+make -j
+make install
+make test
+```
 
 ## Contributing
 
