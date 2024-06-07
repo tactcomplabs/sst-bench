@@ -1,0 +1,10 @@
+*.so
+*.dylib
+*.exe
+.vscode
+*.dylib
+.#*
+*~
+.gdb_history
+*.out
+build/*

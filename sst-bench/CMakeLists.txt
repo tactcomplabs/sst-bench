@@ -16,6 +16,8 @@ add_subdirectory(micro-comp)
 if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   message(STATUS "[SST-BENCH] Enabling CHKPNT micro-benchmark")
   add_subdirectory(chkpnt)
+  message(STATUS "[SST-BENCH] Enabling RESTORE micro-benchmark")
+  add_subdirectory(restore)
 endif()
 
 # EOF
