@@ -17,6 +17,8 @@ present in SST-14.0.0+.  Note that this test is currently only built when SST
 and MPI are not currently supported for checkpoint/restart in SST 14.0.0.
 * *restore* : Tests the storing and loading of well-defined simulation component data using 
 the SST 14.0.0 checkpoint/restart functionality
+* *restart* : Sanity checks data after a context restore operation using the 
+SST 14.0.0 checkpoint/restart functionality
 
 ## Prerequisites
 

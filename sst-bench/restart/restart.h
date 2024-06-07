@@ -1,5 +1,5 @@
 //
-// _restore_h_
+// _restart_h_
 //
 // Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,8 +8,8 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#ifndef _SST_RESTORE_H_
-#define _SST_RESTORE_H_
+#ifndef _SST_RESTART_H_
+#define _SST_RESTART_H_
 
 // -- Standard Headers
 #include <vector>
@@ -35,79 +35,79 @@
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 
-namespace SST::Restore{
+namespace SST::Restart{
 
 // -------------------------------------------------------
-// Restore
+// Restart
 // -------------------------------------------------------
-class Restore : public SST::Component{
+class Restart : public SST::Component{
 public:
-  /// Restore: top-level SST component constructor
-  Restore( SST::ComponentId_t id, const SST::Params& params );
+  /// Restart: top-level SST component constructor
+  Restart( SST::ComponentId_t id, const SST::Params& params );
 
-  /// Restore: top-level SST component destructor
-  ~Restore();
+  /// Restart: top-level SST component destructor
+  ~Restart();
 
-  /// Restore: standard SST component 'setup' function
+  /// Restart: standard SST component 'setup' function
   void setup() override;
 
-  /// Restore: standard SST component 'finish' function
+  /// Restart: standard SST component 'finish' function
   void finish() override;
 
-  /// Restore: standard SST component init function
+  /// Restart: standard SST component init function
   void init( unsigned int phase ) override;
 
-  /// Restore: standard SST component printStatus
+  /// Restart: standard SST component printStatus
   void printStatus(Output& out) override;
 
-  /// Restore: standard SST component clock function
+  /// Restart: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );
 
   // -------------------------------------------------------
-  // Restore Component Registration Data
+  // Restart Component Registration Data
   // -------------------------------------------------------
-  /// Restore: Register the component with the SST core
-  SST_ELI_REGISTER_COMPONENT( Restore,     // component class
-                              "restore",   // component library
-                              "Restore",   // component name
+  /// Restart: Register the component with the SST core
+  SST_ELI_REGISTER_COMPONENT( Restart,     // component class
+                              "restart",   // component library
+                              "Restart",   // component name
                               SST_ELI_ELEMENT_VERSION( 1, 0, 0 ),
-                              "RESTORE SST COMPONENT",
+                              "RESTART SST COMPONENT",
                               COMPONENT_CATEGORY_UNCATEGORIZED )
 
   SST_ELI_DOCUMENT_PARAMS(
     {"verbose",         "Sets the verbosity level of output",   "0" },
     {"numBytes",        "Sets the number of stored bytes (4 byte increments)", "64KB"},
     {"clocks",          "Clock cycles to execute",              "1000"},
-    {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
+    {"baseSeed",        "Base seed value",                      "1223"},
     {"clockFreq",       "Clock frequency",                      "1GHz"},
   )
 
   // -------------------------------------------------------
-  // Restore Component Port Data
+  // Restart Component Port Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_PORTS()
 
   // -------------------------------------------------------
-  // Restore SubComponent Parameter Data
+  // Restart SubComponent Parameter Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_SUBCOMPONENT_SLOTS()
 
   // -------------------------------------------------------
-  // Restore Component Statistics Data
+  // Restart Component Statistics Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_STATISTICS()
 
   // -------------------------------------------------------
-  // Restore Component Checkpoint Methods
+  // Restart Component Checkpoint Methods
   // -------------------------------------------------------
-  /// Restore: serialization constructor
-  Restore() : SST::Component() {}
+  /// Restart: serialization constructor
+  Restart() : SST::Component() {}
 
-  /// Restore: serialization
+  /// Restart: serialization
   void serialize_order(SST::Core::Serialization::serializer& ser) override;
 
-  /// Restore: serialization implementations
-  ImplementSerializable(SST::Restore::Restore)
+  /// Restart: serialization implementations
+  ImplementSerializable(SST::Restart::Restart)
 
 private:
   // -- internal handlers
@@ -118,16 +118,14 @@ private:
   // -- parameters
   uint64_t numBytes;                              ///< number of bytes to store
   uint64_t clocks;                                ///< number of clocks to execute
-
-  // -- rng objects
-  SST::RNG::Random* mersenne;                     ///< mersenne twister object
+  unsigned baseSeed;                              ///< base seed value
 
   // -- internal data
   std::vector<unsigned> data;                     ///< internal data structure
 
-};  // class Restore
-}   // namespace SST::Restore
+};  // class Restart
+}   // namespace SST::Restart
 
-#endif  // _SST_RESTORE_H_
+#endif  // _SST_RESTART_H_
 
 // EOF
