@@ -17,6 +17,8 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   add_subdirectory(chkpnt)
   message(STATUS "[SST-BENCH] Enabling RESTORE testing")
   add_subdirectory(restore)
+  message(STATUS "[SST-BENCH] Enabling RESTART testing")
+  add_subdirectory(restart)
 endif()
 
 # EOF
