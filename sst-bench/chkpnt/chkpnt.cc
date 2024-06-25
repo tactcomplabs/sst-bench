@@ -75,15 +75,15 @@ void Chkpnt::printStatus( Output& out ){
 
 void Chkpnt::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SST_SER(clockHandler)
-  SST_SER(numPorts)
-  SST_SER(minData)
-  SST_SER(maxData)
-  SST_SER(clockDelay)
-  SST_SER(clocks)
-  SST_SER(curCycle)
-  SST_SER(mersenne)
-  SST_SER(linkHandlers)
+  SER_INI(clockHandler)
+  SER_INI(numPorts)
+  SER_INI(minData)
+  SER_INI(maxData)
+  SER_INI(clockDelay)
+  SER_INI(clocks)
+  SER_INI(curCycle)
+  SER_INI(mersenne)
+  SER_INI(linkHandlers)
 }
 
 void Chkpnt::handleEvent(SST::Event *ev){
