@@ -22,7 +22,7 @@ def seg_info(rec):
     seg_name = rec['seg_name']
     seg_num = int(rec['seg_num'])
     seg_size = int(rec['seg_size'])
-    # print(f"Processing segment {seg_num} {seg_name} starting at {g_seg_pos} size {seg_size}")
+    print(f"Processing segment {seg_num} {seg_name} starting at {g_seg_pos} size {seg_size}")
     if (seg_num != g_next_seg_num):
         print(f"seg_num mismatch {g_next_seg_num}", file=sys.stderr)
         exit(1)
@@ -79,16 +79,20 @@ def main():
     print(f"\nLoading checkpoint file {args.cpt_file}")
     with open(args.cpt_file, mode='rb') as datafile:
           data = datafile.read()
-    obj_list = ['simulation_impl.currentSimCycle']
-    # obj_list = ['cp0.curCycle', 'cp1.curCycle']
+    
+    # Look at some variables
+    obj_list = ['config_options.seg0begin', 'config_options.marker0', 'config_options.seg0end' ]
+    obj_list.extend(['loaded_libraries.seg1begin', 'loaded_libraries.seg1end'])
+    obj_list.extend(['simulation_impl.seg2begin', 
+                     'simulation_impl.marker0', 'simulation_impl.marker1', 'simulation_impl.marker2',
+                     'simulation_impl.seg2end'])
+    obj_list.extend(['simulation_impl.currentSimCycle'])
+    obj_list.extend(['cp0.curCycle', 'cp1.curCycle'])
     for s in obj_list:
         pos = g_name2pos[s]
         type = g_hash2type[g_name2hash[s]]
         value = struct.unpack_from("Q", data, pos)
-        print(f"{s} pos={pos} type='{type}' value=0x{value[0]:x}")
-          
-
-    
+        print(f"{s} type='{type}' pos=0x{pos:x}  value=0x{value[0]:x}")
 
 if __name__ == "__main__":
     main()

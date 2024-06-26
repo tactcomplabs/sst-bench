@@ -54,6 +54,8 @@ Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
                                          &Chkpnt::handleEvent>(this)));
   }
 
+  // debug marker
+  markerMsg = "MARKER-" + this->getName();
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
 }
@@ -73,17 +75,26 @@ void Chkpnt::init( unsigned int phase ){
 void Chkpnt::printStatus( Output& out ){
 }
 
+#if 1
+#define _SER_ SER_INI
+#else
+#define _SER_ SST_SER
+#endif
+
 void Chkpnt::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SER_INI(clockHandler)
-  SER_INI(numPorts)
-  SER_INI(minData)
-  SER_INI(maxData)
-  SER_INI(clockDelay)
-  SER_INI(clocks)
-  SER_INI(curCycle)
-  SER_INI(mersenne)
-  SER_INI(linkHandlers)
+  _SER_(clockHandler)
+  _SER_(numPorts)
+  _SER_(minData)
+  _SER_(maxData)
+  _SER_(clockDelay)
+  _SER_(clocks)
+  _SER_(markerMsg)
+  _SER_(markerBegin)
+  _SER_(curCycle)
+  _SER_(markerEnd)
+  _SER_(mersenne)
+  _SER_(linkHandlers)
 }
 
 void Chkpnt::handleEvent(SST::Event *ev){

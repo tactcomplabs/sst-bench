@@ -162,6 +162,11 @@ private:
   uint64_t clocks;                                ///< number of clocks to execute
   uint64_t curCycle;                              ///< current cycle delay
 
+  // -- checkpoint debug markers
+  std::string markerMsg;
+  uint64_t markerBegin = 0xa5a5a5a5a5a5a5a5ULL;
+  uint64_t markerEnd   = 0xf0f0f0f0f0f0f0f0ULL;
+
   // -- rng objects
   SST::RNG::Random* mersenne;                     ///< mersenne twister object
 
