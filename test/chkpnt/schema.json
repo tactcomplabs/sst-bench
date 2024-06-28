@@ -3,7 +3,7 @@
 "rec_type" : "seg_info",
 "seg_name" : "config_options",
 "seg_num" : "0",
-"seg_size" : "650",
+"seg_size" : "903",
 "names" :
 [
    {"name" : "seg0begin" , "pos" : "8" , "hash_code" : "0x1911a4441" },
@@ -11,16 +11,16 @@
    {"name" : "num_ranks.rank" , "pos" : "24" , "hash_code" : "0x1911a441d" },
    {"name" : "num_ranks.thread" , "pos" : "28" , "hash_code" : "0x1911a441d" },
    {"name" : "libpath" , "pos" : "32" , "hash_code" : "0x61cff16e98e71d45" },
-   {"name" : "timeLord.timeBaseString" , "pos" : "111" , "hash_code" : "0x61cff16e98e71d45" },
-   {"name" : "output_directory" , "pos" : "119" , "hash_code" : "0x61cff16e98e71d45" },
-   {"name" : "prefix" , "pos" : "167" , "hash_code" : "0x61cff16e98e71d45" },
-   {"name" : "verbose" , "pos" : "184" , "hash_code" : "0x1911a441d" },
-   {"name" : "globalOutputFileName" , "pos" : "188" , "hash_code" : "0x61cff16e98e71d45" },
-   {"name" : "checkpointPrefix" , "pos" : "201" , "hash_code" : "0x61cff16e98e71d45" },
-   {"name" : "Params::keyMap" , "pos" : "210" , "hash_code" : "0x19648126f1d46db6" },
-   {"name" : "Params::keyMapReverse" , "pos" : "443" , "hash_code" : "0xa52406aa94705684" },
-   {"name" : "Params::nextKeyID" , "pos" : "638" , "hash_code" : "0x1911a441d" },
-   {"name" : "seg0end" , "pos" : "642" , "hash_code" : "0x1911a4441" }
+   {"name" : "timeLord.timeBaseString" , "pos" : "364" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "output_directory" , "pos" : "372" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "prefix" , "pos" : "420" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "verbose" , "pos" : "437" , "hash_code" : "0x1911a441d" },
+   {"name" : "globalOutputFileName" , "pos" : "441" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "checkpointPrefix" , "pos" : "454" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "Params::keyMap" , "pos" : "463" , "hash_code" : "0x19648126f1d46db6" },
+   {"name" : "Params::keyMapReverse" , "pos" : "696" , "hash_code" : "0xa52406aa94705684" },
+   {"name" : "Params::nextKeyID" , "pos" : "891" , "hash_code" : "0x1911a441d" },
+   {"name" : "seg0end" , "pos" : "895" , "hash_code" : "0x1911a4441" }
 ]
 },
 {
@@ -56,12 +56,12 @@
    {"name" : "currentPriority" , "pos" : "100" , "hash_code" : "0x1911a4414" },
    {"name" : "endSimCycle" , "pos" : "104" , "hash_code" : "0x1911a4441" },
    {"name" : "output_directory" , "pos" : "112" , "hash_code" : "0x61cff16e98e71d45" },
-   {"name" : "timeLord" , "pos" : "160" , "hash_code" : "0x104c79cb0" },
+   {"name" : "timeLord" , "pos" : "160" , "hash_code" : "0x102efdcb0" },
    {"name" : "m_exit" , "pos" : "194" , "hash_code" : "0xc183b7a5ea3beeed" },
    {"name" : "syncManager" , "pos" : "286" , "hash_code" : "0xc0ceea581faca48d" },
    {"name" : "m_heartbeat" , "pos" : "394" , "hash_code" : "0xe14ad24b49e9172e" },
    {"name" : "StatisticProcessingEngine::m_statOutputs" , "pos" : "402" , "hash_code" : "0x386f2af2b35614b2" },
-   {"name" : "stat_engine" , "pos" : "492" , "hash_code" : "0x104c7a7fa" },
+   {"name" : "stat_engine" , "pos" : "492" , "hash_code" : "0x102efe7fa" },
    {"name" : "SharedObject::manager" , "pos" : "505" , "hash_code" : "0xc32243002b4b4ae8" },
    {"name" : "marker0" , "pos" : "513" , "hash_code" : "0x1911a4441" },
    {"name" : "clockMap" , "pos" : "521" , "hash_code" : "0x1d57792d7d434285" },
@@ -164,8 +164,8 @@
 {
 "rec_type" : "type_info",
 "type_info": [
-   {"hash_code" : "0x104c79cb0" , "name" : "SST::TimeLord" , "size" : "272" },
-   {"hash_code" : "0x104c7a7fa" , "name" : "SST::Statistics::StatisticProcessingEngine" , "size" : "400" },
+   {"hash_code" : "0x102efdcb0" , "name" : "SST::TimeLord" , "size" : "272" },
+   {"hash_code" : "0x102efe7fa" , "name" : "SST::Statistics::StatisticProcessingEngine" , "size" : "400" },
    {"hash_code" : "0x1911a43d5" , "name" : "bool" , "size" : "1" },
    {"hash_code" : "0x1911a43ec" , "name" : "char const*" , "size" : "8" },
    {"hash_code" : "0x1911a4414" , "name" : "int" , "size" : "4" },
