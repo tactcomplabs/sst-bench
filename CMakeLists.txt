@@ -58,7 +58,12 @@ execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/sst-major-version.sh
                 OUTPUT_VARIABLE SST_MAJOR_VERSION
                 OUTPUT_STRIP_TRAILING_WHITESPACE
                 )
+execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/sst-version.sh
+                OUTPUT_VARIABLE SST_VERSION
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                )
 
+message(STATUS "SST VERSION=${SST_VERSION}")
 message(STATUS "SST MAJOR VERSION=${SST_MAJOR_VERSION}")
 
 #-- Compiler Options

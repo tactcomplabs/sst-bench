@@ -19,8 +19,14 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   add_subdirectory(restore)
   message(STATUS "[SST-BENCH] Enabling RESTART testing")
   add_subdirectory(restart)
+endif()
+
+if (${SST_VERSION} STREQUAL "14.0.0.kg")
+  message(STATUS "SST VERSION=${SST_VERSION}")
   message(STATUS "[SST-BENCH] Enabling DBGPROTO testing")
   add_subdirectory(dbgproto)
+else()
+  message(WARNING "[SST-BENCH] DBGPROTO testing requires sst version 14.0.0.kg")
 endif()
 
 # EOF
