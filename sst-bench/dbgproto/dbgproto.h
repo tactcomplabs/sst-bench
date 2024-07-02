@@ -1,5 +1,5 @@
 //
-// _chkpnt_h_
+// _DbgProto_h_
 //
 // Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,8 +8,8 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#ifndef _SST_CHKPNT_H_
-#define _SST_CHKPNT_H_
+#ifndef _SST_DBGPROTO_H_
+#define _SST_DBGPROTO_H_
 
 // -- Standard Headers
 #include <vector>
@@ -35,74 +35,74 @@
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 
-namespace SST::Chkpnt{
+namespace SST::DbgProto{
 
 // -------------------------------------------------------
-// ChkpntEvent
+// DbgProtoEvent
 // -------------------------------------------------------
-class ChkpntEvent : public SST::Event{
+class DbgProtoEvent : public SST::Event{
 public:
-  /// ChkpntEvent : standard constructor
-  ChkpntEvent() : SST::Event() {}
+  /// DbgProtoEvent : standard constructor
+  DbgProtoEvent() : SST::Event() {}
 
-  /// ChkpntEvent: constructor
-  ChkpntEvent(std::vector<unsigned> d) : SST::Event(), data(d) {}
+  /// DbgProtoEvent: constructor
+  DbgProtoEvent(std::vector<unsigned> d) : SST::Event(), data(d) {}
 
-  /// ChkpntEvent: destructor
-  ~ChkpntEvent() {}
+  /// DbgProtoEvent: destructor
+  ~DbgProtoEvent() {}
 
-  /// ChkpntEvent: retrieve the data
+  /// DbgProtoEvent: retrieve the data
   std::vector<unsigned> const getData() { return data; }
 
 private:
-  std::vector<unsigned> data;     ///< ChkpntEvent: data payload
+  std::vector<unsigned> data;     ///< DbgProtoEvent: data payload
 
-  /// ChkpntEvent: serialization method
+  /// DbgProtoEvent: serialization method
   void serialize_order(SST::Core::Serialization::serializer& ser) override{
     Event::serialize_order(ser);
     SST_SER(data)
   }
 
-  /// ChkpntEvent: serialization implementor
-  ImplementSerializable(SST::Chkpnt::ChkpntEvent);
+  /// DbgProtoEvent: serialization implementor
+  ImplementSerializable(SST::DbgProto::DbgProtoEvent);
 
-};  // class ChkpntEvent
+};  // class DbgProtoEvent
 
 // -------------------------------------------------------
-// Chkpnt
+// DbgProto
 // -------------------------------------------------------
-class Chkpnt : public SST::Component{
+class DbgProto : public SST::Component{
 public:
-  /// Chkpnt: top-level SST component constructor
-  Chkpnt( SST::ComponentId_t id, const SST::Params& params );
+  /// DbgProto: top-level SST component constructor
+  DbgProto( SST::ComponentId_t id, const SST::Params& params );
 
-  /// Chkpnt: top-level SST component destructor
-  ~Chkpnt();
+  /// DbgProto: top-level SST component destructor
+  ~DbgProto();
 
-  /// Chkpnt: standard SST component 'setup' function
+  /// DbgProto: standard SST component 'setup' function
   void setup() override;
 
-  /// Chkpnt: standard SST component 'finish' function
+  /// DbgProto: standard SST component 'finish' function
   void finish() override;
 
-  /// Chkpnt: standard SST component init function
+  /// DbgProto: standard SST component init function
   void init( unsigned int phase ) override;
 
-  /// Chkpnt: standard SST component printStatus
+  /// DbgProto: standard SST component printStatus
   void printStatus(Output& out) override;
 
-  /// Chkpnt: standard SST component clock function
+  /// DbgProto: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );
 
   // -------------------------------------------------------
-  // Chkpnt Component Registration Data
+  // DbgProto Component Registration Data
   // -------------------------------------------------------
-  /// Chkpnt: Register the component with the SST core
-  SST_ELI_REGISTER_COMPONENT( Chkpnt,     // component class
-                              "chkpnt",   // component library
-                              "Chkpnt",   // component name
+  /// DbgProto: Register the component with the SST core
+  SST_ELI_REGISTER_COMPONENT( DbgProto,     // component class
+                              "dbgproto",   // component library
+                              "DbgProto",   // component name
                               SST_ELI_ELEMENT_VERSION( 1, 0, 0 ),
-                              "CHKPNT SST COMPONENT",
+                              "DbgProto SST COMPONENT",
                               COMPONENT_CATEGORY_UNCATEGORIZED )
 
   SST_ELI_DOCUMENT_PARAMS(
@@ -117,36 +117,36 @@ public:
   )
 
   // -------------------------------------------------------
-  // Chkpnt Component Port Data
+  // DbgProto Component Port Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_PORTS(
     {"port%(num_ports)d",
       "Ports which connect to endpoints.",
-      {"chkpnt.ChkpntEvent", ""}
+      {"DbgProto.DbgProtoEvent", ""}
     }
   )
 
   // -------------------------------------------------------
-  // Chkpnt SubComponent Parameter Data
+  // DbgProto SubComponent Parameter Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_SUBCOMPONENT_SLOTS()
 
   // -------------------------------------------------------
-  // Chkpnt Component Statistics Data
+  // DbgProto Component Statistics Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_STATISTICS()
 
   // -------------------------------------------------------
-  // Chkpnt Component Checkpoint Methods
+  // DbgProto Component Checkpoint Methods
   // -------------------------------------------------------
-  /// Chkpnt: serialization constructor
-  Chkpnt() : SST::Component() {}
+  /// DbgProto: serialization constructor
+  DbgProto() : SST::Component() {}
 
-  /// Chkpnt: serialization
+  /// DbgProto: serialization
   void serialize_order(SST::Core::Serialization::serializer& ser) override;
 
-  /// Chkpnt: serialization implementations
-  ImplementSerializable(SST::Chkpnt::Chkpnt)
+  /// DbgProto: serialization implementations
+  ImplementSerializable(SST::DbgProto::DbgProto)
 
 private:
   // -- internal handlers
@@ -162,6 +162,11 @@ private:
   uint64_t clocks;                                ///< number of clocks to execute
   uint64_t curCycle;                              ///< current cycle delay
 
+  // -- checkpoint debug markers
+  std::string markerMsg;
+  uint64_t markerBegin = 0xa5a5a5a5a5a5a5a5ULL;
+  uint64_t markerEnd   = 0xf0f0f0f0f0f0f0f0ULL;
+
   // -- rng objects
   SST::RNG::Random* mersenne;                     ///< mersenne twister object
 
@@ -174,9 +179,9 @@ private:
   /// sends data to adjacent links
   void sendData();
 
-};  // class Chkpnt
-}   // namespace SST::Chkpnt
+};  // class DbgProto
+}   // namespace SST::DbgProto
 
-#endif  // _SST_CHKPNT_H_
+#endif  // _SST_DBGPROTO_H_
 
 // EOF

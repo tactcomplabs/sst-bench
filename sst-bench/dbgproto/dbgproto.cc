@@ -1,5 +1,5 @@
 //
-// _chkpnt_cc_
+// _dbgproto_cc_
 //
 // Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,24 +8,24 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "chkpnt.h"
+#include "dbgproto.h"
 
-namespace SST::Chkpnt{
+namespace SST::DbgProto{
 
 //------------------------------------------
-// Chkpnt
+// DbgProto
 //------------------------------------------
-Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
+DbgProto::DbgProto(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
   curCycle(0) {
 
   const int Verbosity = params.find< int >( "verbose", 0 );
   output.init(
-    "Chkpnt[" + getName() + ":@p:@t]: ",
+    "DbgProto[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
   const std::string cpuClock = params.find< std::string >("clockFreq", "1GHz");
-  clockHandler  = new SST::Clock::Handler2<Chkpnt,&Chkpnt::clockTick>(this);
+  clockHandler  = new SST::Clock::Handler2<DbgProto,&DbgProto::clockTick>(this);
   timeConverter = registerClock(cpuClock, clockHandler);
   registerAsPrimaryComponent();
   primaryComponentDoNotEndSim();
@@ -50,44 +50,55 @@ Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
   // setup the links
   for( unsigned i=0; i<numPorts; i++ ){
     linkHandlers.push_back(configureLink("port"+std::to_string(i),
-                                         new Event::Handler2<Chkpnt,
-                                         &Chkpnt::handleEvent>(this)));
+                                         new Event::Handler2<DbgProto,
+                                         &DbgProto::handleEvent>(this)));
   }
 
+  // debug markers
+  markerMsg = "MARKER-" + this->getName();
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
 }
 
-Chkpnt::~Chkpnt(){
+DbgProto::~DbgProto(){
 }
 
-void Chkpnt::setup(){
+void DbgProto::setup(){
 }
 
-void Chkpnt::finish(){
+void DbgProto::finish(){
 }
 
-void Chkpnt::init( unsigned int phase ){
+void DbgProto::init( unsigned int phase ){
 }
 
-void Chkpnt::printStatus( Output& out ){
+void DbgProto::printStatus( Output& out ){
 }
 
-void Chkpnt::serialize_order(SST::Core::Serialization::serializer& ser){
+#if 1
+#define _SER_ SER_INI
+#else
+#define _SER_ SST_SER
+#endif
+
+void DbgProto::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SST_SER(clockHandler)
-  SST_SER(numPorts)
-  SST_SER(minData)
-  SST_SER(maxData)
-  SST_SER(clockDelay)
-  SST_SER(clocks)
-  SST_SER(curCycle)
-  SST_SER(mersenne)
-  SST_SER(linkHandlers)
+  _SER_(clockHandler)
+  _SER_(numPorts)
+  _SER_(minData)
+  _SER_(maxData)
+  _SER_(clockDelay)
+  _SER_(clocks)
+  _SER_(markerMsg)
+  _SER_(markerBegin)
+  _SER_(curCycle)
+  _SER_(markerEnd)
+  _SER_(mersenne)
+  _SER_(linkHandlers)
 }
 
-void Chkpnt::handleEvent(SST::Event *ev){
-  ChkpntEvent *cev = static_cast<ChkpntEvent*>(ev);
+void DbgProto::handleEvent(SST::Event *ev){
+  DbgProtoEvent *cev = static_cast<DbgProtoEvent*>(ev);
   output.verbose(CALL_INFO, 5, 0,
                  "%s: received %zu unsigned values\n",
                  getName().c_str(),
@@ -95,7 +106,7 @@ void Chkpnt::handleEvent(SST::Event *ev){
   delete ev;
 }
 
-void Chkpnt::sendData(){
+void DbgProto::sendData(){
   for( unsigned i=0; i<numPorts; i++ ){
     // generate a new payload
     std::vector<unsigned> data;
@@ -108,12 +119,12 @@ void Chkpnt::sendData(){
                    "%s: sending %zu unsigned values on link %d\n",
                    getName().c_str(),
                    data.size(), i);
-    ChkpntEvent *ev = new ChkpntEvent(data);
+    DbgProtoEvent *ev = new DbgProtoEvent(data);
     linkHandlers[i]->send(ev);
   }
 }
 
-bool Chkpnt::clockTick( SST::Cycle_t currentCycle ){
+bool DbgProto::clockTick( SST::Cycle_t currentCycle ){
 
   // check to see whether we need to send data over the links
   curCycle++;
@@ -134,6 +145,6 @@ bool Chkpnt::clockTick( SST::Cycle_t currentCycle ){
   return false;
 }
 
-} // namespace SST::Chkpnt
+} // namespace SST::DbgProto
 
 // EOF
