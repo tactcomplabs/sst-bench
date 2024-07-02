@@ -10,10 +10,12 @@ sst --checkpoint-period=1000ns --checkpoint-prefix=dbg --gen-checkpoint-schema -
 # requires Ken's sst branch checkpoint-serobj
 cat $cpt.json | c++filt -t > ${cpt}_schema.json
 
-# dump checkpoint information
-./checkpoint_dump.py ${cpt}_schema.json $cpt.sstcpt
-
 # debug reference
 hexdump -C $cpt.sstcpt > $cpt.hex
+
+# dump checkpoint information
+./checkpoint_dump.py ${cpt}_schema.json $cpt.sstcpt || exit -1
+
+
 
 

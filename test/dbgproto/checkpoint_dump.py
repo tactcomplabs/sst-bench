@@ -80,6 +80,15 @@ def main():
     with open(args.cpt_file, mode='rb') as datafile:
           data = datafile.read()
     
+    # set expected data
+    expected = {}
+    expected['cp0.markerBegin'] = 0xa5a5a5a5a5a5a5a5
+    expected['cp0.curCycle'] = 0x63
+    expected['cp0.markerEnd'] = 0xf0f0f0f0f0f0f0f0
+    expected['cp1.markerBegin'] = 0xa5a5a5a5a5a5a5a5
+    expected['cp1.curCycle'] = 0x63
+    expected['cp1.markerEnd'] = 0xf0f0f0f0f0f0f0f0
+
     # Look at some component level simple variables
     obj_list = []
     # obj_list.extend([ 'simulation_impl.seg2end' ])
@@ -92,6 +101,9 @@ def main():
         type = g_hash2type[g_name2hash[s]]
         value = struct.unpack_from("Q", data, pos)
         print(f"{s} type='{type}' pos=0x{pos:x}  value=0x{value[0]:x}")
+        if expected[s] != value[0]:
+            print(f"ERROR: mismatch E=0x{expected[s]} A=0x{value[0]:x}", file=sys.stderr)
+            exit(2)
 
 if __name__ == "__main__":
     main()
