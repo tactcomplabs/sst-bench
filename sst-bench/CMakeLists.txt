@@ -13,6 +13,12 @@ add_subdirectory(msg-perf)
 message(STATUS "[SST-BENCH] Enabling MICRO-COMP micro-benchmark")
 add_subdirectory(micro-comp)
 
+message(STATUS "[SST-BENCH] Enabling MICRO-COMP-LINK micro-benchmark")
+add_subdirectory(micro-comp-link)
+
+message(STATUS "[SST-BENCH] Enabling LARGE-STAT micro-benchmark")
+#add_subdirectory(large-stat)
+
 if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   message(STATUS "[SST-BENCH] Enabling CHKPNT micro-benchmark")
   add_subdirectory(chkpnt)

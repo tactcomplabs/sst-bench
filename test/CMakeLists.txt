@@ -11,6 +11,8 @@ message(STATUS "[SST-BENCH] Enabling MSG-PERF testing")
 add_subdirectory(msg-perf)
 message(STATUS "[SST-BENCH] Enabling MICRO-COMP testing")
 add_subdirectory(micro-comp)
+message(STATUS "[SST-BENCH] Enabling MICRO-COMP-LINK testing")
+add_subdirectory(micro-comp-link)
 
 if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   message(STATUS "[SST-BENCH] Enabling CHKPNT testing")

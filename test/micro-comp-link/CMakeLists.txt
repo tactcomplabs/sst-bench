@@ -1,5 +1,5 @@
 #
-# sst-bench/test/micro-comp CMake
+# sst-bench/test/micro-comp-link CMake
 #
 # Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 # All Rights Reserved
@@ -7,16 +7,16 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-file(GLOB MICROCOMP_TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.py)
+file(GLOB MICROCOMPLINK_TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.py)
 
 if(SSTBENCH_ENABLE_TESTING)
   set (passRegex "Simulation is complete")
 
-  foreach(testSrc ${MICROCOMP_TEST_SRCS})
+  foreach(testSrc ${MICROCOMPLINK_TEST_SRCS})
     get_filename_component(testName ${testSrc} NAME_WE)
     add_test(NAME ${testName}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND sst --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/micro-comp ${testSrc})
+      COMMAND sst --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/micro-comp-link ${testSrc})
     set_tests_properties(${testName}
       PROPERTIES
       TIMEOUT 30
