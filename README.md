@@ -11,6 +11,9 @@ set of benchmarks includes:
 over `simpleNetwork` links in a ring-network pattern.
 * *micro-comp* : Tests the performance of loading a large number of small components 
 using the various loading methodologies
+* *micro-comp-link* : Similar to `micro-comp` but adds in link configuration with 
+a single link per component that utilizes SimpleNetwork.  Tests the loading 
+of large numbers of components with the default SST partitioner.
 * *chkpnt* : Tests the performance of the checkpoint/restart functionality 
 present in SST-14.0.0+.  Note that this test is currently only built when SST 
 14.0.0 is detected and can be only run in sequential execution mode.  Threading 
@@ -19,6 +22,9 @@ and MPI are not currently supported for checkpoint/restart in SST 14.0.0.
 the SST 14.0.0 checkpoint/restart functionality
 * *restart* : Sanity checks data after a context restore operation using the 
 SST 14.0.0 checkpoint/restart functionality
+* *large-stat* : Tests the creation of instantiation of a variable number of unsigned 
+64bit statistics for very simple components.  Designed to test large blocks of 
+statistics values for simple components.
 
 ## Prerequisites
 
