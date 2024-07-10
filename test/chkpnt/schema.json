@@ -1,0 +1,181 @@
+{ "checkpoint_def" : [
+{
+"rec_type" : "seg_info",
+"seg_name" : "config_options",
+"seg_num" : "0",
+"seg_size" : "871",
+"names" :
+[
+   {"name" : "num_ranks.rank" , "pos" : "0" , "hash_code" : "0x19fbd841d" },
+   {"name" : "num_ranks.thread" , "pos" : "4" , "hash_code" : "0x19fbd841d" },
+   {"name" : "libpath" , "pos" : "8" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "timeLord.timeBaseString" , "pos" : "340" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "output_directory" , "pos" : "348" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "prefix" , "pos" : "396" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "verbose" , "pos" : "413" , "hash_code" : "0x19fbd841d" },
+   {"name" : "globalOutputFileName" , "pos" : "417" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "checkpointPrefix" , "pos" : "430" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "Params::keyMap" , "pos" : "439" , "hash_code" : "0x19648126f1d46db6" },
+   {"name" : "Params::keyMapReverse" , "pos" : "672" , "hash_code" : "0xa52406aa94705684" },
+   {"name" : "Params::nextKeyID" , "pos" : "867" , "hash_code" : "0x19fbd841d" }
+]
+},
+{
+"rec_type" : "seg_info",
+"seg_name" : "loaded_libraries",
+"seg_num" : "1",
+"seg_size" : "25",
+"names" :
+[
+   {"name" : "libnames" , "pos" : "0" , "hash_code" : "0xebdb811f14e14236" }
+]
+},
+{
+"rec_type" : "seg_info",
+"seg_name" : "simulation_impl",
+"seg_num" : "2",
+"seg_size" : "786",
+"names" :
+[
+   {"name" : "num_ranks" , "pos" : "0" , "hash_code" : "0xc0307525065dfd09" },
+   {"name" : "my_rank" , "pos" : "8" , "hash_code" : "0xc0307525065dfd09" },
+   {"name" : "currentSimCycle" , "pos" : "16" , "hash_code" : "0x19fbd8441" },
+   {"name" : "minPart" , "pos" : "24" , "hash_code" : "0x19fbd8441" },
+   {"name" : "minPartTC" , "pos" : "32" , "hash_code" : "0x4ae7def063f2b68e" },
+   {"name" : "interThreadLatencies" , "pos" : "48" , "hash_code" : "0x957105207b4c5d9f" },
+   {"name" : "interThreadMinLatency" , "pos" : "64" , "hash_code" : "0x19fbd8441" },
+   {"name" : "endSim" , "pos" : "72" , "hash_code" : "0x19fbd83d5" },
+   {"name" : "independent" , "pos" : "76" , "hash_code" : "0x19fbd83d5" },
+   {"name" : "runMode" , "pos" : "80" , "hash_code" : "0x4a759cb56414dd6" },
+   {"name" : "currentPriority" , "pos" : "84" , "hash_code" : "0x19fbd8414" },
+   {"name" : "endSimCycle" , "pos" : "88" , "hash_code" : "0x19fbd8441" },
+   {"name" : "output_directory" , "pos" : "96" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "timeLord" , "pos" : "144" , "hash_code" : "0x104741c38" },
+   {"name" : "m_exit" , "pos" : "178" , "hash_code" : "0xc183b7a5ea3beeed" },
+   {"name" : "syncManager" , "pos" : "270" , "hash_code" : "0xc0ceea581faca48d" },
+   {"name" : "m_heartbeat" , "pos" : "378" , "hash_code" : "0xe14ad24b49e9172e" },
+   {"name" : "StatisticProcessingEngine::m_statOutputs" , "pos" : "386" , "hash_code" : "0x386f2af2b35614b2" },
+   {"name" : "stat_engine" , "pos" : "476" , "hash_code" : "0x104742782" },
+   {"name" : "SharedObject::manager" , "pos" : "489" , "hash_code" : "0xc32243002b4b4ae8" },
+   {"name" : "clockMap" , "pos" : "497" , "hash_code" : "0x1d57792d7d434285" },
+   {"name" : "timeVortex" , "pos" : "593" , "hash_code" : "0x34f7dcc38da5ee0f" }
+]
+},
+{
+"rec_type" : "seg_info",
+"seg_name" : "NUM_COMPONENTS",
+"seg_num" : "3",
+"seg_size" : "8",
+"names" :
+[
+   {"name" : "NUM_COMPONENTS" , "pos" : "0" , "hash_code" : "0x19fbd83ec" }
+]
+},
+{
+"rec_type" : "seg_info",
+"seg_name" : "cp1",
+"seg_num" : "4",
+"seg_size" : "2876",
+"names" :
+[
+   {"name" : "compinfo" , "pos" : "0" , "hash_code" : "0x68692f2dd002fc1a" },
+   {"name" : "const_cast<ComponentId_t&>(id)" , "pos" : "8" , "hash_code" : "0x19fbd8441" },
+   {"name" : "parent_info" , "pos" : "16" , "hash_code" : "0x68692f2dd002fc1a" },
+   {"name" : "const_cast<std::string&>(name)" , "pos" : "24" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "const_cast<std::string&>(type)" , "pos" : "31" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "defaultTimeBase" , "pos" : "48" , "hash_code" : "0x4ae7def063f2b68e" },
+   {"name" : "subIDIndex" , "pos" : "64" , "hash_code" : "0x19fbd8441" },
+   {"name" : "const_cast<std::string&>(slot_name)" , "pos" : "72" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "slot_num" , "pos" : "79" , "hash_code" : "0x19fbd8414" },
+   {"name" : "share_flags" , "pos" : "83" , "hash_code" : "0x19fbd8441" },
+   {"name" : "size" , "pos" : "91" , "hash_code" : "0x19fbd842f" },
+   {"name" : "component" , "pos" : "99" , "hash_code" : "0x39b302dd72e5ff41" },
+   {"name" : "my_info" , "pos" : "115" , "hash_code" : "0x68692f2dd002fc1a" },
+   {"name" : "isExtension" , "pos" : "123" , "hash_code" : "0x19fbd83d5" },
+   {"name" : "num_handlers" , "pos" : "127" , "hash_code" : "0x19fbd842f" },
+   {"name" : "p" , "pos" : "135" , "hash_code" : "0x549f57606ff23d77" },
+   {"name" : "clockHandler" , "pos" : "167" , "hash_code" : "0x565995239edc7e52" },
+   {"name" : "numPorts" , "pos" : "175" , "hash_code" : "0x19fbd841d" },
+   {"name" : "minData" , "pos" : "179" , "hash_code" : "0x19fbd8441" },
+   {"name" : "maxData" , "pos" : "187" , "hash_code" : "0x19fbd8441" },
+   {"name" : "clockDelay" , "pos" : "195" , "hash_code" : "0x19fbd8441" },
+   {"name" : "clocks" , "pos" : "203" , "hash_code" : "0x19fbd8441" },
+   {"name" : "curCycle" , "pos" : "211" , "hash_code" : "0x19fbd8441" },
+   {"name" : "marker" , "pos" : "219" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "mersenne" , "pos" : "229" , "hash_code" : "0x5f4c18b87458ec7c" },
+   {"name" : "linkHandlers" , "pos" : "2745" , "hash_code" : "0x573911d5090ac88" },
+   {"name" : "link_map" , "pos" : "2835" , "hash_code" : "0x5b5750b6b57d9fd2" }
+]
+},
+{
+"rec_type" : "seg_info",
+"seg_name" : "cp0",
+"seg_num" : "5",
+"seg_size" : "2876",
+"names" :
+[
+   {"name" : "compinfo" , "pos" : "0" , "hash_code" : "0x68692f2dd002fc1a" },
+   {"name" : "const_cast<ComponentId_t&>(id)" , "pos" : "8" , "hash_code" : "0x19fbd8441" },
+   {"name" : "parent_info" , "pos" : "16" , "hash_code" : "0x68692f2dd002fc1a" },
+   {"name" : "const_cast<std::string&>(name)" , "pos" : "24" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "const_cast<std::string&>(type)" , "pos" : "31" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "defaultTimeBase" , "pos" : "48" , "hash_code" : "0x4ae7def063f2b68e" },
+   {"name" : "subIDIndex" , "pos" : "64" , "hash_code" : "0x19fbd8441" },
+   {"name" : "const_cast<std::string&>(slot_name)" , "pos" : "72" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "slot_num" , "pos" : "79" , "hash_code" : "0x19fbd8414" },
+   {"name" : "share_flags" , "pos" : "83" , "hash_code" : "0x19fbd8441" },
+   {"name" : "size" , "pos" : "91" , "hash_code" : "0x19fbd842f" },
+   {"name" : "component" , "pos" : "99" , "hash_code" : "0x39b302dd72e5ff41" },
+   {"name" : "my_info" , "pos" : "115" , "hash_code" : "0x68692f2dd002fc1a" },
+   {"name" : "isExtension" , "pos" : "123" , "hash_code" : "0x19fbd83d5" },
+   {"name" : "num_handlers" , "pos" : "127" , "hash_code" : "0x19fbd842f" },
+   {"name" : "p" , "pos" : "135" , "hash_code" : "0x549f57606ff23d77" },
+   {"name" : "clockHandler" , "pos" : "167" , "hash_code" : "0x565995239edc7e52" },
+   {"name" : "numPorts" , "pos" : "175" , "hash_code" : "0x19fbd841d" },
+   {"name" : "minData" , "pos" : "179" , "hash_code" : "0x19fbd8441" },
+   {"name" : "maxData" , "pos" : "187" , "hash_code" : "0x19fbd8441" },
+   {"name" : "clockDelay" , "pos" : "195" , "hash_code" : "0x19fbd8441" },
+   {"name" : "clocks" , "pos" : "203" , "hash_code" : "0x19fbd8441" },
+   {"name" : "curCycle" , "pos" : "211" , "hash_code" : "0x19fbd8441" },
+   {"name" : "marker" , "pos" : "219" , "hash_code" : "0x61cff16e98e71d45" },
+   {"name" : "mersenne" , "pos" : "229" , "hash_code" : "0x5f4c18b87458ec7c" },
+   {"name" : "linkHandlers" , "pos" : "2745" , "hash_code" : "0x573911d5090ac88" },
+   {"name" : "link_map" , "pos" : "2835" , "hash_code" : "0x5b5750b6b57d9fd2" }
+]
+},
+{
+"rec_type" : "type_info",
+"type_info": [
+   {"hash_code" : "0x104741c38" , "name" : "SST::TimeLord" , "size" : "272" },
+   {"hash_code" : "0x104742782" , "name" : "SST::Statistics::StatisticProcessingEngine" , "size" : "400" },
+   {"hash_code" : "0x19fbd83d5" , "name" : "bool" , "size" : "1" },
+   {"hash_code" : "0x19fbd83ec" , "name" : "char const*" , "size" : "8" },
+   {"hash_code" : "0x19fbd8414" , "name" : "int" , "size" : "4" },
+   {"hash_code" : "0x19fbd841d" , "name" : "unsigned int" , "size" : "4" },
+   {"hash_code" : "0x19fbd842f" , "name" : "unsigned long" , "size" : "8" },
+   {"hash_code" : "0x19fbd8441" , "name" : "unsigned long long" , "size" : "8" },
+   {"hash_code" : "0x4a759cb56414dd6" , "name" : "SST::SimulationRunMode" , "size" : "4" },
+   {"hash_code" : "0x573911d5090ac88" , "name" : "std::__1::vector<SST::Link*, std::__1::allocator<SST::Link*>>" , "size" : "24" },
+   {"hash_code" : "0x19648126f1d46db6" , "name" : "std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, unsigned int>>>" , "size" : "24" },
+   {"hash_code" : "0x1d57792d7d434285" , "name" : "std::__1::map<std::__1::pair<unsigned long long, int>, SST::Clock*, std::__1::less<std::__1::pair<unsigned long long, int>>, std::__1::allocator<std::__1::pair<std::__1::pair<unsigned long long, int> const, SST::Clock*>>>" , "size" : "24" },
+   {"hash_code" : "0x34f7dcc38da5ee0f" , "name" : "SST::TimeVortex*" , "size" : "8" },
+   {"hash_code" : "0x386f2af2b35614b2" , "name" : "std::__1::vector<SST::Statistics::StatisticOutput*, std::__1::allocator<SST::Statistics::StatisticOutput*>>" , "size" : "24" },
+   {"hash_code" : "0x39b302dd72e5ff41" , "name" : "SST::BaseComponent*" , "size" : "8" },
+   {"hash_code" : "0x4ae7def063f2b68e" , "name" : "SST::TimeConverter*" , "size" : "8" },
+   {"hash_code" : "0x549f57606ff23d77" , "name" : "std::__1::pair<SST::SSTHandlerBase<bool, unsigned long long>*, unsigned long long>" , "size" : "16" },
+   {"hash_code" : "0x565995239edc7e52" , "name" : "SST::SSTHandlerBase<bool, unsigned long long>*" , "size" : "8" },
+   {"hash_code" : "0x5b5750b6b57d9fd2" , "name" : "SST::LinkMap*" , "size" : "8" },
+   {"hash_code" : "0x5f4c18b87458ec7c" , "name" : "SST::RNG::Random*" , "size" : "8" },
+   {"hash_code" : "0x61cff16e98e71d45" , "name" : "std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>" , "size" : "24" },
+   {"hash_code" : "0x68692f2dd002fc1a" , "name" : "SST::ComponentInfo*" , "size" : "8" },
+   {"hash_code" : "0x957105207b4c5d9f" , "name" : "std::__1::vector<unsigned long long, std::__1::allocator<unsigned long long>>" , "size" : "24" },
+   {"hash_code" : "0xa52406aa94705684" , "name" : "std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>" , "size" : "24" },
+   {"hash_code" : "0xc0307525065dfd09" , "name" : "SST::RankInfo" , "size" : "16" },
+   {"hash_code" : "0xc0ceea581faca48d" , "name" : "SST::SyncManager*" , "size" : "8" },
+   {"hash_code" : "0xc183b7a5ea3beeed" , "name" : "SST::Exit*" , "size" : "8" },
+   {"hash_code" : "0xc32243002b4b4ae8" , "name" : "SST::Shared::SharedObjectDataManager" , "size" : "40" },
+   {"hash_code" : "0xe14ad24b49e9172e" , "name" : "SST::SimulatorHeartbeat*" , "size" : "8" },
+   {"hash_code" : "0xebdb811f14e14236" , "name" : "std::__1::set<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>" , "size" : "24" }
+]
+}
+]}
