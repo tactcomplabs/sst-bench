@@ -13,6 +13,8 @@ message(STATUS "[SST-BENCH] Enabling MICRO-COMP testing")
 add_subdirectory(micro-comp)
 message(STATUS "[SST-BENCH] Enabling MICRO-COMP-LINK testing")
 add_subdirectory(micro-comp-link)
+message(STATUS "[SST-BENCH] Enabling LARGE-STAT testing")
+add_subdirectory(large-stat)
 
 if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   message(STATUS "[SST-BENCH] Enabling CHKPNT testing")
