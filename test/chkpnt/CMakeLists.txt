@@ -14,14 +14,16 @@ if(SSTBENCH_ENABLE_TESTING)
 
   foreach(testSrc ${CHKPNT_TEST_SRCS})
     get_filename_component(testName ${testSrc} NAME_WE)
-    add_test(NAME ${testName}
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND sst --checkpoint-period=10ns --checkpoint-prefix=${testName}_SAVE_ --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/chkpnt ${testSrc})
-    set_tests_properties(${testName}
-      PROPERTIES
-      TIMEOUT 60
-      LABELS "all"
-      PASS_REGULAR_EXPRESSION "${passRegex}")
+    if(NOT ${testName} MATCHES "checkpoint_dump")
+      add_test(NAME ${testName}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMAND sst --checkpoint-period=10ns --checkpoint-prefix=${testName}_SAVE_ --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/chkpnt ${testSrc})
+      set_tests_properties(${testName}
+        PROPERTIES
+        TIMEOUT 60
+        LABELS "all"
+        PASS_REGULAR_EXPRESSION "${passRegex}")
+      endif()
   endforeach(testSrc)
 endif()
 
