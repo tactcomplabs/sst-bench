@@ -85,6 +85,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
 # TARGET OPTIONS
 #---------------------------------------------
 
+#-- Benchmark Options
+option(SSTBENCH_ENABLE_SSTDBG "Enable SST-DBG Benchmarks" OFF)
+if(SSTBENCH_ENABLE_SSTDBG)
+  set(ENABLE_SSTDBG "ON")
+endif()
+
 #-- Testing Options
 option(SSTBENCH_ENABLE_TESTING "Enable Testing" OFF)
 if(SSTBENCH_ENABLE_TESTING)

@@ -25,4 +25,9 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   add_subdirectory(restart)
 endif()
 
+if(${ENABLE_SSTDBG})
+  message(STATUS "[SST-BENCH] Enabling TCL-DBG testing")
+  add_subdirectory(tcl-dbg)
+endif()
+
 # EOF
