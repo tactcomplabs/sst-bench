@@ -16,7 +16,7 @@ if(SSTBENCH_ENABLE_TESTING)
     get_filename_component(testName ${testSrc} NAME_WE)
     add_test(NAME ${testName}_SAVE
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND sst --checkpoint-period=5us --checkpoint-prefix=${testName}_SAVE_ --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/restore ${testSrc})
+      COMMAND sst --checkpoint-sim-period=5us --checkpoint-prefix=${testName}_SAVE_ --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/restore ${testSrc})
     set_tests_properties(${testName}_SAVE
       PROPERTIES
       TIMEOUT 60
