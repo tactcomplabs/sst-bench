@@ -55,6 +55,7 @@ Additional build options include:
 from the current version of SST
 * `cmake -DSSTBENCH_ENABLE_TESTING=ON ../` : Enables included test harness: 
 run with `make test`
+* cmake -DSSTBENCH_ENABLE_SSTDBG=ON ../` : Enables TCL SST-Dbg components
 
 ## Testing
 
@@ -68,6 +69,25 @@ make -j
 make install
 make test
 ```
+
+## Special Runtime Notes
+
+### TCL-DBG Benchmark
+
+The `tcl-dbg` micro benchmark is designed to test the report the cost of using 
+the TactCompLabs `sst-dbg` tool flow using a variety of data sizes.  The benchmark 
+randomly seeds a randomly sized `std::vector` container at a specified interval.  Users 
+can then utilize `sst-dbg` or the `sst-dbg-console` application to trigger debugging 
+outputs at a specified interval.  The timing reported is *only* the time required to output 
+the debug data to disk.  An example of executing this benchmark is as follows:
+
+```
+cd sst-bench/test/tcl-dbg
+sst-dbg -i 1 -- sst tcldbg-test1.py
+```
+
+The timing data and size of the vectors (in bytes) will be written to an SST Statistics 
+file (StatisticOutput.csv) using the histogram output format.
 
 ## Contributing
 
@@ -98,3 +118,5 @@ See the [LICENSE](./LICENSE) file
 
 ## Authors
 * John Leidel
+* Ken Griesser
+* Shannon Kuntz

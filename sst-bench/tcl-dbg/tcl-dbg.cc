@@ -18,7 +18,8 @@ namespace SST::TclDbg{
 TclDbg::TclDbg(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
-  curCycle(0) {
+  curCycle(0), statBytes(nullptr), statTiming(nullptr),
+  mersenne(nullptr), Dbg(nullptr) {
 
   const int Verbosity = params.find< int >( "verbose", 0 );
   output.init(
@@ -46,8 +47,17 @@ TclDbg::TclDbg(SST::ComponentId_t id, const SST::Params& params ) :
   // setup the rng
   mersenne = new SST::RNG::MersenneRNG(params.find<unsigned int>("rngSeed", 1223));
 
+  // register the statistics
+  statBytes   = registerStatistic<uint64_t>("statBytes");
+  statTiming  = registerStatistic<uint64_t>("statTiming");
+
   // setup the debugging object
   Dbg = new SSTDebug(getName(),"./");
+  if( !Dbg ){
+    output.fatal(CALL_INFO, 1,
+                 "%s : failed to init the debug library\n",
+                 getName().c_str());
+  }
 
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
@@ -67,15 +77,16 @@ void TclDbg::init( unsigned int phase ){
 }
 
 void TclDbg::printStatus( Output& out ){
-  out.verbose(CALL_INFO, 1, 0, "DUMPING DATA...\n");
-  Dbg->dump(getCurrentSimCycle(),
-            DARG((uint64_t)(getCurrentSimCycle())));
-  for( unsigned i=0; i<data.size(); i++ ){
-    if( !Dbg->dump(getCurrentSimCycle(),
-                   DARG(data[i])) ){
-      out.output("!!!!!!!!!!!!!!!!!!!!!! DEBUG DUMP FAILED !!!!!!!!!!!!!!!!!!!!!!\n");
-    }
+  auto start = std::chrono::high_resolution_clock::now();
+  if( !Dbg->dump(getCurrentSimCycle(),
+            DARG((uint64_t)(getCurrentSimCycle())),
+            DARG(data)) ){
+    out.output("!!!!!!!!!!!!!!!!!!!!!! DEBUG DUMP FAILED !!!!!!!!!!!!!!!!!!!!!!\n");
   }
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);
+  statTiming->addData((uint64_t)(duration.count()));
+  statBytes->addData((uint64_t)(data.size()*4));
 }
 
 void TclDbg::serialize_order(SST::Core::Serialization::serializer& ser){
