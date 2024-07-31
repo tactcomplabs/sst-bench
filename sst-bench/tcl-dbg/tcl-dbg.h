@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <time.h>
+#include <chrono>
 
 // -- SST Headers
 #include <sst/core/sst_config.h>
@@ -100,7 +101,10 @@ public:
   // -------------------------------------------------------
   // TclDbg Component Statistics Data
   // -------------------------------------------------------
-  SST_ELI_DOCUMENT_STATISTICS()
+  SST_ELI_DOCUMENT_STATISTICS(
+    {"statBytes", "Number of bytes written",      "bytes",  1},
+    {"statTiming","Timing info in microseconds",  "usecs",  1},
+  )
 
   // -------------------------------------------------------
   // TclDbg Component Checkpoint Methods
@@ -129,6 +133,9 @@ private:
   uint64_t curCycle;                              ///< current cycle delay
 
   std::vector<unsigned> data;                     ///< internal data container
+
+  Statistic<uint64_t> *statBytes;                 ///< number of bytes
+  Statistic<uint64_t> *statTiming;                ///< timing info
 
   // -- rng objects
   SST::RNG::Random* mersenne;                     ///< mersenne twister object
