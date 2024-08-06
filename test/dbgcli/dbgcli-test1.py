@@ -5,13 +5,13 @@
 #
 # See LICENSE in the top level directory for licensing details
 #
-# chkpnt-test1.py
+# dbgcli-test1.py
 #
 
 import os
 import sst
 
-cp0 = sst.Component("cp0", "chkpnt.Chkpnt")
+cp0 = sst.Component("cp0", "dbgcli.DbgCLI")
 cp0.addParams({
   "verbose" : 5,
   "numPorts" : 1,
@@ -23,7 +23,7 @@ cp0.addParams({
   "clockFreq" : "1Ghz"
 })
 
-cp1 = sst.Component("cp1", "chkpnt.Chkpnt")
+cp1 = sst.Component("cp1", "dbgcli.DbgCLI")
 cp1.addParams({
   "verbose" : 5,
   "numPorts" : 1,
@@ -32,7 +32,8 @@ cp1.addParams({
   "clockDelay" : 100,
   "clocks" : 10000,
   "rngSeed" : 1223,
-  "clockFreq" : "1Ghz"
+  "clockFreq" : "1Ghz",
+  "debugPort" : 12345
 })
 
 link0 = sst.Link("link0")

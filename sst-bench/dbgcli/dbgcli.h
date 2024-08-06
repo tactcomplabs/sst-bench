@@ -1,5 +1,5 @@
 //
-// _chkpnt_h_
+// _dbgcli_h_
 //
 // Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -36,72 +36,72 @@
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 
-namespace SST::Chkpnt{
+namespace SST::DbgCLI{
 
 // -------------------------------------------------------
-// ChkpntEvent
+// DbgCLIEvent
 // -------------------------------------------------------
-class ChkpntEvent : public SST::Event{
+class DbgCLIEvent : public SST::Event{
 public:
-  /// ChkpntEvent : standard constructor
-  ChkpntEvent() : SST::Event() {}
+  /// DbgCLIEvent : standard constructor
+  DbgCLIEvent() : SST::Event() {}
 
-  /// ChkpntEvent: constructor
-  ChkpntEvent(std::vector<unsigned> d) : SST::Event(), data(d) {}
+  /// DbgCLIEvent: constructor
+  DbgCLIEvent(std::vector<unsigned> d) : SST::Event(), data(d) {}
 
-  /// ChkpntEvent: destructor
-  ~ChkpntEvent() {}
+  /// DbgCLIEvent: destructor
+  ~DbgCLIEvent() {}
 
-  /// ChkpntEvent: retrieve the data
+  /// DbgCLIEvent: retrieve the data
   std::vector<unsigned> const getData() { return data; }
 
 private:
-  std::vector<unsigned> data;     ///< ChkpntEvent: data payload
+  std::vector<unsigned> data;     ///< DbgCLIEvent: data payload
 
-  /// ChkpntEvent: serialization method
+  /// DbgCLIEvent: serialization method
   void serialize_order(SST::Core::Serialization::serializer& ser) override{
     Event::serialize_order(ser);
     SST_SER(data)
   }
 
-  /// ChkpntEvent: serialization implementor
-  ImplementSerializable(SST::Chkpnt::ChkpntEvent);
+  /// DbgCLIEvent: serialization implementor
+  ImplementSerializable(SST::DbgCLI::DbgCLIEvent);
 
-};  // class ChkpntEvent
+};  // class DbgCLIEvent
 
 // -------------------------------------------------------
-// Chkpnt
+// DbgCLI
 // -------------------------------------------------------
-class Chkpnt : public SST::Component{
+class DbgCLI : public SST::Component{
 public:
-  /// Chkpnt: top-level SST component constructor
-  Chkpnt( SST::ComponentId_t id, const SST::Params& params );
+  /// DbgCLI: top-level SST component constructor
+  DbgCLI( SST::ComponentId_t id, const SST::Params& params );
 
-  /// Chkpnt: top-level SST component destructor
-  ~Chkpnt();
+  /// DbgCLI: top-level SST component destructor
+  ~DbgCLI();
 
-  /// Chkpnt: standard SST component 'setup' function
+  /// DbgCLI: standard SST component 'setup' function
   void setup() override;
 
-  /// Chkpnt: standard SST component 'finish' function
+  /// DbgCLI: standard SST component 'finish' function
   void finish() override;
 
-  /// Chkpnt: standard SST component init function
+  /// DbgCLI: standard SST component init function
   void init( unsigned int phase ) override;
 
-  /// Chkpnt: standard SST component printStatus
+  /// DbgCLI: standard SST component printStatus
   void printStatus(Output& out) override;
 
-  /// Chkpnt: standard SST component clock function
+  /// DbgCLI: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );
 
   // -------------------------------------------------------
-  // Chkpnt Component Registration Data
+  // DbgCLI Component Registration Data
   // -------------------------------------------------------
-  /// Chkpnt: Register the component with the SST core
-  SST_ELI_REGISTER_COMPONENT( Chkpnt,     // component class
-                              "chkpnt",   // component library
-                              "Chkpnt",   // component name
+  /// DbgCLI: Register the component with the SST core
+  SST_ELI_REGISTER_COMPONENT( DbgCLI,     // component class
+                              "dbgcli",   // component library
+                              "DbgCLI",   // component name
                               SST_ELI_ELEMENT_VERSION( 1, 0, 0 ),
                               "CHKPNT SST COMPONENT",
                               COMPONENT_CATEGORY_UNCATEGORIZED )
@@ -119,43 +119,43 @@ public:
   )
 
   // -------------------------------------------------------
-  // Chkpnt Component Port Data
+  // DbgCLI Component Port Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_PORTS(
     {"port%(num_ports)d",
       "Ports which connect to endpoints.",
-      {"chkpnt.ChkpntEvent", ""}
+      {"dbgcli.DbgCLIEvent", ""}
     }
   )
 
   // -------------------------------------------------------
-  // Chkpnt SubComponent Parameter Data
+  // DbgCLI SubComponent Parameter Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_SUBCOMPONENT_SLOTS()
 
   // -------------------------------------------------------
-  // Chkpnt Component Statistics Data
+  // DbgCLI Component Statistics Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_STATISTICS()
 
   // -------------------------------------------------------
-  // Chkpnt Component Checkpoint Methods
+  // DbgCLI Component Checkpoint Methods
   // -------------------------------------------------------
-  /// Chkpnt: serialization constructor
-  Chkpnt() : SST::Component() {}
+  /// DbgCLI: serialization constructor
+  DbgCLI() : SST::Component() {}
 
-  /// Chkpnt: serialization
+  /// DbgCLI: serialization
   void serialize_order(SST::Core::Serialization::serializer& ser) override;
 
-  /// Chkpnt: serialization implementations
-  ImplementSerializable(SST::Chkpnt::Chkpnt)
+  /// DbgCLI: serialization implementations
+  ImplementSerializable(SST::DbgCLI::DbgCLI)
 
 private:
   // -- internal handlers
   SST::Output    output;                          ///< SST output handler
   TimeConverter* timeConverter;                   ///< SST time conversion handler
   SST::Clock::HandlerBase* clockHandler;          ///< Clock Handler
-  SST::DbgSock*  dbgSock;                         ///< Debug
+  SST::DbgSock*  dbgSock;                         ///< Debug port
 
   // -- parameters
   unsigned numPorts;                              ///< number of ports to configure
@@ -178,8 +178,8 @@ private:
   /// sends data to adjacent links
   void sendData();
 
-};  // class Chkpnt
-}   // namespace SST::Chkpnt
+};  // class DbgCLI
+}   // namespace SST::DbgCLI
 
 #endif  // _SST_CHKPNT_H_
 

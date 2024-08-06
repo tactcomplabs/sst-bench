@@ -1,5 +1,5 @@
 //
-// _chkpnt_cc_
+// _dbgcli_cc_
 //
 // Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,24 +8,26 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "dbgsock.h"
+#include "dbgcli.h"
+#include "sst/core/kgdbg.h"
 
-namespace SST::Chkpnt{
+namespace SST::DbgCLI{
 
 //------------------------------------------
-// Chkpnt
+// DbgCLI
 //------------------------------------------
-Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
+DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
   curCycle(0) {
-
+  
+  kgdbg::spinner("SPINNER");
   const int Verbosity = params.find< int >( "verbose", 0 );
   output.init(
-    "Chkpnt[" + getName() + ":@p:@t]: ",
+    "DbgCLI[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
   const std::string cpuClock = params.find< std::string >("clockFreq", "1GHz");
-  clockHandler  = new SST::Clock::Handler2<Chkpnt,&Chkpnt::clockTick>(this);
+  clockHandler  = new SST::Clock::Handler2<DbgCLI,&DbgCLI::clockTick>(this);
   timeConverter = registerClock(cpuClock, clockHandler);
   registerAsPrimaryComponent();
   primaryComponentDoNotEndSim();
@@ -51,39 +53,47 @@ Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
   // setup the links
   for( unsigned i=0; i<numPorts; i++ ){
     linkHandlers.push_back(configureLink("port"+std::to_string(i),
-                                         new Event::Handler2<Chkpnt,
-                                         &Chkpnt::handleEvent>(this)));
+                                         new Event::Handler2<DbgCLI,
+                                         &DbgCLI::handleEvent>(this)));
   }
 
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
 }
 
-Chkpnt::~Chkpnt(){
+DbgCLI::~DbgCLI(){
+  if (dbgSock) delete dbgSock;
 }
 
-void Chkpnt::setup(){
+void DbgCLI::setup(){
 }
 
-void Chkpnt::finish(){
+void DbgCLI::finish(){
 }
 
-void Chkpnt::init( unsigned int phase ){
+void DbgCLI::init( unsigned int phase ){
 }
 
-void Chkpnt::printStatus( Output& out ){
-  if (debugPort==0) return;
-  if (!dbgSock) {
-    dbgSock = new DbgSock(debugPort);
-    if (dbgSock->create() != DbgSock::SUCCESS) {
-      out.fatal( CALL_INFO, -1, "Could not create debug port %d\n", debugPort);
-      return;
+void DbgCLI::printStatus( Output& out ){
+  assert(false);
+}
+
+void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
+
+  if (debugPort>0) {
+    if (!dbgSock) {
+      dbgSock = new DbgSock(debugPort);
+      if (dbgSock->create() != DbgSock::SUCCESS) {
+        this->output.verbose( CALL_INFO, 1, 0, "Warning: Could not create debug port %d\n", debugPort);
+      }
+    }
+    if (dbgSock->valid()) {
+      if (dbgSock->run_cli_server() != DbgSock::SUCCESS) {
+        this->output.verbose( CALL_INFO, 1, 0, "Warning: An error occured on debug port %d\n", debugPort);
+      }
     }
   }
 
-}
-
-void Chkpnt::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
   SST_SER(clockHandler)
   SST_SER(numPorts)
@@ -96,8 +106,8 @@ void Chkpnt::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(linkHandlers)
 }
 
-void Chkpnt::handleEvent(SST::Event *ev){
-  ChkpntEvent *cev = static_cast<ChkpntEvent*>(ev);
+void DbgCLI::handleEvent(SST::Event *ev){
+  DbgCLIEvent *cev = static_cast<DbgCLIEvent*>(ev);
   output.verbose(CALL_INFO, 5, 0,
                  "%s: received %zu unsigned values\n",
                  getName().c_str(),
@@ -105,7 +115,7 @@ void Chkpnt::handleEvent(SST::Event *ev){
   delete ev;
 }
 
-void Chkpnt::sendData(){
+void DbgCLI::sendData(){
   for( unsigned i=0; i<numPorts; i++ ){
     // generate a new payload
     std::vector<unsigned> data;
@@ -118,12 +128,12 @@ void Chkpnt::sendData(){
                    "%s: sending %zu unsigned values on link %d\n",
                    getName().c_str(),
                    data.size(), i);
-    ChkpntEvent *ev = new ChkpntEvent(data);
+    DbgCLIEvent *ev = new DbgCLIEvent(data);
     linkHandlers[i]->send(ev);
   }
 }
 
-bool Chkpnt::clockTick( SST::Cycle_t currentCycle ){
+bool DbgCLI::clockTick( SST::Cycle_t currentCycle ){
 
   // check to see whether we need to send data over the links
   curCycle++;
@@ -144,6 +154,6 @@ bool Chkpnt::clockTick( SST::Cycle_t currentCycle ){
   return false;
 }
 
-} // namespace SST::Chkpnt
+} // namespace SST::DbgCLI
 
 // EOF
