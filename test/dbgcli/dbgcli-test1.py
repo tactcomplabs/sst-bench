@@ -11,6 +11,8 @@
 import os
 import sst
 
+DEBUG_PORT = int(os.getenv("DEBUG_PORT", 0))
+
 cp0 = sst.Component("cp0", "dbgcli.DbgCLI")
 cp0.addParams({
   "verbose" : 5,
@@ -33,7 +35,7 @@ cp1.addParams({
   "clocks" : 10000,
   "rngSeed" : 1223,
   "clockFreq" : "1Ghz",
-  "debugPort" : 12345
+  "debugPort" : DEBUG_PORT,
 })
 
 link0 = sst.Link("link0")

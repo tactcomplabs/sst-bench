@@ -84,12 +84,14 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
     if (!dbgSock) {
       dbgSock = new DbgSock(debugPort);
       if (dbgSock->create() != DbgSock::SUCCESS) {
-        this->output.verbose( CALL_INFO, 1, 0, "Warning: Could not create debug port %d\n", debugPort);
+        // output.verbose( CALL_INFO, 1, 0, "Warning: Could not create debug port %d\n", debugPort);
+        output.fatal( CALL_INFO, -1, "Could not create debug port %d\n", debugPort);
       }
     }
     if (dbgSock->valid()) {
       if (dbgSock->run_cli_server() != DbgSock::SUCCESS) {
-        this->output.verbose( CALL_INFO, 1, 0, "Warning: An error occured on debug port %d\n", debugPort);
+        // output.verbose( CALL_INFO, 1, 0, "Warning: An error occured on debug port %d\n", debugPort);
+        output.fatal( CALL_INFO, 1, 0, "An error occured on debug port %d\n", debugPort);
       }
     }
   }
