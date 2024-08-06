@@ -26,6 +26,8 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   add_subdirectory(restore)
   message(STATUS "[SST-BENCH] Enabling RESTART micro-benchmark")
   add_subdirectory(restart)
+  message(STATUS "[SST-BENCH] Enabling DBGSOCK micro-benchmark")
+  add_subdirectory(dbgsock)
 endif()
 
 if(${ENABLE_SSTDBG})
