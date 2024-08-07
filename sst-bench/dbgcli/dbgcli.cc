@@ -79,23 +79,6 @@ void DbgCLI::printStatus( Output& out ){
 }
 
 void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
-
-  if (debugPort>0) {
-    if (!dbgSock) {
-      dbgSock = new DbgSock(debugPort);
-      if (dbgSock->create() != DbgSock::SUCCESS) {
-        // output.verbose( CALL_INFO, 1, 0, "Warning: Could not create debug port %d\n", debugPort);
-        output.fatal( CALL_INFO, -1, "Could not create debug port %d\n", debugPort);
-      }
-    }
-    if (dbgSock->valid()) {
-      if (dbgSock->run_cli_server() != DbgSock::SUCCESS) {
-        // output.verbose( CALL_INFO, 1, 0, "Warning: An error occured on debug port %d\n", debugPort);
-        output.fatal( CALL_INFO, 1, 0, "An error occured on debug port %d\n", debugPort);
-      }
-    }
-  }
-
   SST::Component::serialize_order(ser);
   SST_SER(clockHandler)
   SST_SER(numPorts)
@@ -106,6 +89,23 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(curCycle)
   SST_SER(mersenne)
   SST_SER(linkHandlers)
+
+  if (debugPort>0 && ser.mode()==SST::Core::Serialization::serializer::PACK) {
+    if (!dbgSock) {
+      dbgSock = new DbgSock(debugPort);
+      if (dbgSock->create() != DbgSock::SUCCESS) {
+        // output.verbose( CALL_INFO, 1, 0, "Warning: Could not create debug port %d\n", debugPort);
+        output.fatal( CALL_INFO, -1, "Could not create debug port %d\n", debugPort);
+      }
+    }
+    if (dbgSock->valid()) {
+      if (dbgSock->run_cli_server() != DbgSock::SUCCESS) {
+        // output.verbose( CALL_INFO, 1, 0, "Warning: An error occured on debug port %d\n", debugPort);
+        output.fatal( CALL_INFO, -1, "An error occured on debug port %d\n", debugPort);
+      }
+    }
+  }
+
 }
 
 void DbgCLI::handleEvent(SST::Event *ev){

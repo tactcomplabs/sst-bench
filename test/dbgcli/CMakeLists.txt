@@ -7,12 +7,12 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-file(GLOB DBGSOCK_TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.py)
+file(GLOB DBGCLI_TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} dbgcli-test*.py)
 
 if(SSTBENCH_ENABLE_TESTING)
   set (passRegex "Simulation is complete")
 
-  foreach(testSrc ${DBGSOCK_TEST_SRCS})
+  foreach(testSrc ${DBGCLI_TEST_SRCS})
     get_filename_component(testName ${testSrc} NAME_WE)
     add_test(NAME ${testName}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
