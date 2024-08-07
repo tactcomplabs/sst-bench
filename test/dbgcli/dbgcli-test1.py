@@ -12,10 +12,11 @@ import os
 import sst
 
 DEBUG_PORT = int(os.getenv("DEBUG_PORT", 0))
+VERBOSE = 1
 
 cp0 = sst.Component("cp0", "dbgcli.DbgCLI")
 cp0.addParams({
-  "verbose" : 5,
+  "verbose" : VERBOSE,
   "numPorts" : 1,
   "minData" : 1,
   "maxData" : 100,
@@ -27,7 +28,7 @@ cp0.addParams({
 
 cp1 = sst.Component("cp1", "dbgcli.DbgCLI")
 cp1.addParams({
-  "verbose" : 5,
+  "verbose" : VERBOSE,
   "numPorts" : 1,
   "minData" : 1,
   "maxData" : 100,
