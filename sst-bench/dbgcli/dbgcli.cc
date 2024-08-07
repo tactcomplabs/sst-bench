@@ -98,8 +98,10 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
       if (dbgSock->connect() != DbgSock::RESULT::SUCCESS)
         output.fatal( CALL_INFO, -1, "Could not connect to debug port %d\n", debugPort);
     }
-    if (dbgSock->cli_handler() != DbgSock::RESULT::SUCCESS)
-      output.fatal( CALL_INFO, -1, "An error occured on debug port %d\n", debugPort);
+    if (dbgSock->connected()) {
+      if (dbgSock->cli_handler() != DbgSock::RESULT::SUCCESS)
+        output.fatal( CALL_INFO, -1, "An error occured on debug port %d\n", debugPort);
+    }
   }
 
 }
