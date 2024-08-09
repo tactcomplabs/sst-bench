@@ -90,7 +90,14 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(mersenne)
   SST_SER(linkHandlers)
 
-  if (debugPort>0 && ser.mode()==SST::Core::Serialization::serializer::PACK) {
+  // this should be called after PACK operation
+  handle_chkpt_debug_action();
+}
+
+void DbgCLI::handle_chkpt_debug_action()
+{
+    if (!debugPort) return;
+    kgdbg::spinner("CDEBUG_SPINNER");
     if (!dbgSock) {
       dbgSock = new DbgSock(debugPort);
       if (dbgSock->create() != DbgSock::RESULT::SUCCESS)
@@ -102,8 +109,6 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
       if (dbgSock->cli_handler() != DbgSock::RESULT::SUCCESS)
         output.fatal( CALL_INFO, -1, "An error occured on debug port %d\n", debugPort);
     }
-  }
-
 }
 
 void DbgCLI::handleEvent(SST::Event *ev){

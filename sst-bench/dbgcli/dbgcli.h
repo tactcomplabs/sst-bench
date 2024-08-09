@@ -147,8 +147,13 @@ public:
   /// DbgCLI: serialization
   void serialize_order(SST::Core::Serialization::serializer& ser) override;
 
+  /// DbgCLI: Update debug control state object on checkpoint
+  void handle_chkpt_debug_action() override;
+  
   /// DbgCLI: serialization implementations
   ImplementSerializable(SST::DbgCLI::DbgCLI)
+
+
 
 private:
   // -- internal handlers
