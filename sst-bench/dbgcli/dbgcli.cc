@@ -89,9 +89,6 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(curCycle)
   SST_SER(mersenne)
   SST_SER(linkHandlers)
-
-  // this should be called after PACK operation
-  handle_chkpt_debug_action();
 }
 
 void DbgCLI::handle_chkpt_debug_action()
