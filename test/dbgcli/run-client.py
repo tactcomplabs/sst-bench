@@ -14,7 +14,7 @@ from enum import Enum
 
 BUFFER_SIZE = 1024
 HOST = "127.0.0.1"
-DEBUG_PORT = int(os.getenv("DEBUG_PORT", 0))
+PROBE_PORT = int(os.getenv("PROBE_PORT", 0))
 PROMPT = "sstdbg -> "
 
 class State(Enum):
@@ -32,7 +32,7 @@ def decode(msg):
 def client_program():
     global state
     client_socket = socket.socket()
-    client_socket.connect( (HOST, DEBUG_PORT) )
+    client_socket.connect( (HOST, PROBE_PORT) )
     while state == State.RUN:
         msg = input(PROMPT)
         decode(msg)

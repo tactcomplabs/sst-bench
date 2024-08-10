@@ -23,11 +23,11 @@
 // -- SST Headers
 #include <sst/core/sst_config.h>
 #include <sst/core/component.h>
-#include <sst/core/dbgsock.h>
 #include <sst/core/event.h>
 #include <sst/core/interfaces/simpleNetwork.h>
 #include <sst/core/link.h>
 #include <sst/core/output.h>
+#include <sst/core/probe.h>
 #include <sst/core/statapi/stataccumulator.h>
 #include <sst/core/subcomponent.h>
 #include <sst/core/timeConverter.h>
@@ -37,6 +37,13 @@
 #include <sst/core/rng/mersenne.h>
 
 namespace SST::DbgCLI{
+
+// -------------------------------------------------------
+// Debug Control State object
+// -------------------------------------------------------
+class DbgControlState : public SST::ProbeControl {
+
+};
 
 // -------------------------------------------------------
 // DbgCLIEvent
@@ -95,6 +102,8 @@ public:
   /// DbgCLI: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );
 
+  const int DEFAULT_PROBE_BUFFER_SIZE = 1024;
+
   // -------------------------------------------------------
   // DbgCLI Component Registration Data
   // -------------------------------------------------------
@@ -115,7 +124,10 @@ public:
     {"clocks",          "Clock cycles to execute",              "1000"},
     {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
     {"clockFreq",       "Clock frequency",                      "1GHz"},
-    {"debugPort",       "Socket assignment for debug port",     "0" }
+    {"probeMode",       "0-Disabled,1-Checkpoint based, >1-rsv",  "0"},
+    {"probeStartTime", "Use with checkpoint-sim-period",         "0"},
+    {"probeBufferSize", "Records in circular trace buffer",    "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
+    {"probePort",       "Socket assignment for debug port",      "0" }
   )
 
   // -------------------------------------------------------
@@ -148,19 +160,17 @@ public:
   void serialize_order(SST::Core::Serialization::serializer& ser) override;
 
   /// DbgCLI: Update debug control state object on checkpoint
-  void handle_chkpt_debug_action() override;
+  void handle_chkpt_probe_action() override;
   
   /// DbgCLI: serialization implementations
   ImplementSerializable(SST::DbgCLI::DbgCLI)
-
-
 
 private:
   // -- internal handlers
   SST::Output    output;                          ///< SST output handler
   TimeConverter* timeConverter;                   ///< SST time conversion handler
   SST::Clock::HandlerBase* clockHandler;          ///< Clock Handler
-  SST::DbgSock*  dbgSock;                         ///< Debug port
+  SST::ProbeSocket*  probeSocket = nullptr;       ///< Probe socket server
 
   // -- parameters
   unsigned numPorts;                              ///< number of ports to configure
@@ -169,7 +179,13 @@ private:
   uint64_t clockDelay;                            ///< clock delay between sends
   uint64_t clocks;                                ///< number of clocks to execute
   uint64_t curCycle;                              ///< current cycle delay
-  int      debugPort = 0;                         ///< socket assignment for debug port 
+
+  // -- Component probe parameters (TODO move to base class)
+  int      probeMode;                             ///< 0-disable, 1-checkpoint-mode, >1-reserved
+  int      probeStartTime;                       ///< use with --checkpoint-sim-period to trigger first event
+  // TODO probeStartTime                          ///< use with --checkpoint-wall-period to trigger first event
+  int      probeBufferSize;                       ///< initial number of entries for circular buffers. 
+  int      probePort;                             ///< socket assignment for debug probe port  ( 0 = None )
 
   // -- rng objects
   SST::RNG::Random* mersenne;                     ///< mersenne twister object
@@ -184,6 +200,7 @@ private:
   void sendData();
 
 };  // class DbgCLI
+
 }   // namespace SST::DbgCLI
 
 #endif  // _SST_CHKPNT_H_
