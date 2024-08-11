@@ -39,10 +39,11 @@
 namespace SST::DbgCLI{
 
 // -------------------------------------------------------
-// Debug Control State object
+// Debug Control State 
 // -------------------------------------------------------
-class DbgControlState : public SST::ProbeControl {
-
+class DbgCLIProbeControl : public SST::ProbeControl {
+public:
+  DbgCLIProbeControl(SST::Output * out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort);
 };
 
 // -------------------------------------------------------
@@ -170,7 +171,6 @@ private:
   SST::Output    output;                          ///< SST output handler
   TimeConverter* timeConverter;                   ///< SST time conversion handler
   SST::Clock::HandlerBase* clockHandler;          ///< Clock Handler
-  SST::ProbeSocket*  probeSocket = nullptr;       ///< Probe socket server
 
   // -- parameters
   unsigned numPorts;                              ///< number of ports to configure
@@ -180,12 +180,8 @@ private:
   uint64_t clocks;                                ///< number of clocks to execute
   uint64_t curCycle;                              ///< current cycle delay
 
-  // -- Component probe parameters (TODO move to base class)
-  int      probeMode;                             ///< 0-disable, 1-checkpoint-mode, >1-reserved
-  int      probeStartTime;                       ///< use with --checkpoint-sim-period to trigger first event
-  // TODO probeStartTime                          ///< use with --checkpoint-wall-period to trigger first event
-  int      probeBufferSize;                       ///< initial number of entries for circular buffers. 
-  int      probePort;                             ///< socket assignment for debug probe port  ( 0 = None )
+  // -- Component probe state object
+ std::unique_ptr<DbgCLIProbeControl> probeControl_;
 
   // -- rng objects
   SST::RNG::Random* mersenne;                     ///< mersenne twister object

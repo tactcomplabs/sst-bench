@@ -46,19 +46,6 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
                  getName().c_str());
   }
 
-  // Debug Probe
-  probeMode = params.find<int>("probeMode", 0);
-  probeStartTime = params.find<int>("probeStartTime",0);
-  probeBufferSize = params.find<int>("probeBufferSize", DEFAULT_PROBE_BUFFER_SIZE);
-  probePort = params.find<int>("probePort", 0);
-
-  if (probeMode>0) {
-    output.verbose(CALL_INFO,1,0,"probeMode=%d\n", probeMode);
-    output.verbose(CALL_INFO,1,0,"probeStartTime=%d\n", probeStartTime);
-    output.verbose(CALL_INFO,1,0,"probeBufferSize=%d\n", probeBufferSize);
-    output.verbose(CALL_INFO,1,0,"probePort=%d\n", probePort);
-  }
-
   // setup the rng
   mersenne = new SST::RNG::MersenneRNG(params.find<unsigned int>("rngSeed", 1223));
 
@@ -69,13 +56,18 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
                                          &DbgCLI::handleEvent>(this)));
   }
 
+  // Debug Probe
+  int probeMode = params.find<int>("probeMode", 0);
+  int probeStartCycle = params.find<int>("probeStartCycle",0);
+  int probeBufferSize = params.find<int>("probeBufferSize", DEFAULT_PROBE_BUFFER_SIZE);
+  int probePort = params.find<int>("probePort", 0);
+  probeControl_ = std::make_unique<DbgCLIProbeControl>(&output, probeMode, probeStartCycle, probeBufferSize, probePort);
+
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
 }
 
-DbgCLI::~DbgCLI(){
-  if (probeSocket) delete probeSocket;
-}
+DbgCLI::~DbgCLI(){}
 
 void DbgCLI::setup(){
 }
@@ -105,38 +97,9 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
 
 void DbgCLI::handle_chkpt_probe_action()
 {
-  if (!probeMode) return;
-  
-
-  if (!probePort) return;
-  kgdbg::spinner("PROBE_SPINNER");
-
-  // This should move into sst-core
-  if (probeSocket==nullptr) {
-    probeSocket = new ProbeSocket(probePort);
-    if (probeSocket->create() != ProbeSocket::RESULT::SUCCESS)
-      output.fatal( CALL_INFO, -1, "Could not create debug port %d\n", probePort);
-    if (probeSocket->connect() != ProbeSocket::RESULT::SUCCESS)
-      output.fatal( CALL_INFO, -1, "Could not connect to debug port %d\n", probePort);
-  }
-  if (probeSocket->connected()) {
-    if (probeSocket->cli_handler() != ProbeSocket::RESULT::SUCCESS)
-      output.fatal( CALL_INFO, -1, "An error occured on debug port %d\n", probeSocket);
-  }
-  
-
-  // TODO configure trigger and begin sampling
-  // Need to create the  local CDbgControlStateObj which needs to be accessible
-  // by the main process.
-  // States
-  //  SAMPLING
-  //  POST_TRIGGER_DELAY
-  //  TRIGGER_CHECK
-  //  BUFFER_FLUSH
-
-  // Base class handles actions
-  serializable_base::handle_chkpt_probe_action();
-
+  auto c = getCurrentSimCycle();
+  probeControl_->updateSyncState(c);
+  probeControl_->updateProbeState(c);
 }
 
 void DbgCLI::handleEvent(SST::Event *ev){
@@ -186,6 +149,10 @@ bool DbgCLI::clockTick( SST::Cycle_t currentCycle ){
 
   return false;
 }
+
+DbgCLIProbeControl::DbgCLIProbeControl(SST::Output *out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort)
+ : ProbeControl(out, probeMode, probeStartCycle, probeBufferSize, probePort)
+{}
 
 } // namespace SST::DbgCLI
 
