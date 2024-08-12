@@ -126,7 +126,7 @@ public:
     {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
     {"clockFreq",       "Clock frequency",                      "1GHz"},
     {"probeMode",       "0-Disabled,1-Checkpoint based, >1-rsv",  "0"},
-    {"probeStartTime", "Use with checkpoint-sim-period",         "0"},
+    {"probeStartCycle", "Use with checkpoint-sim-period",         "0"},
     {"probeBufferSize", "Records in circular trace buffer",    "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
     {"probePort",       "Socket assignment for debug port",      "0" }
   )
