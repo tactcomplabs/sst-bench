@@ -39,6 +39,14 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   clockDelay = params.find<uint64_t>("clockDelay", 1);
   clocks = params.find<uint64_t>("clocks", 1000);
 
+#if 0
+  output.verbose(CALL_INFO, 1, 0, "numPorts=%u\n",numPorts);
+  output.verbose(CALL_INFO, 1, 0, "minData=%llu\n", minData);
+  output.verbose(CALL_INFO, 1, 0, "maxData=%llu\n", maxData);
+  output.verbose(CALL_INFO, 1, 0, "clockDelay=%llu\n", clockDelay);
+  output.verbose(CALL_INFO, 1, 0, "clocks=%llu\n", clocks);
+#endif
+
   // sanity check the params
   if( maxData < minData ){
     output.fatal(CALL_INFO, -1,
@@ -118,9 +126,11 @@ void DbgCLI::sendData(){
     std::vector<unsigned> data;
     unsigned range = maxData - minData + 1;
     unsigned r = rand() % range + minData;
+
     /// debug probe trigger (advance to post-trigger state)
-    probe_->trigger(r > (range-1));
+    if (probe_->triggering()) probe_->trigger(r > (range-1));
     ///
+
     for( unsigned i=0; i<r; i++ ){
       data.push_back((unsigned)(mersenne->generateNextUInt32()));
     }
@@ -130,6 +140,10 @@ void DbgCLI::sendData(){
                    data.size(), i);
     DbgCLIEvent *ev = new DbgCLIEvent(data);
     linkHandlers[i]->send(ev);
+
+    /// debug probe data capture
+    if (probe_->sampling()) probe_->capture_send_event_atts(getCurrentSimCycle(), r, ev);
+    /// 
   }
 }
 
@@ -154,15 +168,28 @@ bool DbgCLI::clockTick( SST::Cycle_t currentCycle ){
     rc =  true;
   }
 
-  if (probe_->active()) 
-    probe_->updateProbeState(getCurrentSimCycle());
+  /// Debug Probe sequencing
+  if (probe_->active()) probe_->updateProbeState(currentCycle);
+  ///
 
   return rc;
 }
 
 DbgCLI_Probe::DbgCLI_Probe(SST::Output *out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort, int probePostDelay)
  : ProbeControl(out, probeMode, probeStartCycle, probeBufferSize, probePort, probePostDelay)
-{}
+{
+  probeBuffer = std::make_unique<ProbeBuffer<event_atts_t>>(probeBufferSize);
+}
+
+void DbgCLI_Probe::capture_send_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev)
+{
+  if (! sampling()) return;
+  // copy the sample into the circular buffer  
+  event_atts_t e(cycle, sz, ev);
+  probeBuffer->capture(e);
+  // Finally call base class to update counters
+  ProbeControl::sample();
+}
 
 } // namespace SST::DbgCLI
 

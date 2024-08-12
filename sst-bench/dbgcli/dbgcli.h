@@ -36,15 +36,11 @@
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 
-namespace SST::DbgCLI{
+using namespace SST::Probe;
 
-// -------------------------------------------------------
-// Debug Control State 
-// -------------------------------------------------------
-class DbgCLI_Probe : public SST::ProbeControl {
-public:
-  DbgCLI_Probe(SST::Output * out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort, int probePostDelay);
-};
+namespace SST::DbgCLI {
+
+class DbgCLI_Probe;
 
 // -------------------------------------------------------
 // DbgCLIEvent
@@ -199,6 +195,45 @@ private:
   void sendData();
 
 };  // class DbgCLI
+
+// -------------------------------------------------------
+// Debug Control State 
+// -------------------------------------------------------
+class DbgCLI_Probe : public ProbeControl {
+
+public:
+  DbgCLI_Probe(SST::Output * out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort, int probePostDelay);
+  // User custom sampling functions
+  void capture_send_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev);
+  // trace buffer
+  struct event_atts_t {
+    uint64_t cycle_ = 0;
+    uint64_t sz_ = 0;
+    uint64_t deliveryTime_ = 0;
+    uint64_t priority_ = 0;
+    uint64_t orderTag_ = 0; 
+    uint64_t queueOrder_ = 0;
+    event_atts_t() {};
+    event_atts_t(uint64_t c, uint64_t sz, DbgCLIEvent *ev) : cycle_(c), sz_(sz)
+    { 
+      deliveryTime_ = ev->getDeliveryTime();
+      priority_ = ev->getPriority();
+      orderTag_ = ev->getOrderTag();
+      queueOrder_ = ev->getQueueOrder();
+    };
+    friend std::ostream & operator<<(std::ostream &os, const event_atts_t& e) {
+      os << std::dec << "cycle=" << e.cycle_ 
+        << " sz=" << e.sz_ 
+        << " deliveryTime=" << e.deliveryTime_ 
+        << " priority=" << e.priority_
+        << " orderTag=" << e.orderTag_ 
+        << " queueOrder=" << e.queueOrder_;
+      return os;
+    }
+  };
+  std::unique_ptr<ProbeBuffer<event_atts_t>> probeBuffer;
+
+};
 
 }   // namespace SST::DbgCLI
 
