@@ -2,8 +2,11 @@
 mkdir -p run
 cd run
 
-export DEBUG_PORT=12345
-PROBE_START_CYCLE=5000000 sst --checkpoint-sim-period=1us ../dbgcli-test1.py &
+export PROBE_PORT=12345
+export PROBE_START_CYCLE=5000000
+export PROBE_POST_DELAY=100
+export PROBE_BUFFER_SIZE=1024
+sst --checkpoint-sim-period=1us ../dbgcli-test1.py &
 sleep 2
 ../run-client.py <<EOF
 echo hello there sst component

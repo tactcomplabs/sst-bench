@@ -61,8 +61,8 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   int probeStartCycle = params.find<int>("probeStartCycle",0);
   int probeBufferSize = params.find<int>("probeBufferSize", DEFAULT_PROBE_BUFFER_SIZE);
   int probePort = params.find<int>("probePort", 0);
-  probeControl_ = std::make_unique<DbgCLIProbeControl>(&output, probeMode, probeStartCycle, probeBufferSize, probePort);
-  probe_ = std::make_unique<Probe>();
+  int probePostDelay = params.find<int>("probePostDelay", 0);
+  probe_ = std::make_unique<DbgCLI_Probe>(&output, probeMode, probeStartCycle, probeBufferSize, probePort, probePostDelay);
 
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
@@ -99,8 +99,8 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
 void DbgCLI::handle_chkpt_probe_action()
 {
   auto c = getCurrentSimCycle();
-  probeControl_->updateSyncState(c);
-  probeControl_->updateProbeState(c);
+  probe_->updateSyncState(c); 
+  probe_->updateProbeState(c); // ensure states update before next sim clock
 }
 
 void DbgCLI::handleEvent(SST::Event *ev){
@@ -118,11 +118,8 @@ void DbgCLI::sendData(){
     std::vector<unsigned> data;
     unsigned range = maxData - minData + 1;
     unsigned r = rand() % range + minData;
-    /// debug probe trigger 
+    /// debug probe trigger (advance to post-trigger state)
     probe_->trigger(r > (range-1));
-    ///
-    if (r > (range-1)) 
-      output.verbose(CALL_INFO,1,0,"triggered\n");
     ///
     for( unsigned i=0; i<r; i++ ){
       data.push_back((unsigned)(mersenne->generateNextUInt32()));
@@ -148,19 +145,23 @@ bool DbgCLI::clockTick( SST::Cycle_t currentCycle ){
   }
 
   // check to see if we've reached the completion state
+  bool rc = false;
   if( (uint64_t)(currentCycle) >= clocks ){
     output.verbose(CALL_INFO, 1, 0,
                    "%s ready to end simulation\n",
                    getName().c_str());
     primaryComponentOKToEndSim();
-    return true;
+    rc =  true;
   }
 
-  return false;
+  if (probe_->active()) 
+    probe_->updateProbeState(getCurrentSimCycle());
+
+  return rc;
 }
 
-DbgCLIProbeControl::DbgCLIProbeControl(SST::Output *out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort)
- : ProbeControl(out, probeMode, probeStartCycle, probeBufferSize, probePort)
+DbgCLI_Probe::DbgCLI_Probe(SST::Output *out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort, int probePostDelay)
+ : ProbeControl(out, probeMode, probeStartCycle, probeBufferSize, probePort, probePostDelay)
 {}
 
 } // namespace SST::DbgCLI

@@ -41,9 +41,9 @@ namespace SST::DbgCLI{
 // -------------------------------------------------------
 // Debug Control State 
 // -------------------------------------------------------
-class DbgCLIProbeControl : public SST::ProbeControl {
+class DbgCLI_Probe : public SST::ProbeControl {
 public:
-  DbgCLIProbeControl(SST::Output * out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort);
+  DbgCLI_Probe(SST::Output * out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort, int probePostDelay);
 };
 
 // -------------------------------------------------------
@@ -117,18 +117,21 @@ public:
                               COMPONENT_CATEGORY_UNCATEGORIZED )
 
   SST_ELI_DOCUMENT_PARAMS(
-    {"verbose",         "Sets the verbosity level of output",   "0" },
-    {"numPorts",        "Number of external ports",             "1" },
-    {"minData",         "Minimum number of unsigned values",    "1" },
-    {"maxData",         "Maximum number of unsigned values",    "2" },
-    {"clockDelay",      "Clock delay between sends",            "1" },
-    {"clocks",          "Clock cycles to execute",              "1000"},
-    {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
-    {"clockFreq",       "Clock frequency",                      "1GHz"},
-    {"probeMode",       "0-Disabled,1-Checkpoint based, >1-rsv",   "0"},
-    {"probeStartCycle", "Use with checkpoint-sim-period",          "0"},
-    {"probeBufferSize", "Records in circular trace buffer",     "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
-    {"probePort",       "Socket assignment for debug port",       "0" }
+    {"verbose",         "Sets the verbosity level of output",      "0" },
+    {"numPorts",        "Number of external ports",                "1" },
+    {"minData",         "Minimum number of unsigned values",       "1" },
+    {"maxData",         "Maximum number of unsigned values",       "2" },
+    {"clockDelay",      "Clock delay between sends",               "1" },
+    {"clocks",          "Clock cycles to execute",               "1000"},
+    {"rngSeed",         "Mersenne RNG Seed",                     "1223"},
+    {"clockFreq",       "Clock frequency",                       "1GHz"},
+    // TODO Should get this into base class. Component extends Probe instead of instantiating it
+    {"probeMode",       "0-Disabled,1-Checkpoint based, >1-rsv",    "0"},
+    {"probeStartCycle", "Use with checkpoint-sim-period",           "0"},
+    {"probeBufferSize", "Records in circular trace buffer",      "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
+    {"probePort",       "Socket assignment for debug port",         "0"},
+    {"probePostDelay",  "Cycles to continue sampling after triggr", "0"},
+
   )
 
   // -------------------------------------------------------
@@ -181,8 +184,7 @@ private:
   uint64_t curCycle;                              ///< current cycle delay
 
   // -- Component probe state object
- std::unique_ptr<DbgCLIProbeControl> probeControl_;
- std::unique_ptr<Probe> probe_;
+ std::unique_ptr<DbgCLI_Probe> probe_;
 
   // -- rng objects
   SST::RNG::Random* mersenne;                     ///< mersenne twister object
