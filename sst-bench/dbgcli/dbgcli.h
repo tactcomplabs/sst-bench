@@ -125,10 +125,10 @@ public:
     {"clocks",          "Clock cycles to execute",              "1000"},
     {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
     {"clockFreq",       "Clock frequency",                      "1GHz"},
-    {"probeMode",       "0-Disabled,1-Checkpoint based, >1-rsv",  "0"},
-    {"probeStartCycle", "Use with checkpoint-sim-period",         "0"},
-    {"probeBufferSize", "Records in circular trace buffer",    "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
-    {"probePort",       "Socket assignment for debug port",      "0" }
+    {"probeMode",       "0-Disabled,1-Checkpoint based, >1-rsv",   "0"},
+    {"probeStartCycle", "Use with checkpoint-sim-period",          "0"},
+    {"probeBufferSize", "Records in circular trace buffer",     "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
+    {"probePort",       "Socket assignment for debug port",       "0" }
   )
 
   // -------------------------------------------------------
@@ -182,6 +182,7 @@ private:
 
   // -- Component probe state object
  std::unique_ptr<DbgCLIProbeControl> probeControl_;
+ std::unique_ptr<Probe> probe_;
 
   // -- rng objects
   SST::RNG::Random* mersenne;                     ///< mersenne twister object

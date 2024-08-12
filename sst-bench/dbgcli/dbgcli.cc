@@ -62,6 +62,7 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   int probeBufferSize = params.find<int>("probeBufferSize", DEFAULT_PROBE_BUFFER_SIZE);
   int probePort = params.find<int>("probePort", 0);
   probeControl_ = std::make_unique<DbgCLIProbeControl>(&output, probeMode, probeStartCycle, probeBufferSize, probePort);
+  probe_ = std::make_unique<Probe>();
 
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
@@ -117,6 +118,12 @@ void DbgCLI::sendData(){
     std::vector<unsigned> data;
     unsigned range = maxData - minData + 1;
     unsigned r = rand() % range + minData;
+    /// debug probe trigger 
+    probe_->trigger(r > (range-1));
+    ///
+    if (r > (range-1)) 
+      output.verbose(CALL_INFO,1,0,"triggered\n");
+    ///
     for( unsigned i=0; i<r; i++ ){
       data.push_back((unsigned)(mersenne->generateNextUInt32()));
     }
@@ -130,6 +137,8 @@ void DbgCLI::sendData(){
 }
 
 bool DbgCLI::clockTick( SST::Cycle_t currentCycle ){
+
+  kgdbg::spinner("CP0_SPINNER", getName().compare("cp1")==0);
 
   // check to see whether we need to send data over the links
   curCycle++;

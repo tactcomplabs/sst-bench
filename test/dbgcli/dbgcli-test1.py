@@ -13,7 +13,8 @@ import sst
 
 PROBE_MODE = 1
 PROBE_PORT = int(os.getenv("PROBE_PORT", 0))
-PROBE_START_CYCLE = int(os.getenv("PROBE_START_CYCLE",0))
+PROBE_START_CYCLE = int(os.getenv("PROBE_START_CYCLE", 0))
+PROBE_BUFFER_SIZE = int(os.getenv("PROBE_BUFFER_SIZE", 1024))
 VERBOSE = int(os.getenv("VERBOSE", 1))
 
 cp0 = sst.Component("cp0", "dbgcli.DbgCLI")
@@ -40,7 +41,8 @@ cp1.addParams({
   "clockFreq" : "1Ghz",
   "probeMode" : 1,
   "probePort" : PROBE_PORT,
-  "probeStartCycle" : PROBE_START_CYCLE
+  "probeStartCycle" : PROBE_START_CYCLE,
+  "probeBufferSize" : PROBE_BUFFER_SIZE,
 })
 
 link0 = sst.Link("link0")

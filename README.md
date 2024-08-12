@@ -1,4 +1,15 @@
-# sst-bench
+# sst-bench (cli branch)
+
+To use this development branch you must build a compatible version of sst using
+
+   git clone git@github.com:kpgriesser/sst-core-kg.git
+   cd sst-core-kg
+   git checkout cli
+   ./autogen.sh
+   mkdir build
+   cd build
+   ../configure --prefix=$SST_CORE_HOME
+   
 
 ## Getting Started
 
