@@ -178,7 +178,8 @@ bool DbgCLI::clockTick( SST::Cycle_t currentCycle ){
 DbgCLI_Probe::DbgCLI_Probe(SST::Output *out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort, int probePostDelay)
  : ProbeControl(out, probeMode, probeStartCycle, probeBufferSize, probePort, probePostDelay)
 {
-  probeBuffer = std::make_unique<ProbeBuffer<event_atts_t>>(probeBufferSize);
+  probeBuffer = std::make_shared<ProbeBuffer<event_atts_t>>(probeBufferSize);
+  setBufferControls(probeBuffer);
 }
 
 void DbgCLI_Probe::capture_send_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev)

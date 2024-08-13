@@ -126,7 +126,7 @@ public:
     {"probeStartCycle", "Use with checkpoint-sim-period",           "0"},
     {"probeBufferSize", "Records in circular trace buffer",      "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
     {"probePort",       "Socket assignment for debug port",         "0"},
-    {"probePostDelay",  "Cycles to continue sampling after triggr", "0"},
+    {"probePostDelay",  "post-trigger delay cycles. -1 to sample until checkpoint", "0"},
 
   )
 
@@ -231,7 +231,7 @@ public:
       return os;
     }
   };
-  std::unique_ptr<ProbeBuffer<event_atts_t>> probeBuffer;
+  std::shared_ptr<ProbeBuffer<event_atts_t>> probeBuffer;
 
 };
 
