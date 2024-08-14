@@ -11,15 +11,23 @@
 import os
 import sst
 
-DEBUG_PORT = int(os.getenv("DEBUG_PORT", 0))
-VERBOSE = int(os.getenv("VERBOSE", 0))
+PROBE_MODE = 1
+PROBE_PORT = int(os.getenv("PROBE_PORT", 0))
+PROBE_START_CYCLE = int(os.getenv("PROBE_START_CYCLE", 0))
+PROBE_BUFFER_SIZE = int(os.getenv("PROBE_BUFFER_SIZE", 1024))
+PROBE_POST_DELAY  = int(os.getenv("PROBE_POST_DELAY", 128))
+
+MIN_DATA = 1
+MAX_DATA = 100
+
+VERBOSE = int(os.getenv("VERBOSE", 1))
 
 cp0 = sst.Component("cp0", "dbgcli.DbgCLI")
 cp0.addParams({
   "verbose" : VERBOSE,
   "numPorts" : 1,
-  "minData" : 1,
-  "maxData" : 100,
+  "minData" : MIN_DATA,
+  "maxData" : MAX_DATA,
   "clockDelay" : 100,
   "clocks" : 10000,
   "rngSeed" : 1223,
@@ -30,13 +38,17 @@ cp1 = sst.Component("cp1", "dbgcli.DbgCLI")
 cp1.addParams({
   "verbose" : VERBOSE,
   "numPorts" : 1,
-  "minData" : 1,
-  "maxData" : 100,
+  "minData" : MIN_DATA,
+  "maxData" : MAX_DATA,
   "clockDelay" : 100,
   "clocks" : 10000,
   "rngSeed" : 1223,
   "clockFreq" : "1Ghz",
-  "debugPort" : DEBUG_PORT,
+  "probeMode" : 1,
+  "probePort" : PROBE_PORT,
+  "probeStartCycle" : PROBE_START_CYCLE,
+  "probeBufferSize" : PROBE_BUFFER_SIZE,
+  "probePostDelay"  : PROBE_POST_DELAY,
 })
 
 link0 = sst.Link("link0")

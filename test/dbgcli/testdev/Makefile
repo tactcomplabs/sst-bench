@@ -1,3 +1,8 @@
+# List all test names here
+ALL_TESTS = basic.0.0 basic.0.1
+# 
+
+# Repository root
 PROJHOME ?= $(realpath ../..)
 
 # SST
@@ -24,9 +29,6 @@ endif
 # Output Directories
 OUTDIR = out
 
-# Test lists
-ALL_TESTS = basic.0.0 basic.0.1
-
 # Final test selection
 TLIST ?= $(ALL_TESTS)
 
@@ -38,13 +40,15 @@ TARGS  := $(LOGS)
 all: $(TARGS)
 run: $(LOGS)
 
-# Test customization
+#
+# Customize environment and command line options on per test basis here
+#
 $(OUTDIR)/basic.0.0/run.log:      SSTOPTS += --checkpoint-sim-period=1us
 $(OUTDIR)/basic.0.1/run.log:      SSTOPTS += --checkpoint-sim-period=500ns
 $(OUTDIR)/basic.0.1/run.log:      ENVOPTS += VERBOSE=10
 
 
-# TODO does --output-directory actually work? Post a bug
+# TODO does --output-directory actually work in sst? Post a bug if no
 # Run command
 %.log: $(SSTCFG)
 	@mkdir -p $(@D)
