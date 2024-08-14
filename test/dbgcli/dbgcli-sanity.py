@@ -14,6 +14,7 @@ import sst
 PROBE_MODE = 1
 PROBE_PORT = int(os.getenv("PROBE_PORT", 0))
 PROBE_START_CYCLE = int(os.getenv("PROBE_START_CYCLE", 0))
+PROBE_END_CYCLE = int(os.getenv("PROBE_END_CYCLE", 0))
 PROBE_BUFFER_SIZE = int(os.getenv("PROBE_BUFFER_SIZE", 1024))
 PROBE_POST_DELAY  = int(os.getenv("PROBE_POST_DELAY", 128))
 
@@ -47,6 +48,7 @@ cp1.addParams({
   "probeMode" : 1,
   "probePort" : PROBE_PORT,
   "probeStartCycle" : PROBE_START_CYCLE,
+  "probeEndCycle"   : PROBE_END_CYCLE,
   "probeBufferSize" : PROBE_BUFFER_SIZE,
   "probePostDelay"  : PROBE_POST_DELAY,
 })
