@@ -124,6 +124,7 @@ public:
     // TODO Should get this into base class. Component extends Probe instead of instantiating it
     {"probeMode",       "0-Disabled,1-Checkpoint based, >1-rsv",    "0"},
     {"probeStartCycle", "Use with checkpoint-sim-period",           "0"},
+    {"probeEndCycle",   "Cycle probing disable. 0 is no limit",     "0"},
     {"probeBufferSize", "Records in circular trace buffer",      "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
     {"probePort",       "Socket assignment for debug port",         "0"},
     {"probePostDelay",  "post-trigger delay cycles. -1 to sample until checkpoint", "0"},
@@ -202,7 +203,7 @@ private:
 class DbgCLI_Probe : public ProbeControl {
 
 public:
-  DbgCLI_Probe(SST::Output * out, int probeMode, int probeStartCycle, int probeBufferSize, int probePort, int probePostDelay);
+  DbgCLI_Probe(SST::Output * out, int mode, int startCycle, int endCycle, int bufferSize, int port, int postDelay);
   // User custom sampling functions
   void capture_send_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev);
   // trace buffer
