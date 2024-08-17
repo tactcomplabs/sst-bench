@@ -11,10 +11,29 @@ sst --checkpoint-sim-period=1us ../dbgcli-sanity.py &
 sleep 2
 ../dbgcli-client.py <<EOF
 echo hello there sst component
+echo help
 help
-echo 1
-echo 2
-echo 3
+echo help component
+help component
+echo help cycle
+help cycle
+echo help disconnect
+help disconnect
+echo help echo
+help echo
+echo help hostname
+help hostname
+echo help run
+help run
+echo help step
+help step
+echo help spin
+help spin
+echo run
+run
+echo step
+step
+echo disconnect
 disconnect
 EOF
 
