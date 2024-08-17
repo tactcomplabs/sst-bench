@@ -11,6 +11,7 @@ sst --checkpoint-sim-period=1us ../dbgcli-sanity.py &
 sleep 2
 ../dbgcli-client.py <<EOF
 echo hello there sst component
+help
 echo 1
 echo 2
 echo 3

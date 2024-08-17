@@ -17,7 +17,6 @@ from enum import Enum
 BUFFER_SIZE = 1024
 HOST = "127.0.0.1"
 PROBE_PORT = int(os.getenv("PROBE_PORT", 0))
-PROMPT = "probe> "
 
 class State(Enum):
     INIT = 0
@@ -38,17 +37,31 @@ def client_program():
 
     # provite socket server identification
     state = State.INIT
-    init_cmd_list = [ "hostname", "component", "cycle" ]
     divider = "##################################"
     print(divider)
-    for cmd in init_cmd_list:
-        client_socket.send(cmd.encode())
-        data = client_socket.recv(BUFFER_SIZE).decode()
-        print(f"# {cmd} = {data}")
+
+    cmd = "hostname"
+    client_socket.send(cmd.encode())
+    servername = client_socket.recv(BUFFER_SIZE).decode()
+    print(f"# {cmd} = {servername}")
+
+    cmd = "component"
+    client_socket.send(cmd.encode())
+    comp = client_socket.recv(BUFFER_SIZE).decode()
+    print(f"# {cmd} = {comp}")
+
+    cmd = "cycle"
+    client_socket.send(cmd.encode())
+    cycle = client_socket.recv(BUFFER_SIZE).decode()
+    print(f"# {cmd} = {cycle}")
+
     print(divider)
 
     state = State.RUN
     while state == State.RUN:
+        client_socket.send("cycle".encode())
+        cycle = client_socket.recv(BUFFER_SIZE).decode()
+        PROMPT = f"[probe:{comp}:{cycle}]> "
         msg = input(PROMPT)
         decode(msg)
         if state == State.DISCONNECT:
