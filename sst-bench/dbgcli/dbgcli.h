@@ -203,7 +203,7 @@ private:
 class DbgCLI_Probe : public ProbeControl {
 
 public:
-  DbgCLI_Probe(SST::Output * out, int mode, int startCycle, int endCycle, int bufferSize, int port, int postDelay);
+  DbgCLI_Probe(SST::Component * comp, SST::Output * out, int mode, int startCycle, int endCycle, int bufferSize, int port, int postDelay);
   // User custom sampling functions
   void capture_send_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev);
   // trace buffer
