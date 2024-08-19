@@ -128,7 +128,8 @@ public:
     {"probeBufferSize", "Records in circular trace buffer",      "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
     {"probePort",       "Socket assignment for debug port",         "0"},
     {"probePostDelay",  "post-trigger delay cycles. -1 to sample until checkpoint", "0"},
-
+    // component specific probe controls
+    {"traceMode",       "0-none, 1-send, 2-recv",                   "0"},
   )
 
   // -------------------------------------------------------
@@ -179,6 +180,8 @@ private:
   uint64_t clockDelay;                            ///< clock delay between sends
   uint64_t clocks;                                ///< number of clocks to execute
   uint64_t curCycle;                              ///< current cycle delay
+  // -- probing
+  unsigned traceMode;                             ///< 0-none, 1-send, 2-recv, 3-both
 
   // -- Component probe state object
  std::unique_ptr<DbgCLI_Probe> probe_;
@@ -205,7 +208,7 @@ class DbgCLI_Probe : public ProbeControl {
 public:
   DbgCLI_Probe(SST::Component * comp, SST::Output * out, int mode, int startCycle, int endCycle, int bufferSize, int port, int postDelay);
   // User custom sampling functions
-  void capture_send_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev);
+  void capture_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev);
   // trace buffer
   struct event_atts_t {
     uint64_t cycle_ = 0;

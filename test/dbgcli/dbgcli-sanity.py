@@ -18,6 +18,9 @@ PROBE_END_CYCLE = int(os.getenv("PROBE_END_CYCLE", 0))
 PROBE_BUFFER_SIZE = int(os.getenv("PROBE_BUFFER_SIZE", 1024))
 PROBE_POST_DELAY  = int(os.getenv("PROBE_POST_DELAY", 128))
 
+TRACE_SEND = 1
+TRACE_RECV = 2
+
 MIN_DATA = 1
 MAX_DATA = 100
 
@@ -32,7 +35,16 @@ cp0.addParams({
   "clockDelay" : 100,
   "clocks" : 10000,
   "rngSeed" : 1223,
-  "clockFreq" : "1Ghz"
+  "clockFreq" : "1Ghz",
+  # common probe controls
+  "probeMode" : 1,
+  "probePort" : PROBE_PORT,
+  "probeStartCycle" : PROBE_START_CYCLE,
+  "probeEndCycle"   : PROBE_END_CYCLE,
+  "probeBufferSize" : PROBE_BUFFER_SIZE,
+  "probePostDelay"  : PROBE_POST_DELAY,
+  # component specific probe controls
+  "traceMode"       : TRACE_RECV,
 })
 
 cp1 = sst.Component("cp1", "dbgcli.DbgCLI")
@@ -45,12 +57,15 @@ cp1.addParams({
   "clocks" : 10000,
   "rngSeed" : 1223,
   "clockFreq" : "1Ghz",
+  # common probe controls
   "probeMode" : 1,
-  "probePort" : PROBE_PORT,
+  #"probePort" : PROBE_PORT+1,
   "probeStartCycle" : PROBE_START_CYCLE,
   "probeEndCycle"   : PROBE_END_CYCLE,
   "probeBufferSize" : PROBE_BUFFER_SIZE,
   "probePostDelay"  : PROBE_POST_DELAY,
+   # component specific probe controls
+   "traceMode"      : TRACE_SEND,
 })
 
 link0 = sst.Link("link0")

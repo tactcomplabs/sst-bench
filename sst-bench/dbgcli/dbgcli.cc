@@ -38,6 +38,7 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   maxData = params.find<uint64_t>("maxData", 2);
   clockDelay = params.find<uint64_t>("clockDelay", 1);
   clocks = params.find<uint64_t>("clocks", 1000);
+  traceMode = params.find<unsigned>("traceMode", 0);
 
 #if 0
   output.verbose(CALL_INFO, 1, 0, "numPorts=%u\n",numPorts);
@@ -46,6 +47,12 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   output.verbose(CALL_INFO, 1, 0, "clockDelay=%llu\n", clockDelay);
   output.verbose(CALL_INFO, 1, 0, "clocks=%llu\n", clocks);
 #endif
+
+  output.verbose(CALL_INFO, 1, 0, "traceMode=%llu\n", traceMode);
+  if (traceMode & 1) output.verbose(CALL_INFO, 1, 0, "tracing SEND events\n");
+  if (traceMode & 2) output.verbose(CALL_INFO, 1, 0, "tracing RECV events\n");
+  if (traceMode>2) 
+    output.fatal(CALL_INFO, -1, "traceMode>2 not yet supported\n");
 
   // sanity check the params
   if( maxData < minData ){
@@ -118,6 +125,19 @@ void DbgCLI::handleEvent(SST::Event *ev){
                  "%s: received %zu unsigned values\n",
                  getName().c_str(),
                  cev->getData().size());
+
+  /// debug probe 
+  if ((traceMode & 2) == 2) {
+      unsigned range = maxData - minData + 1;
+      unsigned r = cev->getData().size();
+      if (probe_->triggering()) {
+        std::cout << "######" << r << ", " << range << std::endl;
+        probe_->trigger(r > (range-1));
+      }
+      if (probe_->sampling())
+        probe_->capture_event_atts(getCurrentSimCycle(), r, cev);
+  }
+
   delete ev;
 }
 
@@ -129,7 +149,8 @@ void DbgCLI::sendData(){
     unsigned r = rand() % range + minData;
 
     /// debug probe trigger (advance to post-trigger state)
-    if (probe_->triggering()) probe_->trigger(r > (range-1));
+    bool trace = (traceMode & 1) == 1;
+    if (trace && probe_->triggering()) probe_->trigger(r > (range-1));
     ///
 
     for( unsigned i=0; i<r; i++ ){
@@ -143,7 +164,8 @@ void DbgCLI::sendData(){
     linkHandlers[i]->send(ev);
 
     /// debug probe data capture
-    if (probe_->sampling()) probe_->capture_send_event_atts(getCurrentSimCycle(), r, ev);
+    if (trace && probe_->sampling()) 
+      probe_->capture_event_atts(getCurrentSimCycle(), r, ev);
     /// 
   }
 }
@@ -183,7 +205,7 @@ DbgCLI_Probe::DbgCLI_Probe(SST::Component * comp, SST::Output * out, int mode, i
   setBufferControls(probeBuffer);
 }
 
-void DbgCLI_Probe::capture_send_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev)
+void DbgCLI_Probe::capture_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev)
 {
   if (! sampling()) return;
   // copy the sample into the circular buffer  
