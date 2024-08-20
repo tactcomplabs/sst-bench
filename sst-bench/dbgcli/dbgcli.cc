@@ -131,7 +131,6 @@ void DbgCLI::handleEvent(SST::Event *ev){
       unsigned range = maxData - minData + 1;
       unsigned r = cev->getData().size();
       if (probe_->triggering()) {
-        std::cout << "######" << r << ", " << range << std::endl;
         probe_->trigger(r > (range-1));
       }
       if (probe_->sampling())
