@@ -59,9 +59,17 @@ def client_program():
 
     state = State.RUN
     while state == State.RUN:
+        client_socket.send("cli_id".encode())
+        id = client_socket.recv(BUFFER_SIZE).decode()
+        if id=="chkpt":
+            client_socket.send("syncstate".encode())
+        else:
+            id="comp"
+            client_socket.send("probestate".encode())
+        stat = client_socket.recv(BUFFER_SIZE).decode()
         client_socket.send("cycle".encode())
         cycle = client_socket.recv(BUFFER_SIZE).decode()
-        PROMPT = f"[probe:{comp}:{cycle}]> "
+        PROMPT = f"[{id}:{stat}:{comp}:{cycle}]> "
         msg = input(PROMPT)
         decode(msg)
         if state == State.DISCONNECT:

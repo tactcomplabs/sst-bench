@@ -121,15 +121,18 @@ public:
     {"clocks",          "Clock cycles to execute",               "1000"},
     {"rngSeed",         "Mersenne RNG Seed",                     "1223"},
     {"clockFreq",       "Clock frequency",                       "1GHz"},
-    // TODO Should get this into base class. Component extends Probe instead of instantiating it
+    // component specific probe controls
+    {"traceMode",       "0-none, 1-send, 2-recv",                   "0"},
+    // TODO Should get rest into base class. Component extends Probe instead of instantiating it
     {"probeMode",       "0-Disabled,1-Checkpoint based, >1-rsv",    "0"},
     {"probeStartCycle", "Use with checkpoint-sim-period",           "0"},
     {"probeEndCycle",   "Cycle probing disable. 0 is no limit",     "0"},
     {"probeBufferSize", "Records in circular trace buffer",      "1024"}, // DEFAULT_PROBE_BUFFER_SIZE
-    {"probePort",       "Socket assignment for debug port",         "0"},
     {"probePostDelay",  "post-trigger delay cycles. -1 to sample until checkpoint", "0"},
-    // component specific probe controls
-    {"traceMode",       "0-none, 1-send, 2-recv",                   "0"},
+    {"probePort",       "Socket assignment for debug port",         "0"},
+    {"cliControl",  "0x40 every chkpt, 0x20 chkpts when probe active, 0x10 sync state change,\n"
+                    "0x04 every probe sample, 0x02 probe samples from trigger onward, 0x01 probe state change"
+                    , "0"},
   )
 
   // -------------------------------------------------------
@@ -206,7 +209,9 @@ private:
 class DbgCLI_Probe : public ProbeControl {
 
 public:
-  DbgCLI_Probe(SST::Component * comp, SST::Output * out, int mode, int startCycle, int endCycle, int bufferSize, int port, int postDelay);
+  DbgCLI_Probe(SST::Component * comp, SST::Output * out, 
+              int mode, int startCycle, int endCycle, int bufferSize, 
+              int port, int postDelay, uint64_t cliControl);
   // User custom sampling functions
   void capture_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev);
   // trace buffer

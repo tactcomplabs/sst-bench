@@ -78,9 +78,13 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   int probeBufferSize = params.find<int>("probeBufferSize", DEFAULT_PROBE_BUFFER_SIZE);
   int probePort = params.find<int>("probePort", 0);
   int probePostDelay = params.find<int>("probePostDelay", 0);
-  probe_ = std::make_unique<DbgCLI_Probe>(this, &output, probeMode, probeStartCycle, probeEndCycle, probeBufferSize, probePort, probePostDelay);
+  uint64_t cliControl = params.find<uint64_t>("cliControl", 0);
+  probe_ = std::make_unique<DbgCLI_Probe>(
+          this, &output, probeMode, 
+          probeStartCycle, probeEndCycle, probeBufferSize, 
+          probePort, probePostDelay, cliControl);
 
-  // constructor complete
+  // constructor completeå
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
 }
 
@@ -197,8 +201,10 @@ bool DbgCLI::clockTick( SST::Cycle_t currentCycle ){
   return rc;
 }
 
-DbgCLI_Probe::DbgCLI_Probe(SST::Component * comp, SST::Output * out, int mode, int startCycle, int endCycle, int bufferSize, int port, int postDelay)
- : ProbeControl(comp, out, mode, startCycle, endCycle, bufferSize, port, postDelay)
+DbgCLI_Probe::DbgCLI_Probe(SST::Component * comp, SST::Output * out, 
+  int mode, int startCycle, int endCycle, int bufferSize, 
+  int port, int postDelay, uint64_t cliControl)
+ : ProbeControl(comp, out, mode, startCycle, endCycle, bufferSize, port, postDelay, cliControl)
 {
   probeBuffer = std::make_shared<ProbeBuffer<event_atts_t>>(bufferSize);
   setBufferControls(probeBuffer);
