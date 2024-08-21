@@ -1,13 +1,16 @@
 # List all test names here
-ALL_TESTS = basic.0.0 basic.0.1
+ALL_TESTS  = basic.0.0 basic.0.1 basic.0.2 basic.0.3
+ALL_TESTS += basic.0.4 basic.0.5 basic.0.6 basic.0.7
+# ALL_TESTS += cli0x40.0
 # 
 
 # Repository root
 PROJHOME ?= $(realpath ../..)
 
 # SST
-SSTCFG ?= $(PWD)/basic.py
-SSTOPTS += --add-lib-path=$(PROJHOME)/sst-bench/dbgcli --output-json=rank.json
+SSTCFG ?= $(PWD)/probe.py
+SSTCHKPT ?= --checkpoint-sim-period=1us
+SSTOPTS += $(SSTCHKPT) --add-lib-path=$(PROJHOME)/sst-bench/dbgcli --output-json=rank.json
 ifdef VALGRIND
  SST ?= valgrind sst
 else
@@ -43,18 +46,59 @@ run: $(LOGS)
 #
 # Customize environment and command line options on per test basis here
 #
-$(OUTDIR)/basic.0.0/run.log:      SSTOPTS += --checkpoint-sim-period=1us
-$(OUTDIR)/basic.0.1/run.log:      SSTOPTS += --checkpoint-sim-period=500ns
-$(OUTDIR)/basic.0.1/run.log:      ENVOPTS += VERBOSE=10
 
+# basic test defaults
+# sst checkpoint sampling period: 1us
+# sample:  		cp1 send events, cp0 recv events
+# trigger:  	max payload size
+# 
+# PROBE_MODE=1 (probeMode=1)
+# PROBE_START_CYCLE=0  (probeStartCycle=0)   # start of 1st checkpoint
+# PROBE_END_CYCLE=0    (probeEndCycle=0)     # no limit
+# PROBE_BUFFER_SIZE=16 (probeBufferSize=16)
+# PROBE_POST_DELAY=8   (probePostDelay=8)
+# PROBE_PORT=10000     (probePort=10000)     # cp0 10000, cp1 10001, ...
+# CLI_CONTROL_CP0=0    (cliControl=0) 
+# CLI_CONTROL_CP1=0    (cliControl=0) 
+
+# cliControl determines when to break into interactive mode
+# 0b0100_0000 : 0x40 : 64 Every checkpoint
+# 0b0010_0000 : 0x20 : 32 Every checkpoint when probe is active
+# 0b0001_0000 : 0x10 : 16 Every checkpoint sync state change
+# 0b0000_0100 : 0x04 : 04 Every probe sample
+# 0b0000_0010 : 0x02 : 02 Every probe sample from trigger onward
+# 0b0000_0001 : 0x01 : 01 Every probe state change
+# 0b0000_0000 : 0x00 : 00 Disabled
+
+# Test: basic.0.* : check trigger and buffering
+$(OUTDIR)/basic.0.0/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=0
+$(OUTDIR)/basic.0.1/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=1
+$(OUTDIR)/basic.0.2/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=2
+$(OUTDIR)/basic.0.3/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=3
+$(OUTDIR)/basic.0.4/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=4
+$(OUTDIR)/basic.0.5/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=5
+$(OUTDIR)/basic.0.6/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=6
+$(OUTDIR)/basic.0.7/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=7
+
+# Test: cli0x40.* : check break to CLI at every checkpoint
+$(OUTDIR)/cli0x40.0/run.log:   ENVOPTS += CLI_CONTROL_CP1=64
 
 # TODO does --output-directory actually work in sst? Post a bug if no
 # Run command
+# %.log: $(SSTCFG)
+# 	@mkdir -p $(@D)
+# 	@echo Running $(basename $@) in $(@D)
+# 	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) $(SST) $(SSTOPTS) $(SSTCFG) \
+#  > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
+# 	@echo "### " $@":" `cat $(@D)/run.status`
+
+RUNSCRIPT ?= $(PWD)/client-run5.bash
+
 %.log: $(SSTCFG)
 	@mkdir -p $(@D)
 	@echo Running $(basename $@) in $(@D)
-	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) $(SST) $(SSTOPTS) $(SSTCFG) \
- > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
+	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) SST="$(SST)" SSTOPTS="$(SSTOPTS)" SSTCFG=$(SSTCFG) $(RUNSCRIPT) \
+  > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
 	@echo "### " $@":" `cat $(@D)/run.status`
 
 clean:

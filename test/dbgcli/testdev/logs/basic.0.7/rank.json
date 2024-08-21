@@ -1,0 +1,77 @@
+{
+  "program_options": {
+    "verbose": "0",
+    "stop-at": "0 ns",
+    "print-timing-info": "false",
+    "heartbeat-sim-period": "",
+    "heartbeat-wall-period": "0",
+    "timebase": "1 ps",
+    "partitioner": "sst.single",
+    "timeVortex": "sst.timevortex.priority_queue",
+    "interthread-links": "false",
+    "output-prefix-core": "@x SST Core: ",
+    "checkpoint-sim-period": "1us",
+    "checkpoint-wall-period": "0"
+  },
+  "components": [
+    {
+      "name": "cp0",
+      "type": "dbgcli.DbgCLI",
+      "params": {
+        "verbose": "1",
+        "numPorts": "1",
+        "minData": "1",
+        "maxData": "100",
+        "clockDelay": "100",
+        "clocks": "10000",
+        "rngSeed": "1223",
+        "clockFreq": "1Ghz",
+        "traceMode": "2",
+        "probeMode": "1",
+        "probeStartCycle": "0",
+        "probeEndCycle": "0",
+        "probeBufferSize": "4",
+        "probePostDelay": "7",
+        "probePort": "10000",
+        "cliControl": "0"
+      }
+    },
+    {
+      "name": "cp1",
+      "type": "dbgcli.DbgCLI",
+      "params": {
+        "verbose": "1",
+        "numPorts": "1",
+        "minData": "1",
+        "maxData": "100",
+        "clockDelay": "100",
+        "clocks": "10000",
+        "rngSeed": "1223",
+        "clockFreq": "1Ghz",
+        "traceMode": "1",
+        "probeMode": "1",
+        "probeStartCycle": "0",
+        "probeEndCycle": "0",
+        "probeBufferSize": "4",
+        "probePostDelay": "7",
+        "probePort": "10001",
+        "cliControl": "0"
+      }
+    }
+  ],
+  "links": [
+    {
+      "name": "link0",
+      "left": {
+        "component": "cp0",
+        "port": "port0",
+        "latency": "1us"
+      },
+      "right": {
+        "component": "cp1",
+        "port": "port0",
+        "latency": "1us"
+      }
+    }
+  ]
+}
