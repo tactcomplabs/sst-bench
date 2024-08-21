@@ -14,7 +14,7 @@ import sys
 
 from enum import Enum
 
-BUFFER_SIZE = 1024
+BUFFER_SIZE = 4096
 HOST = "127.0.0.1"
 PROBE_PORT = int(os.getenv("PROBE_PORT", 0))
 
@@ -35,7 +35,7 @@ def client_program():
     print(f"Connecting to {HOST}:{PROBE_PORT}")
     client_socket.connect( (HOST, PROBE_PORT) )
 
-    # provite socket server identification
+    # socket server identification
     state = State.INIT
     divider = "##################################"
     print(divider)
@@ -55,22 +55,31 @@ def client_program():
     cycle = client_socket.recv(BUFFER_SIZE).decode()
     print(f"# {cmd} = {cycle}")
 
+    cmd = "clicontrol"
+    client_socket.send(cmd.encode())
+    clicontrol = int(client_socket.recv(BUFFER_SIZE).decode(),10)
+    print(f"# {cmd} = 0x{clicontrol:x}")
+
     print(divider)
 
     state = State.RUN
     while state == State.RUN:
-        client_socket.send("cli_id".encode())
-        id = client_socket.recv(BUFFER_SIZE).decode()
-        if id=="chkpt":
+        client_socket.send("clicontrol".encode())
+        cctl = int(client_socket.recv(BUFFER_SIZE).decode(),10)
+        id = "comp"
+        if (cctl & 0x100):
+            id = "chkpt"
             client_socket.send("syncstate".encode())
         else:
-            id="comp"
             client_socket.send("probestate".encode())
         stat = client_socket.recv(BUFFER_SIZE).decode()
         client_socket.send("cycle".encode())
         cycle = client_socket.recv(BUFFER_SIZE).decode()
         PROMPT = f"[{id}:{stat}:{comp}:{cycle}]> "
-        msg = input(PROMPT)
+        msg_len=0;
+        while msg_len<1:
+            msg = input(PROMPT).lstrip(' ').rstrip(' ')
+            msg_len = len(msg)
         decode(msg)
         if state == State.DISCONNECT:
             msg = "disconnect"

@@ -1,8 +1,10 @@
 # List all test names here
 ALL_TESTS  = basic.0.0 basic.0.1 basic.0.2 basic.0.3
 ALL_TESTS += basic.0.4 basic.0.5 basic.0.6 basic.0.7
-# ALL_TESTS += cli0x40.0
-# 
+
+# Tests development
+WIP_TESTS += cli0x40.0 cli0x20.0 cli0x10.0
+WIP_TESTS += cli0x04.0 cli0x02.0 cli0x01.0
 
 # Repository root
 PROJHOME ?= $(realpath ../..)
@@ -81,25 +83,29 @@ $(OUTDIR)/basic.0.6/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=6
 $(OUTDIR)/basic.0.7/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=7
 
 # Test: cli0x40.* : check break to CLI at every checkpoint
-$(OUTDIR)/cli0x40.0/run.log:   ENVOPTS += CLI_CONTROL_CP1=64
+$(OUTDIR)/cli0x40.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=64
+$(OUTDIR)/cli0x20.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=32
+$(OUTDIR)/cli0x10.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=16
+$(OUTDIR)/cli0x04.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=4
+$(OUTDIR)/cli0x02.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=2
+$(OUTDIR)/cli0x01.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=1  
 
 # TODO does --output-directory actually work in sst? Post a bug if no
 # Run command
-# %.log: $(SSTCFG)
-# 	@mkdir -p $(@D)
-# 	@echo Running $(basename $@) in $(@D)
-# 	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) $(SST) $(SSTOPTS) $(SSTCFG) \
-#  > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
-# 	@echo "### " $@":" `cat $(@D)/run.status`
-
-RUNSCRIPT ?= $(PWD)/client-run5.bash
-
 %.log: $(SSTCFG)
 	@mkdir -p $(@D)
 	@echo Running $(basename $@) in $(@D)
-	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) SST="$(SST)" SSTOPTS="$(SSTOPTS)" SSTCFG=$(SSTCFG) $(RUNSCRIPT) \
-  > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
+	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) $(SST) $(SSTOPTS) $(SSTCFG) > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
 	@echo "### " $@":" `cat $(@D)/run.status`
+
+RUNSCRIPT ?= $(PWD)/client-run5.bash
+
+# experimental: attach client
+# %.log: $(SSTCFG)
+# 	@mkdir -p $(@D)
+# 	@echo Running $(basename $@) in $(@D)
+# 	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) SST="$(SST)" SSTOPTS="$(SSTOPTS)" SSTCFG=$(SSTCFG) $(RUNSCRIPT) > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
+# 	@echo "### " $@":" `cat $(@D)/run.status`
 
 clean:
 	rm -rf $(OUTDIR)
@@ -110,7 +116,10 @@ help:
 	@echo make 
 	@echo make DOT=1 SSTCFG=\$$PWD/test3.py TLIST=test3
 	@echo make VALGRIND=1 TLIST=test1
-	@echo Valid TLIST selections are: $(ALL_TESTS)
+	@echo Valid TLIST selections are:
+	@echo $(ALL_TESTS)
+	@echo WIP TLIST selections are:
+	@echo $(WIP_TESTS)
 	@echo
 
 .PHONY: clean help
