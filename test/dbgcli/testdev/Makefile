@@ -111,11 +111,15 @@ RUNSCRIPT ?= $(PWD)/client-run5.bash
 # 	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) SST="$(SST)" SSTOPTS="$(SSTOPTS)" SSTCFG=$(SSTCFG) $(RUNSCRIPT) > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
 # 	@echo "### " $@":" `cat $(@D)/run.status`
 
+check: run
+	diff -r out logs | grep -v 'Real CPU time' | grep -v Binary | egrep -v '^\-\-\-$$' | egrep -v '^\d+c\d+$$' | egrep -v '^\d+,\d+c\d+,\d+$$'
+
 clean:
 	rm -rf $(OUTDIR)
 
 help:
 	@echo make run
+	@echo make check
 	@echo make TLIST=\"test1 test2 ...\"
 	@echo make 
 	@echo make DOT=1 SSTCFG=\$$PWD/test3.py TLIST=test3
