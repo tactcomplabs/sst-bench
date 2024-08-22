@@ -12,7 +12,9 @@ import os
 import sst
 
 # PROBE controls
-PROBE_MODE = 1
+PROBE_CP0    = int(os.getenv("PROBE_CP0", 0))
+PROBE_CP1    = int(os.getenv("PROBE_CP1", 0))
+
 PROBE_START_CYCLE = int(os.getenv("PROBE_START_CYCLE", 0))
 PROBE_END_CYCLE   = int(os.getenv("PROBE_END_CYCLE", 0))
 PROBE_BUFFER_SIZE = int(os.getenv("PROBE_BUFFER_SIZE", 16))
@@ -54,7 +56,7 @@ cp0.addParams({
   # component specific probe controls
   "traceMode"  : TRACE_RECV,
   # common probe controls
-  "probeMode"       : 1,
+  "probeMode"       : PROBE_CP0,
   "probeStartCycle" : PROBE_START_CYCLE,
   "probeEndCycle"   : PROBE_END_CYCLE,
   "probeBufferSize" : PROBE_BUFFER_SIZE,
@@ -76,7 +78,7 @@ cp1.addParams({
   # component specific probe controls
   "traceMode"  : TRACE_SEND,
   # common probe controls
-  "probeMode"       : 1,
+  "probeMode"       : PROBE_CP1,
   "probeStartCycle" : PROBE_START_CYCLE,
   "probeEndCycle"   : PROBE_END_CYCLE,
   "probeBufferSize" : PROBE_BUFFER_SIZE,

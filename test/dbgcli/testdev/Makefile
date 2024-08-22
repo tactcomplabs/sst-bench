@@ -54,7 +54,8 @@ run: $(LOGS)
 # sample:  		cp1 send events, cp0 recv events
 # trigger:  	max payload size
 # 
-# PROBE_MODE=1 (probeMode=1)
+# PROBE_CP0=0 (probeMode=0)
+# PROBE_CP1=0 (probeMode=0)
 # PROBE_START_CYCLE=0  (probeStartCycle=0)   # start of 1st checkpoint
 # PROBE_END_CYCLE=0    (probeEndCycle=0)     # no limit
 # PROBE_BUFFER_SIZE=16 (probeBufferSize=16)
@@ -71,6 +72,9 @@ run: $(LOGS)
 # 0b0000_0010 : 0x02 : 02 Every probe sample from trigger onward
 # 0b0000_0001 : 0x01 : 01 Every probe state change
 # 0b0000_0000 : 0x00 : 00 Disabled
+
+# For testing always have PROBE_CP0 and PROBE_CP1 enabled
+ENVOPTS = PROBE_CP0=1 PROBE_CP1=1 
 
 # Test: basic.0.* : check trigger and buffering
 $(OUTDIR)/basic.0.0/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=0
