@@ -16,7 +16,8 @@ namespace SST::MsgPerf{
   // MsgPerfNIC
   //------------------------------------------
   MsgPerfNIC::MsgPerfNIC( SST::ComponentId_t id, SST::Params& params )
-    : MsgPerfAPI(id, params){
+    : MsgPerfAPI(id, params), timeConverter(nullptr), clockHandler(nullptr),
+      iFace(nullptr), msgHandler(nullptr), initBcastSent(false), numDest(0) {
 
     int verbosity = params.find<int>("verbose", 0);
     output.init(
@@ -26,6 +27,10 @@ namespace SST::MsgPerf{
     const std::string nicClock = params.find< std::string >( "clock", "1GHz" );
     iFace = loadUserSubComponent<SST::Interfaces::SimpleNetwork>(
       "iface", ComponentInfo::SHARE_NONE, 1 );
+
+    clockHandler  = new SST::Clock::Handler< MsgPerfNIC >(this,
+                                                      &MsgPerfNIC::clockTick);
+    timeConverter = registerClock(nicClock, clockHandler);
 
     if( !iFace ){
       // load the anonymous nic
@@ -47,9 +52,6 @@ namespace SST::MsgPerf{
     iFace->setNotifyOnReceive(
       new SST::Interfaces::SimpleNetwork::Handler<MsgPerfNIC>(
         this, &MsgPerfNIC::msgNotify ));
-
-    initBcastSent= false;
-    msgHandler = nullptr;
   }
 
   MsgPerfNIC::~MsgPerfNIC(){

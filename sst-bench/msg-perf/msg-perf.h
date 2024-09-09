@@ -176,6 +176,8 @@ protected:
   SST::Output output;     ///< MsgPerfNIC: SST output object
   int verbosity;          ///< MsgPerfNIC: verbosity
 
+  TimeConverter* timeConverter;   ///< SST time conversion handler
+  SST::Clock::Handler< MsgPerfNIC >* clockHandler;  ///< Clock Handler
   SST::Interfaces::SimpleNetwork *iFace;  ///< MsgPerfNIC: SST network interface
 
   SST::Event::HandlerBase* msgHandler;    ///< MsgPerfNIC: SST message handler
