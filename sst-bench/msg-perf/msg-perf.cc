@@ -107,8 +107,8 @@ namespace SST::MsgPerf{
         shift += 8;
       }
       output.verbose(CALL_INFO, 10, 0,
-                     "Receiving endpoint id=%" PRIu64 "\n",
-                     endP);
+                     "Endpoint %" PRIu64 " receiving endpoint id=%" PRIu64 "\n",
+                     iFace->getEndpointID(), endP);
 
       endPoints.push_back(endP);
     }
@@ -166,14 +166,12 @@ namespace SST::MsgPerf{
 
   uint64_t MsgPerfNIC::getNextAddress(){
     uint64_t myAddr = (uint64_t)(getAddress());
+    uint64_t lastAddr = endPoints.back();
+    if (myAddr > lastAddr)
+      return endPoints[0];
     for( unsigned i=0; i<endPoints.size(); i++ ){
-      if( endPoints[i] == myAddr ){
-        if( (i+1) <= (endPoints.size()-1) ){
-          return endPoints[i+1];
-        }else{
-          return endPoints[0];
-        }
-      }
+      if( endPoints[i] > myAddr )
+          return endPoints[i];
     }
     return 0;
   }
