@@ -173,7 +173,7 @@ namespace SST::MsgPerf{
       if( endPoints[i] > myAddr )
           return endPoints[i];
     }
-    return 0;
+    return endPoints[0];
   }
 
   bool MsgPerfNIC::clockTick(Cycle_t cycle){
