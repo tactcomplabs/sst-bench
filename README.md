@@ -55,7 +55,7 @@ Additional build options include:
 from the current version of SST
 * `cmake -DSSTBENCH_ENABLE_TESTING=ON ../` : Enables included test harness: 
 run with `make test`
-* cmake -DSSTBENCH_ENABLE_SSTDBG=ON ../` : Enables TCL SST-Dbg components
+* `cmake -DSSTBENCH_ENABLE_SSTDBG=ON ../` : Enables TCL SST-Dbg components
 
 ## Testing
 
