@@ -13,7 +13,7 @@ import argparse
 import sst
 
 parser = argparse.ArgumentParser(description="Run MsgPerf Test2")
-parser.add_argument("--numCores", type=int, help="Number of cores to load", default=1)
+parser.add_argument("--numCores", type=int, help="Number of cores to load", default=2)
 parser.add_argument("--startSize", help="starting payload size", default="64B")
 parser.add_argument("--endSize", help="ending payload size", default="128B")
 parser.add_argument("--stepSize", help="step size", default="8B")
