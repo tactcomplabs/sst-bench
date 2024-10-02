@@ -16,7 +16,8 @@ namespace SST::MsgPerf{
   // MsgPerfNIC
   //------------------------------------------
   MsgPerfNIC::MsgPerfNIC( SST::ComponentId_t id, SST::Params& params )
-    : MsgPerfAPI(id, params){
+    : MsgPerfAPI(id, params), timeConverter(nullptr), clockHandler(nullptr),
+      iFace(nullptr), msgHandler(nullptr), initBcastSent(false), numDest(0) {
 
     int verbosity = params.find<int>("verbose", 0);
     output.init(
@@ -26,6 +27,10 @@ namespace SST::MsgPerf{
     const std::string nicClock = params.find< std::string >( "clock", "1GHz" );
     iFace = loadUserSubComponent<SST::Interfaces::SimpleNetwork>(
       "iface", ComponentInfo::SHARE_NONE, 1 );
+
+    clockHandler  = new SST::Clock::Handler< MsgPerfNIC >(this,
+                                                      &MsgPerfNIC::clockTick);
+    timeConverter = registerClock(nicClock, clockHandler);
 
     if( !iFace ){
       // load the anonymous nic
@@ -47,9 +52,6 @@ namespace SST::MsgPerf{
     iFace->setNotifyOnReceive(
       new SST::Interfaces::SimpleNetwork::Handler<MsgPerfNIC>(
         this, &MsgPerfNIC::msgNotify ));
-
-    initBcastSent= false;
-    msgHandler = nullptr;
   }
 
   MsgPerfNIC::~MsgPerfNIC(){
@@ -105,8 +107,8 @@ namespace SST::MsgPerf{
         shift += 8;
       }
       output.verbose(CALL_INFO, 10, 0,
-                     "Receiving endpoint id=%" PRIu64 "\n",
-                     endP);
+                     "Endpoint %" PRIu64 " receiving endpoint id=%" PRIu64 "\n",
+                     iFace->getEndpointID(), endP);
 
       endPoints.push_back(endP);
     }
@@ -164,16 +166,14 @@ namespace SST::MsgPerf{
 
   uint64_t MsgPerfNIC::getNextAddress(){
     uint64_t myAddr = (uint64_t)(getAddress());
+    uint64_t lastAddr = endPoints.back();
+    if (myAddr > lastAddr)
+      return endPoints[0];
     for( unsigned i=0; i<endPoints.size(); i++ ){
-      if( endPoints[i] == myAddr ){
-        if( (i+1) <= (endPoints.size()-1) ){
-          return endPoints[i+1];
-        }else{
-          return endPoints[0];
-        }
-      }
+      if( endPoints[i] > myAddr )
+          return endPoints[i];
     }
-    return 0;
+    return endPoints[0];
   }
 
   bool MsgPerfNIC::clockTick(Cycle_t cycle){
