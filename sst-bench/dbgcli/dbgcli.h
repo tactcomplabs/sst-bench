@@ -214,7 +214,7 @@ public:
               int port, int postDelay, uint64_t cliControl);
   // User custom sampling functions
   void capture_event_atts(uint64_t cycle, uint64_t sz, DbgCLIEvent *ev);
-  // trace buffer
+  // Custom data type for samples
   struct event_atts_t {
     uint64_t cycle_ = 0;
     uint64_t sz_ = 0;
@@ -240,6 +240,7 @@ public:
       return os;
     }
   };
+  // trace buffer
   std::shared_ptr<ProbeBuffer<event_atts_t>> probeBuffer;
 
 };

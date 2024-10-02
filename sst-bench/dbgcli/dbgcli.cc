@@ -71,14 +71,15 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
                                          &DbgCLI::handleEvent>(this)));
   }
 
-  // Debug Probe
-  int probeMode = params.find<int>("probeMode", 0);
+  // Debug Probe Parameters
+  int probeMode       = params.find<int>("probeMode", 0);
   int probeStartCycle = params.find<int>("probeStartCycle",0);
-  int probeEndCycle = params.find<int>("probeEndCycle", 0);
+  int probeEndCycle   = params.find<int>("probeEndCycle", 0);
   int probeBufferSize = params.find<int>("probeBufferSize", DEFAULT_PROBE_BUFFER_SIZE);
-  int probePort = params.find<int>("probePort", 0);
-  int probePostDelay = params.find<int>("probePostDelay", 0);
+  int probePort       = params.find<int>("probePort", 0);
+  int probePostDelay  = params.find<int>("probePostDelay", 0);
   uint64_t cliControl = params.find<uint64_t>("cliControl", 0);
+  // Create Probe
   probe_ = std::make_unique<DbgCLI_Probe>(
           this, &output, probeMode, 
           probeStartCycle, probeEndCycle, probeBufferSize, 

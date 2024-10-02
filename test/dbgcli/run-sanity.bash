@@ -21,18 +21,22 @@ sleep 2
 echo hello there sst component
 echo help
 help
-echo help cli_id
-help cli_id
+echo help clicontrol
+help clicontrol
 echo help component
 help component
 echo help cycle
 help cycle
 echo help disconnect
 help disconnect
+echo help dump
+help dump
 echo help echo
 help echo
 echo help hostname
 help hostname
+echo help numrecs
+help numrecs
 echo help probestate
 help probestate
 echo help run
@@ -41,6 +45,8 @@ echo help spin
 help spin
 echo help syncstate
 echo syncstate
+echo help trigstate
+echo trigstate
 echo run
 run
 echo disconnect
