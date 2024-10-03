@@ -17,11 +17,7 @@ if [ -d $1 ]; then
     rm -rf ${1}
 fi
 
-args=""
-for (( i==2; i <= "$#"; i++)); do
-    args="$args ${!i}"
-done
-
+args=${@:2:$#}
 echo sst --checkpoint-prefix=$1 $args
 sst --checkpoint-prefix=$1 $args
 
