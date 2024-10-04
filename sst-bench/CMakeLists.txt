@@ -26,6 +26,8 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   add_subdirectory(restore)
   message(STATUS "[SST-BENCH] Enabling RESTART micro-benchmark")
   add_subdirectory(restart)
+  message(STATUS "[SST-BENCH] Enabling GRID micro-benchmark")
+  add_subdirectory(grid)
 endif()
 
 if(${SST_MAJOR_VERSION} EQUAL 14)
