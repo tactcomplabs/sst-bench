@@ -1,5 +1,5 @@
 //
-// _chkpnt_cc_
+// _gridcomp_cc_
 //
 // Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -47,7 +47,8 @@ GridComp::GridComp(SST::ComponentId_t id, const SST::Params& params ) :
   }
 
   // setup the rng
-  mersenne = new SST::RNG::MersenneRNG(params.find<unsigned int>("rngSeed", 1223));
+  rngSend = new SST::RNG::MersenneRNG(params.find<unsigned int>("rngSeed", 1223));
+  rngRcv  = new SST::RNG::MersenneRNG(params.find<unsigned int>("rngSeed", 1223));
 
   // setup the links
   for( unsigned i=0; i<numPorts; i++ ){
@@ -71,7 +72,7 @@ void GridComp::finish(){
 
 void GridComp::init( unsigned int phase ){
   if( phase == 0 ){
-    // setup the internal data
+    // setup the initial data
     output.verbose(CALL_INFO, 5, 0,
                    "%s: initializing internal data at init phase=0\n",
                    getName().c_str());
@@ -96,16 +97,40 @@ void GridComp::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(baseSeed)
   SST_SER(data)
   SST_SER(curCycle)
-  SST_SER(mersenne)
+  SST_SER(rngSend)
+  SST_SER(rngRcv)
   SST_SER(linkHandlers)
 }
 
 void GridComp::handleEvent(SST::Event *ev){
   GridCompEvent *cev = static_cast<GridCompEvent*>(ev);
+  auto data = cev->getData();
   output.verbose(CALL_INFO, 5, 0,
                  "%s: received %zu unsigned values\n",
                  getName().c_str(),
-                 cev->getData().size());
+                 data.size());
+  // Check the incoming data
+  unsigned range = maxData - minData + 1;
+  unsigned r = rngRcv->generateNextUInt32() % range + minData;
+  if (r != data.size()) {
+    output.fatal(CALL_INFO, -1,
+                  "Expected data size %" PRIu32 " does not match actual size %" PRIu64 "\n",
+                  r, data.size());
+  }
+  if (r != data[0]) {
+    output.fatal(CALL_INFO, -1,
+              "Expected data[0] %" PRIu32 " does not match actual %" PRIu32 "\n",
+              r, data[0]);
+  }
+  for (unsigned i=1; i<r; i++){
+    unsigned d = (unsigned)rngRcv->generateNextUInt32();
+    if ( d != data[i] ) {
+      output.fatal(CALL_INFO, -1,
+          "Expected data[%" PRIu32 "] %" PRIu32 " does not match actual %" PRIu32 "\n",
+          i, d, data[i]);
+    }
+  }
+  
   delete ev;
 }
 
@@ -114,9 +139,11 @@ void GridComp::sendData(){
     // generate a new payload
     std::vector<unsigned> data;
     unsigned range = maxData - minData + 1;
-    unsigned r = rand() % range + minData;
-    for( unsigned i=0; i<r; i++ ){
-      data.push_back((unsigned)(mersenne->generateNextUInt32()));
+    unsigned r = rngSend->generateNextUInt32() % range + minData;
+    // First data is the number of ints
+    data.push_back(r);
+    for( unsigned i=1; i<r; i++ ){
+      data.push_back((unsigned)(rngSend->generateNextUInt32()));
     }
     output.verbose(CALL_INFO, 5, 0,
                    "%s: sending %zu unsigned values on link %d\n",

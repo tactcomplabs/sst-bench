@@ -14,7 +14,7 @@ import sst
 
 parser = argparse.ArgumentParser(description="2d grid network test 1 with checkpoint/restart checks")
 parser.add_argument("--numEdgePorts", type=int, help="Number of ports per component edge", default=10)
-parser.add_argument("--verbose", type=int, help="verbosity level", default=1)
+parser.add_argument("--verbose", type=int, help="verbosity level", default=5)
 args = parser.parse_args()
 
 print("2d grid test SST Simulation Configuration:")

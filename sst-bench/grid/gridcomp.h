@@ -107,7 +107,7 @@ public:
 
   SST_ELI_DOCUMENT_PARAMS(
     {"verbose",         "Sets the verbosity level of output",   "0" },
-    {"numBytes",        "Sets the number of stored bytes (4 byte increments)", "64KB"},
+    {"numBytes",        "Internal state size (4 byte increments)", "64KB"},
     {"numPorts",        "Number of external ports",             "1" },
     {"minData",         "Minimum number of unsigned values",    "1" },
     {"maxData",         "Maximum number of unsigned values",    "2" },
@@ -157,7 +157,7 @@ private:
   SST::Clock::HandlerBase* clockHandler;          ///< Clock Handler
 
   // -- parameters
-  uint64_t numBytes;                              ///< number of bytes to store
+  uint64_t numBytes;                              ///< number of bytes of internal state
   unsigned numPorts;                              ///< number of ports to configure
   uint64_t minData;                               ///< minimum number of data elements
   uint64_t maxData;                               ///< maxmium number of data elements
@@ -167,7 +167,8 @@ private:
   uint64_t curCycle;                              ///< current cycle delay
 
   // -- internals
-  SST::RNG::Random* mersenne;                     ///< mersenne twister object
+  SST::RNG::Random* rngSend;                      ///< mersenne twister object for send data
+  SST::RNG::Random* rngRcv;                       ///< rng for receiver to check data
 
   std::vector<SST::Link *> linkHandlers;          ///< LinkHandler objects
   
