@@ -13,12 +13,18 @@ period_ns=500
 period=f"{period_ns}ns"
 cpts_expected=ns/period_ns
 
-cmd=f"sst --checkpoint-prefix={pfx} --checkpoint-period={period} --add-lib-path=../../sst-bench/grid 2d.py -- --verbose=0"
+dotopts=f"--output-dot={pfx}.dot --dot-verbosity=10"
+progopts="--verbose=0 --x=2 --y=2"
+cmd=f"sst --checkpoint-prefix={pfx} --checkpoint-period={period} --add-lib-path=../../sst-bench/grid {dotopts} 2d.py -- {progopts}"
 print(cmd)
 rc = os.system(cmd)
+
 if rc!=0:
     print(f"Error: sst checkpointing test failed. rc={rc}")
     exit(1)
+
+cmd = f"dot -Tpdf {pfx}.dot -o {pfx}.pdf"
+rc = os.system(cmd)
 
 cpts=glob.glob(f"{pfx}/*/*.sstcpt")
 if len(cpts) != cpts_expected:
