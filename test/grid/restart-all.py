@@ -1,9 +1,37 @@
 #!/usr/bin/env python3 
 
+#
+# Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
+# All Rights Reserved
+# contact@tactcomplabs.com
+#
+# See LICENSE in the top level directory for licensing details
+#
+# restart-all.py
+#
+
 import argparse
 import glob
 import os
 import shutil
+import time
+
+def timed_run(cmd, key):
+    print(cmd)
+    start = time.perf_counter()
+    rc = os.system(cmd)
+    etime = time.perf_counter() - start;
+    if rc!=0:
+        print(f"Error: rc={rc} cmd={cmd}")
+        exit(rc)
+    print(f"TIME {key}:{etime}")
+
+def untimed_run(cmd):
+    print(cmd)
+    rc = os.system(cmd)
+    if rc!=0:
+        print(f"Error: rc={rc} cmd={cmd}")
+        exit(rc)
 
 parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart testing")
 parser.add_argument("--x", type=int, help="number of horizonal components", default=2)
@@ -31,22 +59,20 @@ dotopts=""
 if args.pdf==True:
     dotopts=f"--output-dot={pfx}.dot --dot-verbosity=10"
 
+simkey = f"{period}_{args.x}_{args.y}"
+
 mpiopts=""
 if args.mpi>1:
     mpiopts=f"mpirun -n {args.mpi} --use-hwthread-cpus"
     sstopts=f"{sstopts} --parallel-output=1"
+    simkey = f"{simkey}_{args.mpi}"
 
 cmd=f"{mpiopts} sst  {cptopts} {sstopts} {dotopts} 2d.py -- {progopts}"
-print(cmd)
-rc = os.system(cmd)
-
-if rc!=0:
-    print(f"Error: sst checkpointing test failed. rc={rc}")
-    exit(1)
+timed_run(cmd,f"checkpointing_{simkey}")
 
 if args.pdf == True:
     cmd = f"dot -Tpdf {pfx}.dot -o {pfx}.pdf"
-    rc = os.system(cmd)
+    untimed_run(cmd)
 
 cpts=glob.glob(f"{pfx}/*/*.sstcpt")
 if len(cpts) != cpts_expected:
@@ -55,11 +81,7 @@ if len(cpts) != cpts_expected:
 
 for cpt in cpts:
     cmd=f"{mpiopts} sst --load-checkpoint {cpt} {sstopts}"
-    print(cmd)
-    rc = os.system(cmd)
-    if rc!=0:
-        print(f"Error: sst restart test failed for checkpoint {cpt}. rc={rc}")
-        exit(3)
+    timed_run(cmd,f"restart_{simkey}")
 
 
 
