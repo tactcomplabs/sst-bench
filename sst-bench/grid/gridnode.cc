@@ -1,5 +1,5 @@
 //
-// _gridcomp_cc_
+// _gridnode_cc_
 //
 // Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,15 +8,15 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "gridcomp.h"
+#include "gridnode.h"
 #include "kgdbg.h"
 
-namespace SST::GridComp{
+namespace SST::GridNode{
 
 //------------------------------------------
-// GridComp
+// GridNode
 //------------------------------------------
-GridComp::GridComp(SST::ComponentId_t id, const SST::Params& params ) :
+GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
   curCycle(0) {
@@ -25,10 +25,10 @@ GridComp::GridComp(SST::ComponentId_t id, const SST::Params& params ) :
 
   const int Verbosity = params.find< int >( "verbose", 0 );
   output.init(
-    "GridComp[" + getName() + ":@p:@t]: ",
+    "GridNode[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
   const std::string cpuClock = params.find< std::string >("clockFreq", "1GHz");
-  clockHandler  = new SST::Clock::Handler2<GridComp,&GridComp::clockTick>(this);
+  clockHandler  = new SST::Clock::Handler2<GridNode,&GridNode::clockTick>(this);
   timeConverter = registerClock(cpuClock, clockHandler);
   registerAsPrimaryComponent();
   primaryComponentDoNotEndSim();
@@ -55,8 +55,8 @@ GridComp::GridComp(SST::ComponentId_t id, const SST::Params& params ) :
   for( unsigned i=0; i<numPorts; i++ ){
     portname[i] = "port" + std::to_string(i);
     linkHandlers.push_back(configureLink("port"+std::to_string(i),
-                                         new Event::Handler2<GridComp,
-                                         &GridComp::handleEvent>(this)));
+                                         new Event::Handler2<GridNode,
+                                         &GridNode::handleEvent>(this)));
     // TODO unique seed for each port matching recievers seed with corresponding senders.
     // send: up=0, down=1, left=2, right=3
     // rcv:  up=4, down=5, left=6, right=7
@@ -68,20 +68,20 @@ GridComp::GridComp(SST::ComponentId_t id, const SST::Params& params ) :
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
 }
 
-GridComp::~GridComp(){
+GridNode::~GridNode(){
   for (unsigned i=0;i<numPorts; i++) {
     if (rng[portname[i]]) 
       delete rng[portname[i]];
   }
 }
 
-void GridComp::setup(){
+void GridNode::setup(){
 }
 
-void GridComp::finish(){
+void GridNode::finish(){
 }
 
-void GridComp::init( unsigned int phase ){
+void GridNode::init( unsigned int phase ){
   if( phase == 0 ){
     // setup the initial data
     output.verbose(CALL_INFO, 5, 0,
@@ -93,10 +93,10 @@ void GridComp::init( unsigned int phase ){
   }
 }
 
-void GridComp::printStatus( Output& out ){
+void GridNode::printStatus( Output& out ){
 }
 
-void GridComp::serialize_order(SST::Core::Serialization::serializer& ser){
+void GridNode::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
   SST_SER(clockHandler)
   SST_SER(numBytes)
@@ -113,8 +113,8 @@ void GridComp::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(linkHandlers)
 }
 
-void GridComp::handleEvent(SST::Event *ev){
-  GridCompEvent *cev = static_cast<GridCompEvent*>(ev);
+void GridNode::handleEvent(SST::Event *ev){
+  GridNodeEvent *cev = static_cast<GridNodeEvent*>(ev);
   auto data = cev->getData();
   output.verbose(CALL_INFO, 5, 0,
                  "%s: received %zu unsigned values\n",
@@ -154,7 +154,7 @@ void GridComp::handleEvent(SST::Event *ev){
   delete ev;
 }
 
-void GridComp::sendData(){
+void GridNode::sendData(){
   // Iterate over sending ports.
   // Treating links as unidirectional so the recieve port RNG tracks the send port.
   // TODO: create 2 RNG's per port, one for send, one for recieve
@@ -176,16 +176,16 @@ void GridComp::sendData(){
                    "%s: sending %zu unsigned values on link %d\n",
                    getName().c_str(),
                    data.size(), port);
-    GridCompEvent *ev = new GridCompEvent(data);
+    GridNodeEvent *ev = new GridNodeEvent(data);
     linkHandlers[port]->send(ev);
   }
 }
 
-unsigned GridComp::neighbor(unsigned n)
+unsigned GridNode::neighbor(unsigned n)
 {
   // send: up=0, down=1, left=2, right=3
   // rcv:  up=4, down=5, left=6, right=7
-  assert(n < numPorts);
+  assert(n < numPorts/2); //TODO bidirectional links
   switch (n) {
     case 0:
       return 5;
@@ -210,7 +210,7 @@ unsigned GridComp::neighbor(unsigned n)
   return 8; // invalid
 }
 
-bool GridComp::clockTick( SST::Cycle_t currentCycle ){
+bool GridNode::clockTick( SST::Cycle_t currentCycle ){
 
   // sanity check the array
   for( uint64_t i = 0; i < (numBytes/4ull); i++ ){
@@ -241,6 +241,6 @@ bool GridComp::clockTick( SST::Cycle_t currentCycle ){
   return false;
 }
 
-} // namespace SST::GridComp
+} // namespace SST::GridNode
 
 // EOF

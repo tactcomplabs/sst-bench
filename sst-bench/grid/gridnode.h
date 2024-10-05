@@ -1,5 +1,5 @@
 //
-// _gridcomp_h_
+// _gridnode_h_
 //
 // Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,8 +8,8 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#ifndef _SST_GRIDCOMP_H_
-#define _SST_GRIDCOMP_H_
+#ifndef _SST_GRIDNODE_H_
+#define _SST_GRIDNODE_H_
 
 // -- Standard Headers
 #include <map>
@@ -36,74 +36,74 @@
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 
-namespace SST::GridComp{
+namespace SST::GridNode{
 
 // -------------------------------------------------------
-// GridCompEvent
+// GridNodeEvent
 // -------------------------------------------------------
-class GridCompEvent : public SST::Event{
+class GridNodeEvent : public SST::Event{
 public:
-  /// GridCompEvent : standard constructor
-  GridCompEvent() : SST::Event() {}
+  /// GridNodeEvent : standard constructor
+  GridNodeEvent() : SST::Event() {}
 
-  /// GridCompEvent: constructor
-  GridCompEvent(std::vector<unsigned> d) : SST::Event(), data(d) {}
+  /// GridNodeEvent: constructor
+  GridNodeEvent(std::vector<unsigned> d) : SST::Event(), data(d) {}
 
-  /// GridCompEvent: destructor
-  ~GridCompEvent() {}
+  /// GridNodeEvent: destructor
+  ~GridNodeEvent() {}
 
-  /// GridCompEvent: retrieve the data
+  /// GridNodeEvent: retrieve the data
   std::vector<unsigned> const getData() { return data; }
 
 private:
-  std::vector<unsigned> data;     ///< GridCompEvent: data payload
+  std::vector<unsigned> data;     ///< GridNodeEvent: data payload
 
-  /// GridCompEvent: serialization method
+  /// GridNodeEvent: serialization method
   void serialize_order(SST::Core::Serialization::serializer& ser) override{
     Event::serialize_order(ser);
     SST_SER(data)
   }
 
-  /// GridCompEvent: serialization implementor
-  ImplementSerializable(SST::GridComp::GridCompEvent);
+  /// GridNodeEvent: serialization implementor
+  ImplementSerializable(SST::GridNode::GridNodeEvent);
 
-};  // class GridCompEvent
+};  // class GridNodeEvent
 
 // -------------------------------------------------------
-// GridComp
+// GridNode
 // -------------------------------------------------------
-class GridComp : public SST::Component{
+class GridNode : public SST::Component{
 public:
-  /// GridComp: top-level SST component constructor
-  GridComp( SST::ComponentId_t id, const SST::Params& params );
+  /// GridNode: top-level SST component constructor
+  GridNode( SST::ComponentId_t id, const SST::Params& params );
 
-  /// GridComp: top-level SST component destructor
-  ~GridComp();
+  /// GridNode: top-level SST component destructor
+  ~GridNode();
 
-  /// GridComp: standard SST component 'setup' function
+  /// GridNode: standard SST component 'setup' function
   void setup() override;
 
-  /// GridComp: standard SST component 'finish' function
+  /// GridNode: standard SST component 'finish' function
   void finish() override;
 
-  /// GridComp: standard SST component init function
+  /// GridNode: standard SST component init function
   void init( unsigned int phase ) override;
 
-  /// GridComp: standard SST component printStatus
+  /// GridNode: standard SST component printStatus
   void printStatus(Output& out) override;
 
-  /// GridComp: standard SST component clock function
+  /// GridNode: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );
 
   // -------------------------------------------------------
-  // GridComp Component Registration Data
+  // GridNode Component Registration Data
   // -------------------------------------------------------
-  /// GridComp: Register the component with the SST core
-  SST_ELI_REGISTER_COMPONENT( GridComp,     // component class
+  /// GridNode: Register the component with the SST core
+  SST_ELI_REGISTER_COMPONENT( GridNode,     // component class
                               "grid",       // component library
-                              "GridComp",   // component name
+                              "GridNode",   // component name
                               SST_ELI_ELEMENT_VERSION( 1, 0, 0 ),
-                              "GRIDCOMP SST COMPONENT",
+                              "GRIDNODE SST COMPONENT",
                               COMPONENT_CATEGORY_UNCATEGORIZED )
 
   SST_ELI_DOCUMENT_PARAMS(
@@ -120,36 +120,36 @@ public:
   )
 
   // -------------------------------------------------------
-  // GridComp Component Port Data
+  // GridNode Component Port Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_PORTS(
     {"port%(num_ports)d",
       "Ports which connect to endpoints.",
-      {"chkpnt.GridCompEvent", ""}
+      {"chkpnt.GridNodeEvent", ""}
     }
   )
 
   // -------------------------------------------------------
-  // GridComp SubComponent Parameter Data
+  // GridNode SubComponent Parameter Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_SUBCOMPONENT_SLOTS()
 
   // -------------------------------------------------------
-  // GridComp Component Statistics Data
+  // GridNode Component Statistics Data
   // -------------------------------------------------------
   SST_ELI_DOCUMENT_STATISTICS()
 
   // -------------------------------------------------------
-  // GridComp Component Checkpoint Methods
+  // GridNode Component Checkpoint Methods
   // -------------------------------------------------------
-  /// GridComp: serialization constructor
-  GridComp() : SST::Component() {}
+  /// GridNode: serialization constructor
+  GridNode() : SST::Component() {}
 
-  /// GridComp: serialization
+  /// GridNode: serialization
   void serialize_order(SST::Core::Serialization::serializer& ser) override;
 
-  /// GridComp: serialization implementations
-  ImplementSerializable(SST::GridComp::GridComp)
+  /// GridNode: serialization implementations
+  ImplementSerializable(SST::GridNode::GridNode)
 
 private:
   // -- internal handlers
@@ -181,9 +181,9 @@ private:
   /// calculates the port number for the receiver
   unsigned neighbor(unsigned n);
 
-};  // class GridComp
-}   // namespace SST::GridComp
+};  // class GridNode
+}   // namespace SST::GridNode
 
-#endif  // _SST_GRIDCOMP_H_
+#endif  // _SST_GRIDNODE_H_
 
 // EOF

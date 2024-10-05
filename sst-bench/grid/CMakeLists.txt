@@ -8,8 +8,8 @@
 #
 
 set(GridSrcs
-  gridcomp.cc
-  gridcomp.h
+  gridnode.cc
+  gridnode.h
 )
 
 add_library(grid SHARED ${GridSrcs})

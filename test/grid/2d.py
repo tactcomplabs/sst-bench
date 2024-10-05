@@ -34,11 +34,11 @@ comp_params = {
   "clockFreq" : "1Ghz"
 }
 
-class GRIDCOMP():
+class GRIDNODE():
   def __init__(self, x, y):
     id = f"cp_{x}_{y}"
     self.id = id
-    self.comp = sst.Component(id, "grid.GridComp" )
+    self.comp = sst.Component(id, "grid.GridNode" )
     self.comp.addParams(comp_params)
     # everyone gets 8 links, up/down/left/right, send/rcv
     # links here are associated with this component's send ports
@@ -55,9 +55,9 @@ class GRIDCOMP():
 
 if args.x==2 and args.y==1:
   # for known good check
-  cp0 = sst.Component("cp0", "grid.GridComp")
+  cp0 = sst.Component("cp0", "grid.GridNode")
   cp0.addParams(comp_params)
-  cp1 = sst.Component("cp1", "grid.GridComp")
+  cp1 = sst.Component("cp1", "grid.GridNode")
   cp1.addParams(comp_params)
   link = [None] * PORTS
   for i in range(0, PORTS):
@@ -69,7 +69,7 @@ else:
   grid = {}
   for x in range(args.x):
     for y in range(args.y):
-      comp = GRIDCOMP(x,y)
+      comp = GRIDNODE(x,y)
       grid[comp.id] = comp
 
   # connect send ports to adjacent rcv ports. Edge nodes wrap around
