@@ -72,12 +72,12 @@ else:
       comp = GRIDCOMP(x,y)
       grid[comp.id] = comp
 
-  # connect send ports to adjacent rcv ports
+  # connect send ports to adjacent rcv ports. Edge nodes wrap around
   #  send: up=0, down=1, left=2, right=3
   #  rcv:  up=4, down=5, left=6, right=7
-  for key in grid:
-    print(f"Connecting {key}")
-    tile = grid[key]
+  for node in grid:
+    print(f"Connecting {node}")
+    tile = grid[node]
     comp=tile.comp
     tile.upLink.connect(    (comp, f"port{0}", "1us"), (grid[tile.neighbor['u']].comp, f"port{5}", "1us") )
     tile.downLink.connect(  (comp, f"port{1}", "1us"), (grid[tile.neighbor['d']].comp, f"port{4}", "1us") )

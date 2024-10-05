@@ -12,6 +12,7 @@
 #define _SST_GRIDCOMP_H_
 
 // -- Standard Headers
+#include <map>
 #include <vector>
 #include <queue>
 #include <random>
@@ -166,20 +167,19 @@ private:
   unsigned baseSeed;                              ///< base seed value
   uint64_t curCycle;                              ///< current cycle delay
 
-  // -- internals
-  SST::RNG::Random* rngSend;                      ///< mersenne twister object for send data
-  SST::RNG::Random* rngRcv;                       ///< rng for receiver to check data
-
+  // -- internal state
+  std::vector<std::string> portname;              ///< port 0 to numPorts names
   std::vector<SST::Link *> linkHandlers;          ///< LinkHandler objects
-  
-  std::vector<unsigned> data;                     ///< internal data structure
+  std::vector<unsigned> state;                     ///< internal data structure
+  std::map< std::string, SST::RNG::Random* > rng; ///< per port mersenne twister objects
 
   // -- private methods
   /// event handler
   void handleEvent(SST::Event *ev);
-
   /// sends data to adjacent links
   void sendData();
+  /// calculates the port number for the receiver
+  unsigned neighbor(unsigned n);
 
 };  // class GridComp
 }   // namespace SST::GridComp
