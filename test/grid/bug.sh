@@ -15,12 +15,12 @@
 # Ubuntu 22.04.5 LTS
 
 # test cases
-#   checkpoint-period   mpi-ranks   Pass/Fail
-#       None            None        Pass
-#       None              2         Pass
+#   checkpoint-period   mpi-ranks   Result
+#         None          None        Pass
 #       5000ns          None        Pass
-#       5000ns            2         Pass
 #        500ns          None        Pass
+#         None            2         Pass
+#       5000ns            2         Pass
 #        500ns            2         Fail
 #
 
@@ -57,7 +57,7 @@ fi
 echo "####################################################################"
 echo "Running with 2 MPI ranks, no checkpointing."
 echo "####################################################################"
-sst  --add-lib-path=../../sst-bench/grid  2d.py -- --verbose=1 --x=$x --y=$y
+mpirun -n 2 sst  --add-lib-path=../../sst-bench/grid  2d.py -- --verbose=1 --x=$x --y=$y
 if [[ $? != 0 ]]; then
     echo "FAILED"
     exit 1
