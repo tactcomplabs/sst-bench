@@ -15,6 +15,7 @@ import sst
 parser = argparse.ArgumentParser(description="2d grid network test 1 with checkpoint/restart checks")
 parser.add_argument("--x", type=int, help="number of horizonal components", default=2)
 parser.add_argument("--y", type=int, help="number of vertical components", default=1)
+parser.add_argument("--clocks", type=int, help="number of clocks to run sim", default=10000)
 parser.add_argument("--verbose", type=int, help="verbosity level", default=1)
 args = parser.parse_args()
 
@@ -26,10 +27,10 @@ PORTS = 8
 comp_params = {
   "verbose" : args.verbose,
   "numPorts" : PORTS,
-  "minData" : 1,
-  "maxData" : 10000,
+  "minData" : 10,
+  "maxData" : 16384,
   "clockDelay" : 100,
-  "clocks" : 10000,
+  "clocks" : args.clocks,
   "rngSeed" : 1223,
   "clockFreq" : "1Ghz"
 }

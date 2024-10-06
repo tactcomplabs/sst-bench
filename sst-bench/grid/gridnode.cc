@@ -36,13 +36,18 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   // read the rest of the parameters
   numBytes = params.find<SST::UnitAlgebra>("numBytes", "64KB").getRoundedValue();
   numPorts = params.find<unsigned>("numPorts", 1);
-  minData = params.find<uint64_t>("minData", 1);
-  maxData = params.find<uint64_t>("maxData", 2);
+  minData = params.find<uint64_t>("minData", 10);
+  maxData = params.find<uint64_t>("maxData", 65536);
   clockDelay = params.find<uint64_t>("clockDelay", 1);
   clocks = params.find<uint64_t>("clocks", 1000);
   baseSeed = params.find<unsigned>("baseSeed", "1223");
 
   // sanity check the params
+  if (minData < 10) {
+    output.verbose(CALL_INFO, 1, 0, 
+    "Warning: User specified minData < 10. Setting to 10\n");
+    minData = 10;
+  }
   if( maxData < minData ){
     output.fatal(CALL_INFO, -1,
                  "%s : maxData < minData\n",
