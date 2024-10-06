@@ -16,20 +16,25 @@
 
 x=3
 y=3
+rm -rf restart_bug_SAVE
 
 echo "#####################################################################"
 echo "Generating checkpoints using 7 threads"
 echo "#####################################################################"
-sst  --checkpoint-prefix=restart_SAVE --checkpoint-period=1000ns --add-lib-path=../../sst-bench/grid  -n 7 2d.py -- --verbose=1 --x=3 --y=3 --clocks=10000
+sst  --checkpoint-prefix=restart_bug_SAVE --checkpoint-period=1000ns --add-lib-path=../../sst-bench/grid  -n 7 2d.py -- --verbose=1 --x=3 --y=3 --clocks=10000
 if [[ $? != 0 ]]; then
-    echo "FAILED"
+    echo "FAILED checkpoint sim"
     exit 1
 fi
 
 echo "#####################################################################"
-echo "Restarting from restart_SAVE_8_9000000 (and repeating 100 times)"
+echo "Restarting from restart_bug_SAVE_8_9000000 (and repeating 100 times)"
 echo "#####################################################################"
 for i in {1..100}; do
-    sst --load-checkpoint restart_SAVE/bug_restart_8_9000000/bug_restart_8_9000000.sstcpt -n 7
+    sst --load-checkpoint restart_bug_SAVE/restart_bug_SAVE_8_9000000/restart_bug_SAVE_8_9000000.sstcpt -n 7
+    if [[ $? != 0 ]]; then
+        echo "FAILED restart"
+        exit 2
+    fi
 done
 
