@@ -13,6 +13,7 @@
 import argparse
 import glob
 import os
+import re
 import shutil
 import time
 
@@ -48,32 +49,37 @@ pfx = "restart-all_SAVE_"
 if os.path.isdir(pfx):
     shutil.rmtree(pfx)
 
-ns=args.clocks
-period_ns=args.period
-period=f"{period_ns}ns"
-cpts_expected=int(ns/period_ns)
+ns = args.clocks
+period_ns = args.period
+period = f"{period_ns}ns"
+cpts_expected = int(ns/period_ns)
 
-cptopts=f"--checkpoint-prefix={pfx} --checkpoint-period={period}"
-sstopts=f"--add-lib-path=../../sst-bench/grid"
-progopts=f"--verbose={args.verbose} --x={args.x} --y={args.y} --clocks={ns}"
+# bug? When using sst threads we get a checkpoint file past the end of the simulation.
+if ( args.threads > 1 ):
+    cpts_expected = cpts_expected + 1
 
-dotopts=""
-if args.pdf==True:
-    dotopts=f"--output-dot={pfx}.dot --dot-verbosity=10"
+cptopts = f"--checkpoint-prefix={pfx} --checkpoint-period={period}"
+sstopts = f"--add-lib-path=../../sst-bench/grid"
+progopts = f"--verbose={args.verbose} --x={args.x} --y={args.y} --clocks={ns}"
 
-simkey = f"{period}_{args.x}_{args.y}"
+dotopts = ""
+if args.pdf == True:
+    dotopts = f"--output-dot={pfx}.dot --dot-verbosity=10"
 
+simkey = f"{args.x}_{args.y}_{ns}_{period}"
+
+threadopts=""
 if args.threads>1:
-    sstopts=f"{sstopts} -n {args.threads}"
+    threadopts = f"-n {args.threads}"
     simkey = f"{simkey}_thr{args.threads}"
 
 mpiopts=""
 if args.mpi>1:
-    mpiopts=f"mpirun -n {args.mpi} --use-hwthread-cpus"
+    mpiopts = f"mpirun -n {args.mpi} --use-hwthread-cpus"
     simkey = f"{simkey}_mpi{args.mpi}"
 
 
-cmd=f"{mpiopts} sst  {cptopts} {sstopts} {dotopts} 2d.py -- {progopts}"
+cmd=f"{mpiopts} sst  {cptopts} {sstopts} {dotopts} {threadopts} 2d.py -- {progopts}"
 timed_run(cmd,f"checkpointing_{simkey}")
 
 if args.pdf == True:
@@ -85,9 +91,15 @@ if len(cpts) != cpts_expected:
     print(f"Error: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
     exit(2)
 
+pat=re.compile(f"(.*/.*)+/{pfx}_(.+).sstcpt$")
 for cpt in cpts:
-    cmd=f"{mpiopts} sst --load-checkpoint {cpt} {sstopts}"
-    timed_run(cmd,f"restart_{simkey}")
+    m=pat.match(cpt)
+    if m != None:
+        cptkey=f"{simkey}_{m.group(m.lastindex)}"
+    else:
+        cptkey=f"{simkey}_?"
+    cmd=f"{mpiopts} sst --load-checkpoint {cpt} {threadopts}"
+    timed_run(cmd,f"restart_{cptkey}")
 
 
 
