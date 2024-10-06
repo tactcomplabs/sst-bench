@@ -24,7 +24,7 @@ namespace SST::LargeStatChkpnt{
       Verbosity, 0, SST::Output::STDOUT );
     output.verbose( CALL_INFO, 5, 0, "Init is complete\n" );
     clockHandler  = new SST::Clock::Handler2<LargeStatChkpnt,
-                  &LargeStatCkpnt::clockTick>(this);
+                  &LargeStatChkpnt::clockTick>(this);
     timeConverter = registerClock("1GHz", clockHandler);
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();

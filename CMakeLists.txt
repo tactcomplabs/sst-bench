@@ -16,6 +16,9 @@ endif()
 cmake_minimum_required(VERSION 3.19)
 project(sstdata CXX)
 
+# Local scripts
+set(SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
+
 #-- SST Setup
 execute_process(COMMAND sst-config --prefix
                 OUTPUT_VARIABLE SST_INSTALL_DIR
@@ -54,11 +57,11 @@ execute_process(COMMAND sst-config SST_ELEMENT_LIBRARY SST_ELEMENT_LIBRARY_LIBDI
                 OUTPUT_VARIABLE SST_ELEMENT_LIBRARY_LIBDIR
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/sst-major-version.sh
+execute_process(COMMAND ${SCRIPTS}/sst-major-version.sh
                 OUTPUT_VARIABLE SST_MAJOR_VERSION
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/sst-minor-version.sh
+execute_process(COMMAND ${SCRIPTS}/sst-minor-version.sh
                 OUTPUT_VARIABLE SST_MINOR_VERSION
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
