@@ -18,17 +18,17 @@ import shutil
 import time
 
 def timed_run(cmd, key):
-    print(cmd)
+    print(cmd, flush=True)
     start = time.perf_counter()
     rc = os.system(cmd)
     etime = time.perf_counter() - start;
-    if rc!=0:
+    if rc != 0:
         print(f"Error: rc={rc} cmd={cmd}")
         exit(rc)
     print(f"#TIME {key}:{etime}")
 
 def untimed_run(cmd):
-    print(cmd)
+    print(cmd, flush=True)
     rc = os.system(cmd)
     if rc!=0:
         print(f"Error: rc={rc} cmd={cmd}")
@@ -37,11 +37,11 @@ def untimed_run(cmd):
 parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart testing")
 parser.add_argument("--x", type=int, help="number of horizonal components", default=2)
 parser.add_argument("--y", type=int, help="number of vertical components", default=1)
-parser.add_argument("--clocks", type=int, help="number of clocks to run sim", default=10000)
-parser.add_argument("--mpi", type=int, help="specify number of mpi threads", default=1)
+parser.add_argument("--ranks", type=int, help="specify number of mpi ranks", default=1)
 parser.add_argument("--threads", type=int, help="number of sst threads per rank", default=1)
+parser.add_argument("--clocks", type=int, help="number of clocks to run sim", default=10000)
+parser.add_argument("--period", type=int, help="time in ns between checkpoints", default=1000)
 parser.add_argument("--pdf", type=bool, help="generate network graph pdf", default=False)
-parser.add_argument("--period", type=int, help="time in ns between checkpoints", default=500)
 parser.add_argument("--verbose", type=int, help="sst verbosity level", default=1)
 args = parser.parse_args()
 
@@ -67,13 +67,13 @@ simkey = f"{args.x}_{args.y}_{ns}_{period}"
 threadopts=""
 if args.threads>1:
     threadopts = f"-n {args.threads}"
-    simkey = f"{simkey}_thr{args.threads}"
+    simkey = f"{simkey}_T{args.threads}"
 
 mpiopts=""
-if args.mpi>1:
-    mpiopts = f"mpirun -n {args.mpi} --use-hwthread-cpus"
-    simkey = f"{simkey}_mpi{args.mpi}"
-
+#TODO option to use hardware threads ( or not )
+if args.ranks>1:
+    mpiopts = f"mpirun -n {args.ranks} --use-hwthread-cpus"
+    simkey = f"{simkey}_R{args.ranks}"
 
 cmd=f"{mpiopts} sst  {cptopts} {sstopts} {dotopts} {threadopts} 2d.py -- {progopts}"
 timed_run(cmd,f"checkpointing_{simkey}")
@@ -97,6 +97,8 @@ for cpt in cpts:
         cptkey=f"{simkey}_?"
     cmd=f"{mpiopts} sst --load-checkpoint {cpt} {threadopts}"
     timed_run(cmd,f"restart_{cptkey}")
+
+#EOF
 
 
 
