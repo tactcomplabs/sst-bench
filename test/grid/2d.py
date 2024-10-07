@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser(description="2d grid network test 1 with checkp
 parser.add_argument("--x", type=int, help="number of horizonal components", default=2)
 parser.add_argument("--y", type=int, help="number of vertical components", default=1)
 parser.add_argument("--clocks", type=int, help="number of clocks to run sim", default=10000)
+parser.add_argument("--rngSeed", type=int, help="seed for random number generator", default=1223)
 parser.add_argument("--verbose", type=int, help="verbosity level", default=1)
 args = parser.parse_args()
 
@@ -23,6 +24,7 @@ print("2d grid test SST Simulation Configuration:")
 for arg in vars(args):
   print("\t", arg, " = ", getattr(args, arg))
 
+# the number of ports must always be 8 but may change this later
 PORTS = 8
 comp_params = {
   "verbose" : args.verbose,
@@ -31,7 +33,7 @@ comp_params = {
   "maxData" : 16384,
   "clockDelay" : 100,
   "clocks" : args.clocks,
-  "rngSeed" : 1223,
+  "rngSeed" : args.rngSeed,
   "clockFreq" : "1Ghz"
 }
 

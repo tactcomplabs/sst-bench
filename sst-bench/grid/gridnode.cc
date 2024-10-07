@@ -40,7 +40,7 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   maxData = params.find<uint64_t>("maxData", 65536);
   clockDelay = params.find<uint64_t>("clockDelay", 1);
   clocks = params.find<uint64_t>("clocks", 1000);
-  baseSeed = params.find<unsigned>("baseSeed", "1223");
+  rngSeed = params.find<unsigned>("rngSeed", "1223");
 
   // sanity check the params
   if (minData < 10) {
@@ -62,11 +62,20 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
     linkHandlers.push_back(configureLink("port"+std::to_string(i),
                                          new Event::Handler2<GridNode,
                                          &GridNode::handleEvent>(this)));
-    // TODO unique seed for each port matching recievers seed with corresponding senders.
+    
+    // The sending link and receiving links must have the same seed for the checking to work
     // send: up=0, down=1, left=2, right=3
     // rcv:  up=4, down=5, left=6, right=7
-    rng.insert( {portname[i], new SST::RNG::MersenneRNG(params.find<unsigned int>("rngSeed",baseSeed))} );
-
+    #if 0
+    // Keep same random sequence for all ports
+    rng.insert( {portname[i], new SST::RNG::MersenneRNG(params.find<unsigned int>("rngSeed",rngSeed))} );
+    #else
+    // Each port has unique random sequence.
+    // However, across components the data for each corresponding port will be the same.
+    // To add the complimentary port's component info to the seed could be a future enhancement.
+    int n = i<4 ? i : neighbor(i);
+    rng.insert( {portname[i], new SST::RNG::MersenneRNG(n + params.find<unsigned int>("rngSeed",rngSeed))} );
+    #endif
   }
 
   // constructor complete
@@ -93,7 +102,7 @@ void GridNode::init( unsigned int phase ){
                    "%s: initializing internal data at init phase=0\n",
                    getName().c_str());
     for( uint64_t i = 0; i < (numBytes/4ull); i++ ){
-      state.push_back( (unsigned)(i) + baseSeed );
+      state.push_back( (unsigned)(i) + rngSeed );
     }
   }
 }
@@ -110,7 +119,7 @@ void GridNode::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(maxData)
   SST_SER(clockDelay)
   SST_SER(clocks)
-  SST_SER(baseSeed)
+  SST_SER(rngSeed)
   SST_SER(state)
   SST_SER(curCycle)
   SST_SER(portname)
@@ -190,7 +199,6 @@ unsigned GridNode::neighbor(unsigned n)
 {
   // send: up=0, down=1, left=2, right=3
   // rcv:  up=4, down=5, left=6, right=7
-  assert(n < numPorts/2); //TODO bidirectional links
   switch (n) {
     case 0:
       return 5;
@@ -219,11 +227,11 @@ bool GridNode::clockTick( SST::Cycle_t currentCycle ){
 
   // sanity check the array
   for( uint64_t i = 0; i < (numBytes/4ull); i++ ){
-    if( state[i] != ((unsigned)(i) + baseSeed) ){
+    if( state[i] != ((unsigned)(i) + rngSeed) ){
       // found a mismatch
       output.fatal( CALL_INFO, -1,
                     "Error : found a mismatch data element: element %" PRIu64 " was %d and should have been %d\n",
-                    i, state[i], ((unsigned)(i) + baseSeed));
+                    i, state[i], ((unsigned)(i) + rngSeed));
     }
   }
 

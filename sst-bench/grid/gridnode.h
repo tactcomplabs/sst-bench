@@ -109,14 +109,13 @@ public:
   SST_ELI_DOCUMENT_PARAMS(
     {"verbose",         "Sets the verbosity level of output",   "0" },
     {"numBytes",        "Internal state size (4 byte increments)", "64KB"},
-    {"numPorts",        "Number of external ports",             "1" },
+    {"numPorts",        "Number of external ports",             "8" },
     {"minData",         "Minimum number of unsigned values",    "1" },
     {"maxData",         "Maximum number of unsigned values",    "2" },
     {"clockDelay",      "Clock delay between sends",            "1" },
     {"clocks",          "Clock cycles to execute",              "1000"},
-    {"baseSeed",        "Base seed value",                      "1223"},
-    {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
     {"clockFreq",       "Clock frequency",                      "1GHz"},
+    {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
   )
 
   // -------------------------------------------------------
@@ -164,7 +163,7 @@ private:
   uint64_t maxData;                               ///< maxmium number of data elements
   uint64_t clockDelay;                            ///< clock delay between sends
   uint64_t clocks;                                ///< number of clocks to execute
-  unsigned baseSeed;                              ///< base seed value
+  unsigned rngSeed;                               ///< base seed for random number generator
   uint64_t curCycle;                              ///< current cycle delay
 
   // -- internal state
