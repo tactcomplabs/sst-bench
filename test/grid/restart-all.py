@@ -41,6 +41,7 @@ parser.add_argument("--ranks", type=int, help="specify number of mpi ranks", def
 parser.add_argument("--threads", type=int, help="number of sst threads per rank", default=1)
 parser.add_argument("--clocks", type=int, help="number of clocks to run sim", default=10000)
 parser.add_argument("--period", type=int, help="time in ns between checkpoints", default=1000)
+parser.add_argument("--nobase", type=bool, help="skip running test with no checkpointing", default=False)
 parser.add_argument("--pdf", type=bool, help="generate network graph pdf", default=False)
 parser.add_argument("--verbose", type=int, help="sst verbosity level", default=1)
 args = parser.parse_args()
@@ -74,6 +75,10 @@ mpiopts=""
 if args.ranks>1:
     mpiopts = f"mpirun -n {args.ranks} --use-hwthread-cpus"
     simkey = f"{simkey}_R{args.ranks}"
+
+if args.nobase == False:
+    cmd=f"{mpiopts} sst {sstopts} {dotopts} {threadopts} 2d.py -- {progopts}"
+    timed_run(cmd,f"base_{simkey}")
 
 cmd=f"{mpiopts} sst  {cptopts} {sstopts} {dotopts} {threadopts} 2d.py -- {progopts}"
 timed_run(cmd,f"checkpointing_{simkey}")
