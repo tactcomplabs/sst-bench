@@ -44,44 +44,55 @@ parser.add_argument("--period", type=int, help="time in ns between checkpoints",
 parser.add_argument("--nobase", type=bool, help="skip running test with no checkpointing", default=False)
 parser.add_argument("--pdf", type=bool, help="generate network graph pdf", default=False)
 parser.add_argument("--verbose", type=int, help="sst verbosity level", default=1)
-args = parser.parse_args()
 
-pfx = "restart-all_SAVE_"
-if os.path.isdir(pfx):
-    shutil.rmtree(pfx)
+args = parser.parse_args()
+for arg in vars(args):
+    print("\t", arg, " = ", getattr(args, arg))
 
 ns = args.clocks
 period_ns = args.period
 period = f"{period_ns}ns"
 cpts_expected = int(ns/period_ns)
 
+pfx = f"_cpt_x{args.x}y{args.y}r{args.ranks}t{args.threads}c{args.clocks}p{args.period}"
+if os.path.isdir(pfx):
+    shutil.rmtree(pfx)
+
 cptopts = f"--checkpoint-prefix={pfx} --checkpoint-period={period}"
 sstopts = f"--add-lib-path=../../sst-bench/grid"
+
+# grid component parameters
+#  verbose: Sets the verbosity level of output  [0]
+#  numBytes: Internal state size (4 byte increments)  [64KB]
+#  numPorts: Number of external ports  [8]
+#  minData: Minimum number of unsigned values  [1]
+#  maxData: Maximum number of unsigned values  [2]
+#  clockDelay: Clock delay between sends  [1]
+#  clocks: Clock cycles to execute  [1000]
+#  clockFreq: Clock frequency  [1GHz]
+#  rngSeed: Mersenne RNG Seed  [1223]
+         
 progopts = f"--verbose={args.verbose} --x={args.x} --y={args.y} --clocks={ns}"
 
 dotopts = ""
 if args.pdf == True:
     dotopts = f"--output-dot={pfx}.dot --dot-verbosity=10"
 
-simkey = f"{args.x}_{args.y}_{ns}_{period}"
-
 threadopts=""
 if args.threads>1:
     threadopts = f"-n {args.threads}"
-    simkey = f"{simkey}_T{args.threads}"
 
 mpiopts=""
 #TODO option to use hardware threads ( or not )
 if args.ranks>1:
     mpiopts = f"mpirun -n {args.ranks} --use-hwthread-cpus"
-    simkey = f"{simkey}_R{args.ranks}"
 
 if args.nobase == False:
     cmd=f"{mpiopts} sst {sstopts} {dotopts} {threadopts} 2d.py -- {progopts}"
-    timed_run(cmd,f"base_{simkey}")
+    timed_run(cmd,f"base_{pfx}")
 
 cmd=f"{mpiopts} sst  {cptopts} {sstopts} {dotopts} {threadopts} 2d.py -- {progopts}"
-timed_run(cmd,f"checkpointing_{simkey}")
+timed_run(cmd,f"checkpointing_{pfx}")
 
 if args.pdf == True:
     cmd = f"dot -Tpdf {pfx}.dot -o {pfx}.pdf"
@@ -97,9 +108,9 @@ pat=re.compile(f"(.*/.*)+/{pfx}_(.+).sstcpt$")
 for cpt in cpts:
     m=pat.match(cpt)
     if m != None:
-        cptkey=f"{simkey}_{m.group(m.lastindex)}"
+        cptkey=f"{pfx}_{m.group(m.lastindex)}"
     else:
-        cptkey=f"{simkey}_?"
+        cptkey=f"{pfx}_?"
     cmd=f"{mpiopts} sst --load-checkpoint {cpt} {threadopts}"
     timed_run(cmd,f"restart_{cptkey}")
 

@@ -2,3 +2,4 @@
 *.pdf
 *.log
 *.errlog
+_cpt_*/
