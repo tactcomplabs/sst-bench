@@ -27,8 +27,8 @@ class sqldb():
         self.cur.execute(qy)
         data = ( None, args.clocks, args.minDelay, args.maxDelay, args.minData, args.maxData, args.numBytes, args.period, args.ranks, args.rngSeed, args.threads, args.x, args.y, pfx )
         self.cur.execute("INSERT INTO siminfo VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
-        self.cur.execute("CREATE TABLE IF NOT EXISTS chkpnt (id INTEGER PRIMARY KEY, simid, basetime, cpttime, basecmd, cptcmd )")
-        self.cur.execute("CREATE TABLE IF NOT EXISTS restart (id INTEGER PRIMARY KEY, simid, cptname, size, simtime, cmd )")
+        self.cur.execute("CREATE TABLE IF NOT EXISTS chkpnt (id INTEGER PRIMARY KEY AUTOINCREMENT, simid, basetime, cpttime, basecmd, cptcmd )")
+        self.cur.execute("CREATE TABLE IF NOT EXISTS restart (id INTEGER PRIMARY KEY AUTOINCREMENT, simid, cptname, size, simtime, cmd )")
         self.con.commit()
         self.id = self.cur.execute("SELECT MAX(id) FROM siminfo").fetchone()[0]    
         print(f"Simulation ID = {self.id}")
