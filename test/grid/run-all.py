@@ -29,7 +29,7 @@ if __name__ == '__main__':
     parser.add_argument("--norun", action="store_true", help="print simulation commands but do not run")
     parser.add_argument("--short", action="store_true", help="run only up to a 2x2 grid")
     args = parser.parse_args()
-    prog = "permute-threads-xy.py"
+    prog = "./permute-threads-xy.py"
     
     if args.short:
         cpus=2
