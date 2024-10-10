@@ -107,6 +107,8 @@ if __name__ == '__main__':
     cpts_expected = int(ns/period_ns)
 
     pfx = f"_cpt_x{args.x}y{args.y}r{args.ranks}t{args.threads}c{args.clocks}p{args.period}"
+    pfx = f"{pfx}d{args.minData}_{args.maxData}_{args.minDelay}_{args.maxDelay}_{args.numBytes}"
+    pfx = f"{pfx}_{args.rngSeed}"
     if os.path.isdir(pfx):
         shutil.rmtree(pfx)
 
