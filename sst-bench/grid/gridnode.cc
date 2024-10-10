@@ -18,7 +18,7 @@ namespace SST::GridNode{
 //------------------------------------------
 GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
-  numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
+  numPorts(8), minData(10), maxData(256), minDelay(20), maxDelay(100), clocks(1000),
   curCycle(0) {
   
   kgdbg::spinner("GRIDSPINNER");
@@ -34,13 +34,14 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   primaryComponentDoNotEndSim();
 
   // read the rest of the parameters
-  numBytes = params.find<SST::UnitAlgebra>("numBytes", "64KB").getRoundedValue();
-  numPorts = params.find<unsigned>("numPorts", 1);
+  numBytes = params.find<uint64_t>("numBytes", 16384);
+  numPorts = params.find<unsigned>("numPorts", 8);
   minData = params.find<uint64_t>("minData", 10);
-  maxData = params.find<uint64_t>("maxData", 65536);
-  clockDelay = params.find<uint64_t>("clockDelay", 1);
+  maxData = params.find<uint64_t>("maxData", 256);
+  minDelay = params.find<uint64_t>("minDelay", 50);
+  maxDelay = params.find<uint64_t>("maxDelay", 100);
   clocks = params.find<uint64_t>("clocks", 1000);
-  rngSeed = params.find<unsigned>("rngSeed", "1223");
+  rngSeed = params.find<unsigned>("rngSeed", 1223);
 
   // sanity check the params
   if (minData < 10) {
@@ -51,6 +52,11 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   if( maxData < minData ){
     output.fatal(CALL_INFO, -1,
                  "%s : maxData < minData\n",
+                 getName().c_str());
+  }
+ if( maxDelay < minDelay ){
+    output.fatal(CALL_INFO, -1,
+                 "%s : maxDelay < minDelay\n",
                  getName().c_str());
   }
 
@@ -74,19 +80,24 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
     // However, across components the data for each corresponding port will be the same.
     // To add the complimentary port's component info to the seed could be a future enhancement.
     int n = i<4 ? i : neighbor(i);
-    rng.insert( {portname[i], new SST::RNG::MersenneRNG(n + params.find<unsigned int>("rngSeed",rngSeed))} );
+    rng.insert( {portname[i], new SST::RNG::MersenneRNG(n + rngSeed)} );
     #endif
   }
+  
+  // local random number generator. These can run independently for each component.
+  localRNG = new SST::RNG::MersenneRNG(id + rngSeed);
+  clkDelay = localRNG->generateNextUInt32() % (maxDelay-minDelay+1) + minData;
 
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
 }
 
 GridNode::~GridNode(){
+  if (localRNG) delete localRNG;
   for (unsigned i=0;i<numPorts; i++) {
     if (rng[portname[i]]) 
       delete rng[portname[i]];
-  }
+  } 
 }
 
 void GridNode::setup(){
@@ -117,13 +128,16 @@ void GridNode::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(numPorts)
   SST_SER(minData)
   SST_SER(maxData)
-  SST_SER(clockDelay)
+  SST_SER(minDelay)
+  SST_SER(maxDelay)
+  SST_SER(clkDelay)
   SST_SER(clocks)
   SST_SER(rngSeed)
   SST_SER(state)
   SST_SER(curCycle)
   SST_SER(portname)
   SST_SER(rng)
+  SST_SER(localRNG)
   SST_SER(linkHandlers)
 }
 
@@ -237,9 +251,10 @@ bool GridNode::clockTick( SST::Cycle_t currentCycle ){
 
   // check to see whether we need to send data over the links
   curCycle++;
-  if( curCycle >= clockDelay ){
+  if( curCycle >= clkDelay ){
     sendData();
     curCycle = 0;
+    clkDelay = localRNG->generateNextUInt32() % (maxDelay-minDelay+1) + minData;
   }
 
   // check to see if we've reached the completion state

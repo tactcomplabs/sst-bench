@@ -15,7 +15,12 @@ import sst
 parser = argparse.ArgumentParser(description="2d grid network test 1 with checkpoint/restart checks")
 parser.add_argument("--x", type=int, help="number of horizonal components", default=2)
 parser.add_argument("--y", type=int, help="number of vertical components", default=1)
+parser.add_argument("--numBytes", type=int, help="Internal state size (4 byte increments)", default=16384)
+parser.add_argument("--minData", type=int, help="Minimum number of dwords transmitted per link", default=10)
+parser.add_argument("--maxData", type=int, help="Maximum number of dwords transmitted per link", default=256)
 parser.add_argument("--clocks", type=int, help="number of clocks to run sim", default=10000)
+parser.add_argument("--minDelay", type=int, help="min number of clocks between transmissions", default=50)
+parser.add_argument("--maxDelay", type=int, help="max number of clocks between transmissions", default=100)
 parser.add_argument("--rngSeed", type=int, help="seed for random number generator", default=1223)
 parser.add_argument("--verbose", type=int, help="verbosity level", default=1)
 args = parser.parse_args()
@@ -28,10 +33,12 @@ for arg in vars(args):
 PORTS = 8
 comp_params = {
   "verbose" : args.verbose,
+  "numBytes" : args.numBytes,
   "numPorts" : PORTS,
-  "minData" : 10,
-  "maxData" : 16384,
-  "clockDelay" : 100,
+  "minData" : args.minData,
+  "maxData" : args.maxData,
+  "minDelay" : args.minDelay,
+  "maxDelay" : args.maxDelay,
   "clocks" : args.clocks,
   "rngSeed" : args.rngSeed,
   "clockFreq" : "1Ghz"

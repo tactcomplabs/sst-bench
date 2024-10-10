@@ -108,11 +108,12 @@ public:
 
   SST_ELI_DOCUMENT_PARAMS(
     {"verbose",         "Sets the verbosity level of output",   "0" },
-    {"numBytes",        "Internal state size (4 byte increments)", "64KB"},
+    {"numBytes",        "Internal state size (4 byte increments)", "16384"},
     {"numPorts",        "Number of external ports",             "8" },
-    {"minData",         "Minimum number of unsigned values",    "1" },
-    {"maxData",         "Maximum number of unsigned values",    "2" },
-    {"clockDelay",      "Clock delay between sends",            "1" },
+    {"minData",         "Minimum number of unsigned values",    "10" },
+    {"maxData",         "Maximum number of unsigned values",    "8192" },
+    {"minDelay",        "Minumum clock delay between sends",    "50" },
+    {"maxDelay",        "Maximum clock delay between sends",    "100" },
     {"clocks",          "Clock cycles to execute",              "1000"},
     {"clockFreq",       "Clock frequency",                      "1GHz"},
     {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
@@ -161,16 +162,19 @@ private:
   unsigned numPorts;                              ///< number of ports to configure
   uint64_t minData;                               ///< minimum number of data elements
   uint64_t maxData;                               ///< maxmium number of data elements
-  uint64_t clockDelay;                            ///< clock delay between sends
+  uint64_t minDelay;                              ///< minimum clock delay between sends
+  uint64_t maxDelay;                              ///< maximum clock delay between sends
   uint64_t clocks;                                ///< number of clocks to execute
   unsigned rngSeed;                               ///< base seed for random number generator
   uint64_t curCycle;                              ///< current cycle delay
 
   // -- internal state
+  uint64_t clkDelay = 0;                          ///< current clock delay
   std::vector<std::string> portname;              ///< port 0 to numPorts names
   std::vector<SST::Link *> linkHandlers;          ///< LinkHandler objects
-  std::vector<unsigned> state;                     ///< internal data structure
+  std::vector<unsigned> state;                    ///< internal data structure
   std::map< std::string, SST::RNG::Random* > rng; ///< per port mersenne twister objects
+  SST::RNG::Random* localRNG = 0;                 ///< component local random number generator
 
   // -- private methods
   /// event handler
