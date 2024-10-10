@@ -7,7 +7,7 @@
 #
 # See LICENSE in the top level directory for licensing details
 #
-# parallel-permute.py
+# permute-threads-xy.py
 #
 
 import argparse
@@ -24,12 +24,12 @@ def untimed_run(cmd, norun):
             exit(rc)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart testing")
+    parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart test by permuting x,y dimensions and threads")
     parser.add_argument("--maxrows", type=int, help="maximum number of vertical components", default=1)
     parser.add_argument("--maxcols", type=int, help="maximum number of horizontal components", default=2)
     parser.add_argument("--maxranks", type=int, help="maximum number of ranks", default=1)
     parser.add_argument("--maxthreads", type=int, help="maximum number of threads", default=1)
-    parser.add_argument("--norun", type=bool, help="print simulation commands but do not run", default=False)
+    parser.add_argument("--norun", action="store_true", help="print simulation commands but do not run")
     # These are restart-all.py arguments
     parser.add_argument("--clocks", type=int, help="number of clocks to run sim [10000]", default=10000)
     parser.add_argument("--db", type=str, help="sqlite database file [restart-all.db]", default="restart-all.db")
@@ -92,5 +92,6 @@ if __name__ == '__main__':
                 numSims = numSims + 1
 
     print(f"Number of Simulations {numSims}")
+    print("permute-threads-xy.py comleted normally")
 
 #EOF

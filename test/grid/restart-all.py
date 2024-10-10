@@ -52,19 +52,20 @@ class sqldb():
         self.base = ( cmd, self.timed_run(cmd, f"base_{self.pfx}"))
 
     def cpt_run(self, cmd):
-        self.cpt = ( cmd, self.timed_run(cmd, f"cpt_{pfx}"))
+        self.cpt = ( cmd, self.timed_run(cmd, f"cpt_{self.pfx}"))
         # id INTEGER PRIMARY KEY, simid, basetime, cpttime, basecmd, cptcmd
         data = (None, self.id, self.base[1], self.cpt[1], self.base[0], self.cpt[0])
         self.cur.execute("INSERT INTO chkpnt VALUES(?, ?, ?, ?, ?, ?)", data)
         self.con.commit()
 
-    def restart_run(self, cmd):
-        rst = ( cmd, self.timed_run(cmd, f"rst_{pfx}") )
+    def restart_run(self, cmd, cptname, cptsize):
+        cptkey=f"{self.pfx}_{cptname}"
+        print(f"#CPT {cptkey}:{cptsize}", flush=True);
+        rst = ( cmd, self.timed_run(cmd, f"rst_{cptkey}") )
         # id INTEGER PRIMARY KEY, simid, cptname, size, simtime, cmd
-        data = (None, self.id, "TODO", 0, rst[1], rst[0])
+        data = (None, self.id, cptname, cptsize, rst[1], rst[0])
         self.cur.execute("INSERT INTO restart VALUES(?, ?, ?, ?, ?, ?)", data)
         self.con.commit()
-
 
 def untimed_run(cmd):
     print(cmd, flush=True)
@@ -73,22 +74,17 @@ def untimed_run(cmd):
         print(f"Error: rc={rc} cmd={cmd}")
         exit(rc)
 
-def cptinfo(cpt,key):
-    p=os.path.dirname(cpt)
-    cptSize =  sum(os.path.getsize(f"{p}/{f}") for f in os.listdir(p) if os.path.isfile(f"{p}/{f}"))
-    print(f"#CPT {key}:{cptSize}", flush=True);
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart testing")
     parser.add_argument("--clocks", type=int, help="number of clocks to run sim [10000]", default=10000)
     parser.add_argument("--db", type=str, help="sqlite database file [restart-all.db]", default="restart-all.db")
-    parser.add_argument("--prune", action="store_true", help="remove check checkpoint data files when done [False]")
+    parser.add_argument("--prune", action="store_true", help="remove check checkpoint data files when done")
     parser.add_argument("--minDelay", type=int, help="min number of clocks between transmissions [50]", default=50)
     parser.add_argument("--maxDelay", type=int, help="max number of clocks between transmissions [100]", default=100)
     parser.add_argument("--minData", type=int, help="Minimum number of dwords transmitted per link [10]", default=10)
     parser.add_argument("--maxData", type=int, help="Maximum number of dwords transmitted per link [256]", default=256)
     parser.add_argument("--numBytes", type=int, help="Internal state size (4 byte increments) [16384]", default=16384)
-    parser.add_argument("--pdf", action="store_true", help="generate network graph pdf [False]")
+    parser.add_argument("--pdf", action="store_true", help="generate network graph pdf")
     parser.add_argument("--period", type=int, help="time in ns between checkpoints [1000]", default=1000)
     parser.add_argument("--ranks", type=int, help="specify number of mpi ranks [1]", default=1)
     parser.add_argument("--rngSeed", type=int, help="seed for random number generator [1223]", default=1223)
@@ -138,7 +134,6 @@ if __name__ == '__main__':
         threadopts = f"-n {args.threads}"
 
     mpiopts=""
-    #TODO option to use hardware threads ( or not )
     if args.ranks>1:
         mpiopts = f"mpirun -n {args.ranks} --use-hwthread-cpus"
 
@@ -165,21 +160,29 @@ if __name__ == '__main__':
 
     pat=re.compile(f"(.*/.*)+/{pfx}_(.+).sstcpt$")
     for cpt in cpts:
+        # Determine checkpoint file name
         m=pat.match(cpt)
         if m != None:
-            cptkey=f"{pfx}_{m.group(m.lastindex)}"
+            cptname=m.group(m.lastindex)
         else:
-            cptkey=f"{pfx}_?"
+            print("Error: Could not determine name of checkpoint for {cpt}")
+            exit(1)
+
+        # Determine size of checkpoint directory
+        p=os.path.dirname(cpt)
+        cptsize =  sum(os.path.getsize(f"{p}/{f}") for f in os.listdir(p) if os.path.isfile(f"{p}/{f}"))
+        # Restart from checkpoint
         cmd=f"{mpiopts} sst --load-checkpoint {cpt} {threadopts}"
-        db.restart_run(cmd)
-        cptinfo(cpt,cptkey)
+        db.restart_run(cmd, cptname, cptsize)       
+
+
 
     # optional cleaning
     if args.prune == True and os.path.isdir(pfx):
-        print(f"Done: removing {pfx}", flush=True)
+        print(f"Removing {pfx}", flush=True)
         shutil.rmtree(pfx)
-    else:
-        print("Done")
+
+    print("restart-all.py completed normally")
 
 #EOF
 
