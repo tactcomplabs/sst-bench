@@ -16,6 +16,7 @@ import os
 import re
 import shutil
 import sqlite3
+import sys
 import time
 
 class sqldb():
@@ -23,10 +24,10 @@ class sqldb():
         self.pfx = pfx
         self.con = sqlite3.connect(args.db)
         self.cur = self.con.cursor()
-        qy = "CREATE TABLE IF NOT EXISTS siminfo (id INTEGER PRIMARY KEY AUTOINCREMENT, clocks, mindelay, maxdelay, mindata, maxdata, numbytes, period, ranks, rngseed, threads, x, y, pfx)"
+        qy = "CREATE TABLE IF NOT EXISTS siminfo (id INTEGER PRIMARY KEY AUTOINCREMENT, clocks, mindelay, maxdelay, mindata, maxdata, numbytes, period, ranks, rngseed, threads, x, y, pfx, cmd)"
         self.cur.execute(qy)
-        data = ( None, args.clocks, args.minDelay, args.maxDelay, args.minData, args.maxData, args.numBytes, args.period, args.ranks, args.rngSeed, args.threads, args.x, args.y, pfx )
-        self.cur.execute("INSERT INTO siminfo VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
+        data = ( None, args.clocks, args.minDelay, args.maxDelay, args.minData, args.maxData, args.numBytes, args.period, args.ranks, args.rngSeed, args.threads, args.x, args.y, pfx, str(sys.argv))
+        self.cur.execute("INSERT INTO siminfo VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
         self.cur.execute("CREATE TABLE IF NOT EXISTS chkpnt (id INTEGER PRIMARY KEY AUTOINCREMENT, simid, basetime, cpttime, basecmd, cptcmd )")
         self.cur.execute("CREATE TABLE IF NOT EXISTS restart (id INTEGER PRIMARY KEY AUTOINCREMENT, simid, cptname, size, simtime, cmd )")
         self.con.commit()
