@@ -86,7 +86,7 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   
   // local random number generator. These can run independently for each component.
   localRNG = new SST::RNG::MersenneRNG(id + rngSeed);
-  clkDelay = localRNG->generateNextUInt32() % (maxDelay-minDelay+1) + minData;
+  clkDelay = localRNG->generateNextUInt32() % (maxDelay-minDelay+1) + minDelay;
 
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
