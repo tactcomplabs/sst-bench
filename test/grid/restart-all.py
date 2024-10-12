@@ -24,10 +24,11 @@ class sqldb():
         self.pfx = pfx
         self.con = sqlite3.connect(args.db)
         self.cur = self.con.cursor()
-        qy = "CREATE TABLE IF NOT EXISTS siminfo (id INTEGER PRIMARY KEY AUTOINCREMENT, clocks, mindelay, maxdelay, mindata, maxdata, numbytes, period, ranks, rngseed, threads, x, y, pfx, cmd)"
+        qy = "CREATE TABLE IF NOT EXISTS siminfo (id INTEGER PRIMARY KEY AUTOINCREMENT, clocks, mindelay, maxdelay, mindata, maxdata, numbytes, simperiod, wallperiod, ranks, rngseed, threads, x, y, pfx, cmd)"
         self.cur.execute(qy)
-        data = ( None, args.clocks, args.minDelay, args.maxDelay, args.minData, args.maxData, args.numBytes, args.period, args.ranks, args.rngSeed, args.threads, args.x, args.y, pfx, str(sys.argv))
-        self.cur.execute("INSERT INTO siminfo VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
+        data = ( None, args.clocks, args.minDelay, args.maxDelay, args.minData, args.maxData, args.numBytes, 
+                args.simPeriod, args.wallPeriod, args.ranks, args.rngSeed, args.threads, args.x, args.y, pfx, str(sys.argv))
+        self.cur.execute("INSERT INTO siminfo VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
         self.cur.execute("CREATE TABLE IF NOT EXISTS chkpnt (id INTEGER PRIMARY KEY AUTOINCREMENT, simid, basetime, cpttime, basecmd, cptcmd )")
         self.cur.execute("CREATE TABLE IF NOT EXISTS restart (id INTEGER PRIMARY KEY AUTOINCREMENT, simid, cptname, size, simtime, cmd )")
         self.con.commit()
@@ -86,7 +87,8 @@ if __name__ == '__main__':
     parser.add_argument("--maxData", type=int, help="Maximum number of dwords transmitted per link [256]", default=256)
     parser.add_argument("--numBytes", type=int, help="Internal state size (4 byte increments) [16384]", default=16384)
     parser.add_argument("--pdf", action="store_true", help="generate network graph pdf")
-    parser.add_argument("--period", type=int, help="time in ns between checkpoints [1000]", default=1000)
+    parser.add_argument("--simPeriod", type=int, help="time in ns between checkpoints. 0 disables. [0]", default=0)
+    parser.add_argument("--wallPeriod", type=int, help="time in s between checkpoints. 0 disables. [0]", default=0)
     parser.add_argument("--ranks", type=int, help="specify number of mpi ranks [1]", default=1)
     parser.add_argument("--rngSeed", type=int, help="seed for random number generator [1223]", default=1223)
     parser.add_argument("--threads", type=int, help="number of sst threads per rank [1]", default=1)
@@ -98,18 +100,30 @@ if __name__ == '__main__':
     for arg in vars(args):
         print("\t", arg, " = ", getattr(args, arg))
 
-    ns = args.clocks
-    period_ns = args.period
-    period = f"{period_ns}ns"
-    cpts_expected = int(ns/period_ns)
+    if args.simPeriod>0 and args.wallPeriod>0:
+        print("simPeriod and wallPeriod are mutually exclusive")
+        exit(1)
+    if (args.simPeriod==0 and args.wallPeriod==0):
+        print("One of simPeriod or wallPeriod must be set")
+        exit(1)
 
-    pfx = f"_cpt_x{args.x}y{args.y}r{args.ranks}t{args.threads}c{args.clocks}p{args.period}"
+
+    ns = args.clocks
+
+    if args.simPeriod > 0:
+        periodPfx = f"sp{args.simPeriod}"
+        periodOpts = f"--checkpoint-sim-period={args.simPeriod}ns"
+    else:
+        periodPfx = f"wp{args.wallPeriod}"
+        periodOpts = f"--checkpoint-wall-period={args.wallPeriod}s"
+        
+    pfx = f"_cpt_x{args.x}y{args.y}r{args.ranks}t{args.threads}c{args.clocks}{periodPfx}"
     pfx = f"{pfx}d{args.minData}_{args.maxData}_{args.minDelay}_{args.maxDelay}_{args.numBytes}"
     pfx = f"{pfx}_{args.rngSeed}"
     if os.path.isdir(pfx):
         shutil.rmtree(pfx)
 
-    cptopts = f"--checkpoint-prefix={pfx} --checkpoint-period={period}"
+    cptopts = f"--checkpoint-prefix={pfx} {periodOpts}"
     sstopts = f"--add-lib-path=../../sst-bench/grid"
 
     # grid component parameters
@@ -155,9 +169,20 @@ if __name__ == '__main__':
 
     # Sometimes using sst threads we get a checkpoint file past the end of the simulation.
     cpts=glob.glob(f"{pfx}/*/*.sstcpt")
+    print(f"{cpts} checkpoints generated")
+
+    if args.wallPeriod>0:
+        cpts_expected = int(db.base/args.wallPeriod)
+    else:
+        cpts_expected = int(ns/args.simPeriod)
+
     if len(cpts) != cpts_expected and len(cpts) != ( cpts_expected + 1 ):
-        print(f"Error: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
-        exit(2)
+        if (args.simPeriod>0):
+            print(f"Error: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
+            exit(2)
+        else:
+            #TODO Change to error
+            print(f"Warning: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
 
     pat=re.compile(f"(.*/.*)+/{pfx}_(.+).sstcpt$")
     for cpt in cpts:
@@ -175,8 +200,6 @@ if __name__ == '__main__':
         # Restart from checkpoint
         cmd=f"{mpiopts} sst --load-checkpoint {cpt} {threadopts}"
         db.restart_run(cmd, cptname, cptsize)       
-
-
 
     # optional cleaning
     if args.prune == True and os.path.isdir(pfx):
