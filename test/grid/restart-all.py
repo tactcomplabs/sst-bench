@@ -88,7 +88,7 @@ if __name__ == '__main__':
     parser.add_argument("--numBytes", type=int, help="Internal state size (4 byte increments) [16384]", default=16384)
     parser.add_argument("--pdf", action="store_true", help="generate network graph pdf")
     parser.add_argument("--simPeriod", type=int, help="time in ns between checkpoints. 0 disables. [0]", default=0)
-    parser.add_argument("--wallPeriod", type=int, help="time in s between checkpoints. 0 disables. [0]", default=0)
+    parser.add_argument("--wallPeriod", type=str, help="time %H:%M:%S between checkpoints. 0 disables. [None]", default=None)
     parser.add_argument("--ranks", type=int, help="specify number of mpi ranks [1]", default=1)
     parser.add_argument("--rngSeed", type=int, help="seed for random number generator [1223]", default=1223)
     parser.add_argument("--threads", type=int, help="number of sst threads per rank [1]", default=1)
@@ -100,10 +100,10 @@ if __name__ == '__main__':
     for arg in vars(args):
         print("\t", arg, " = ", getattr(args, arg))
 
-    if args.simPeriod>0 and args.wallPeriod>0:
+    if args.simPeriod>0 and args.wallPeriod==None:
         print("simPeriod and wallPeriod are mutually exclusive")
         exit(1)
-    if (args.simPeriod==0 and args.wallPeriod==0):
+    if (args.simPeriod==0 and args.wallPeriod==None):
         print("One of simPeriod or wallPeriod must be set")
         exit(1)
 
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         periodOpts = f"--checkpoint-sim-period={args.simPeriod}ns"
     else:
         periodPfx = f"wp{args.wallPeriod}"
-        periodOpts = f"--checkpoint-wall-period={args.wallPeriod}s"
+        periodOpts = f"--checkpoint-wall-period={args.wallPeriod}"
         
     pfx = f"_cpt_x{args.x}y{args.y}r{args.ranks}t{args.threads}c{args.clocks}{periodPfx}"
     pfx = f"{pfx}d{args.minData}_{args.maxData}_{args.minDelay}_{args.maxDelay}_{args.numBytes}"
@@ -171,18 +171,23 @@ if __name__ == '__main__':
     cpts=glob.glob(f"{pfx}/*/*.sstcpt")
     print(f"{cpts} checkpoints generated")
 
-    if args.wallPeriod>0:
-        cpts_expected = int(db.base/args.wallPeriod)
-    else:
+    if args.simPeriod > 0:
         cpts_expected = int(ns/args.simPeriod)
+    # else: TODO
+    #     cpts_expected = int(db.base/args.wallPeriod)
 
-    if len(cpts) != cpts_expected and len(cpts) != ( cpts_expected + 1 ):
-        if (args.simPeriod>0):
-            print(f"Error: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
-            exit(2)
-        else:
-            #TODO Change to error
-            print(f"Warning: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
+    # TODO
+    # if len(cpts) != cpts_expected and len(cpts) != ( cpts_expected + 1 ):
+    #     if (args.simPeriod>0):
+    #         print(f"Error: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
+    #         exit(2)
+    #     else:
+    #         #TODO Change to error
+    #         print(f"Warning: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
+
+    if args.simPeriod>0 and len(cpts) != cpts_expected and len(cpts) != ( cpts_expected + 1 ):
+        print(f"Error: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
+        exit(2)
 
     pat=re.compile(f"(.*/.*)+/{pfx}_(.+).sstcpt$")
     for cpt in cpts:
