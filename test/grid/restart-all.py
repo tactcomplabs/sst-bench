@@ -88,7 +88,7 @@ if __name__ == '__main__':
     parser.add_argument("--numBytes", type=int, help="Internal state size (4 byte increments) [16384]", default=16384)
     parser.add_argument("--pdf", action="store_true", help="generate network graph pdf")
     parser.add_argument("--simPeriod", type=int, help="time in ns between checkpoints. 0 disables. [0]", default=0)
-    parser.add_argument("--wallPeriod", type=str, help="time %H:%M:%S between checkpoints. 0 disables. [None]", default=None)
+    parser.add_argument("--wallPeriod", type=str, help="time %%H:%%M:%%S between checkpoints. 0 disables. [None]", default=None)
     parser.add_argument("--ranks", type=int, help="specify number of mpi ranks [1]", default=1)
     parser.add_argument("--rngSeed", type=int, help="seed for random number generator [1223]", default=1223)
     parser.add_argument("--threads", type=int, help="number of sst threads per rank [1]", default=1)
