@@ -22,7 +22,7 @@ def untimed_run(cmd, norun):
         rc = os.system(cmd)
         if rc != 0:
             print(f"Error: rc={rc} cmd={cmd}")
-            sys.exit(rc)
+            sys.exit(1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart test by permuting component size")
