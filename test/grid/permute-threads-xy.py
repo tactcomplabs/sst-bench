@@ -12,6 +12,7 @@
 
 import argparse
 import os
+import sys
 
 def untimed_run(cmd, norun):
     print("\n###########################################################################", flush=True)
@@ -21,14 +22,14 @@ def untimed_run(cmd, norun):
         rc = os.system(cmd)
         if rc != 0:
             print(f"Error: rc={rc} cmd={cmd}")
-            exit(rc)
+            sys.exit(rc)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart test by permuting x,y dimensions and threads")
-    parser.add_argument("--maxrows", type=int, help="maximum number of vertical components", default=1)
-    parser.add_argument("--maxcols", type=int, help="maximum number of horizontal components", default=2)
-    parser.add_argument("--maxranks", type=int, help="maximum number of ranks", default=1)
-    parser.add_argument("--maxthreads", type=int, help="maximum number of threads", default=1)
+    parser.add_argument("--maxrows", type=int, help="maximum number of vertical components [1]", default=1)
+    parser.add_argument("--maxcols", type=int, help="maximum number of horizontal components [2]", default=2)
+    parser.add_argument("--maxranks", type=int, help="maximum number of ranks [1]", default=1)
+    parser.add_argument("--maxthreads", type=int, help="maximum number of threads [1]", default=1)
     parser.add_argument("--norun", action="store_true", help="print simulation commands but do not run")
     # These are restart-all.py arguments
     parser.add_argument("--clocks", type=int, help="number of clocks to run sim [10000]", default=10000)
@@ -40,7 +41,8 @@ if __name__ == '__main__':
     parser.add_argument("--maxData", type=int, help="Maximum number of dwords transmitted per link [256]", default=256)
     parser.add_argument("--numBytes", type=int, help="Internal state size (4 byte increments) [16384]", default=16384)
     parser.add_argument("--pdf", action="store_true", help="generate network graph pdf [False]")
-    parser.add_argument("--period", type=int, help="time in ns between checkpoints [1000]", default=1000)
+    parser.add_argument("--simPeriod", type=int, help="time in ns between checkpoints. 0 disables. [0]", default=0)
+    parser.add_argument("--wallPeriod", type=str, help="time %%H:%%M:%%S between checkpoints. 0 disables. [None]", default=None)
     # parser.add_argument("--ranks", type=int, help="specify number of mpi ranks [1]", default=1)
     parser.add_argument("--rngSeed", type=int, help="seed for random number generator [1223]", default=1223)
     # parser.add_argument("--threads", type=int, help="number of sst threads per rank [1]", default=1)
@@ -50,11 +52,17 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    periodOpts = ""
+    if args.wallPeriod != None:
+        periodOpts = f"--wallPeriod={args.wallPeriod}"
+    else:
+        periodOpts = f"--simPeriod={args.simPeriod}"
+
     useRanks = args.maxranks > 1
     useThreads = args.maxthreads > 1
     if useRanks == True and useThreads == True:
         print("Currently only supporting ranks or threads, but not both")
-        exit(1)
+        sys.exit(1)
 
     maxProcesses = args.maxranks
     procOpt = ""
@@ -83,7 +91,7 @@ if __name__ == '__main__':
                 c = f"./restart-all.py --x={x} --y={y}"
                 if useRanks == True or useThreads == True:
                     c = f"{c} {procOpt}{threads}"
-                c = f"{c} --clocks={args.clocks} --period={args.period}"
+                c = f"{c} --clocks={args.clocks} {periodOpts}"
                 c = f"{c} --minDelay={args.minDelay} --maxDelay={args.maxDelay}"
                 c = f"{c} --minData={args.minData} --maxData={args.maxData} --numBytes={args.numBytes}"
                 c = f"{c} --rngSeed={args.rngSeed}"

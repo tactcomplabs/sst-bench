@@ -3,7 +3,10 @@ create temp table rpt as select simid, size/1000 as kb, basetime, cpttime, (cptt
 
 .mode csv
 .headers on
+select * from siminfo limit 1;
 select * from rpt;
+.output siminfo.csv
+select * from siminfo limit 1;
 .output cptsizes.csv
 select * from rpt;
 

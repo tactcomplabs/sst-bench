@@ -12,6 +12,7 @@
 
 import argparse
 import os
+import sys
 
 def untimed_run(cmd, norun):
     print("\n###########################################################################", flush=True)
@@ -21,12 +22,12 @@ def untimed_run(cmd, norun):
         rc = os.system(cmd)
         if rc != 0:
             print(f"Error: rc={rc} cmd={cmd}")
-            exit(rc)
+            sys.exit(rc)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart test by permuting component size")
-    parser.add_argument("--minBytes", type=int, help="minimum component size", default=16384)
-    parser.add_argument("--maxBytes", type=int, help="maximum component size", default=65536)
+    parser.add_argument("--minBytes", type=int, help="minimum component size [1024]", default=1024)
+    parser.add_argument("--maxBytes", type=int, help="maximum component size [65536]", default=65536)
     parser.add_argument("--steps", type=int, help="number of runs sweeping data size from 1024 to maxBytes [4]", default=4)
     parser.add_argument("--norun", action="store_true", help="print simulation commands but do not run")
     # These are restart-all.py arguments
@@ -49,10 +50,16 @@ if __name__ == '__main__':
     parser.add_argument("--y", type=int, help="number of vertical components [1]", default=1)
 
     args = parser.parse_args()
+    
+    periodOpts = ""
+    if args.wallPeriod != None:
+        periodOpts = f"--wallPeriod={args.wallPeriod}"
+    else:
+        periodOpts = f"--simPeriod={args.simPeriod}"
 
     if args.maxBytes < args.minBytes:
         print(f"maxBytes {args.maxBytes} must be greater than minBytes {args.minBytes}")
-        exit(1)
+        sys.exit(1)
 
     stepSize = int((args.maxBytes-args.minBytes)/args.steps)
     if stepSize == 0:
@@ -62,7 +69,7 @@ if __name__ == '__main__':
     for bytes in range(args.minBytes, args.maxBytes, stepSize):
         c = f"./restart-all.py --x={args.x} --y={args.y}"
         c = f"{c} --threads={args.threads} --ranks={args.ranks}"
-        c = f"{c} --clocks={args.clocks} --simPeriod={args.simPeriod} --wallPeriod={args.wallPeriod}"
+        c = f"{c} --clocks={args.clocks} {periodOpts}"
         c = f"{c} --minDelay={args.minDelay} --maxDelay={args.maxDelay}"
         c = f"{c} --minData={args.minData} --maxData={args.maxData} --numBytes={bytes}"
         c = f"{c} --rngSeed={args.rngSeed}"

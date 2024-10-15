@@ -46,7 +46,7 @@ class sqldb():
         etime = time.perf_counter() - start;
         if rc != 0:
             print(f"Error: rc={rc} cmd={cmd}")
-            exit(rc)
+            sys.exit(rc)
         print(f"#TIME {key}:{etime}", flush=True)
         return etime
 
@@ -74,7 +74,7 @@ def untimed_run(cmd):
     rc = os.system(cmd)
     if rc!=0:
         print(f"Error: rc={rc} cmd={cmd}")
-        exit(rc)
+        sys.exit(rc)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart testing")
@@ -100,12 +100,12 @@ if __name__ == '__main__':
     for arg in vars(args):
         print("\t", arg, " = ", getattr(args, arg))
 
-    if args.simPeriod>0 and args.wallPeriod==None:
+    if args.simPeriod>0 and args.wallPeriod!=None:
         print("simPeriod and wallPeriod are mutually exclusive")
-        exit(1)
+        sys.exit(1)
     if (args.simPeriod==0 and args.wallPeriod==None):
         print("One of simPeriod or wallPeriod must be set")
-        exit(1)
+        sys.exit(1)
 
 
     ns = args.clocks
@@ -180,14 +180,14 @@ if __name__ == '__main__':
     # if len(cpts) != cpts_expected and len(cpts) != ( cpts_expected + 1 ):
     #     if (args.simPeriod>0):
     #         print(f"Error: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
-    #         exit(2)
+    #         sys.exit(2)
     #     else:
     #         #TODO Change to error
     #         print(f"Warning: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
 
     if args.simPeriod>0 and len(cpts) != cpts_expected and len(cpts) != ( cpts_expected + 1 ):
         print(f"Error: Expected {cpts_expected} checkpoint files but found {len(cpts)}")
-        exit(2)
+        sys.exit(2)
 
     pat=re.compile(f"(.*/.*)+/{pfx}_(.+).sstcpt$")
     for cpt in cpts:
@@ -197,7 +197,7 @@ if __name__ == '__main__':
             cptname=m.group(m.lastindex)
         else:
             print("Error: Could not determine name of checkpoint for {cpt}")
-            exit(1)
+            sys.exit(1)
 
         # Determine size of checkpoint directory
         p=os.path.dirname(cpt)
