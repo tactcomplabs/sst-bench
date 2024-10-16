@@ -80,10 +80,13 @@ if __name__ == '__main__':
     for x in range(1, args.maxcols+1):
         for y in range(1, args.maxrows+1):
             keys = [ f"{x}_{y}", f"{y}_{x}" ]
+            done = False
             for k in keys:
                 if k in simlog:
-                    continue
-                simlog[k] = True
+                    done=True
+            if done==True:
+                continue;
+            simlog[k] = True
             procLimit = x * y
             if procLimit > maxProcesses:
                 procLimit = maxProcesses 

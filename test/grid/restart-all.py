@@ -43,7 +43,6 @@ class sqldb():
         print(cmd, flush=True)
         start = time.perf_counter()
         rc = os.system(cmd)
-        print(f"################## timed run {rc}")
         etime = time.perf_counter() - start;
         if rc != 0:
             print(f"Error: rc={rc} cmd={cmd}")
@@ -73,7 +72,6 @@ class sqldb():
 def untimed_run(cmd):
     print(cmd, flush=True)
     rc = os.system(cmd)
-    print(f"################## untimed run {rc}")
     if rc != 0:
         print(f"Error: rc={rc} cmd={cmd}")
         sys.exit(1)
