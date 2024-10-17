@@ -5,8 +5,6 @@
 # For development branches (-dev); return "99"
 #
 
-# TODO version information should come from sst-config
-
 ver=$(sst --version | awk '{print $3}' | tr -d '()')
 if [ "$ver" == "-dev" ]; then
     echo 99

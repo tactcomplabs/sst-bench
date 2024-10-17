@@ -1,0 +1,6 @@
+*.db
+*.dot
+*.pdf
+*.log
+*.errlog
+_cpt_*/

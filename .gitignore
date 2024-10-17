@@ -7,4 +7,5 @@
 *~
 .gdb_history
 *.out
-build/*
+build/
+

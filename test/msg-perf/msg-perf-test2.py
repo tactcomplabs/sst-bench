@@ -13,7 +13,7 @@ import argparse
 import sst
 
 parser = argparse.ArgumentParser(description="Run MsgPerf Test2")
-parser.add_argument("--numCores", type=int, help="Number of cores to load", default=1)
+parser.add_argument("--numCores", type=int, help="Number of cores to load", default=2)
 parser.add_argument("--startSize", help="starting payload size", default="64B")
 parser.add_argument("--endSize", help="ending payload size", default="128B")
 parser.add_argument("--stepSize", help="step size", default="8B")
@@ -28,6 +28,10 @@ for arg in vars(args):
   print("\t", arg, " = ", getattr(args, arg))
 
 #-- common params
+nic_params = {
+  "verbose" : args.verbose
+}
+
 net_params = {
   "input_buf_size" : "2048B",
   "output_buf_size" : "2048B",
@@ -59,6 +63,7 @@ for comp in range(args.numCores):
         "clockDelay" : args.clockDelay
     })
     nic = core.setSubComponent("nic", "msgperf.MsgPerfNIC")
+    nic.addParams(nic_params)
     iface = nic.setSubComponent("iface", "merlin.linkcontrol")
     iface.addParams(net_params)
     link = sst.Link("link_" + str(comp))
