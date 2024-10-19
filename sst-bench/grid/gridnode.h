@@ -117,6 +117,8 @@ public:
     {"clocks",          "Clock cycles to execute",              "1000"},
     {"clockFreq",       "Clock frequency",                      "1GHz"},
     {"rngSeed",         "Mersenne RNG Seed",                    "1223"},
+    {"demoBug",         "Induce bug for debug demo",               "0"},
+
   )
 
   // -------------------------------------------------------
@@ -167,6 +169,11 @@ private:
   uint64_t clocks;                                ///< number of clocks to execute
   unsigned rngSeed;                               ///< base seed for random number generator
   uint64_t curCycle;                              ///< current cycle delay
+
+  // Bug injection
+  unsigned demoBug;                               ///< induce bug for debug demonstration
+  uint64_t dataMask;                              ///< send only 16 bits of data
+  uint64_t dataMax;                               ///< change to inject illegal values
 
   // -- internal state
   uint64_t clkDelay = 0;                          ///< current clock delay

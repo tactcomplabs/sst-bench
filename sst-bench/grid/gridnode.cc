@@ -19,7 +19,7 @@ namespace SST::GridNode{
 GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(8), minData(10), maxData(256), minDelay(20), maxDelay(100), clocks(1000),
-  curCycle(0) {
+  curCycle(0), demoBug(0), dataMask(0x1ffffff), dataMax(0x1ffffff) {
   
   kgdbg::spinner("GRIDSPINNER");
 
@@ -42,6 +42,10 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   maxDelay = params.find<uint64_t>("maxDelay", 100);
   clocks = params.find<uint64_t>("clocks", 1000);
   rngSeed = params.find<unsigned>("rngSeed", 1223);
+  demoBug = params.find<unsigned>("demoBug", 0);
+
+  // bug injection
+  dataMax += demoBug;
 
   // sanity check the params
   if (minData < 10) {
@@ -139,6 +143,9 @@ void GridNode::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(rng)
   SST_SER(localRNG)
   SST_SER(linkHandlers)
+  SST_SER(demoBug)
+  SST_SER(dataMask)
+  SST_SER(dataMax)
 }
 
 void GridNode::handleEvent(SST::Event *ev){
@@ -171,7 +178,8 @@ void GridNode::handleEvent(SST::Event *ev){
               getName().c_str(), r, data[0]);
   }
   for (unsigned i=2; i<r; i++){
-    unsigned d = (unsigned)portRNG->generateNextUInt32();
+    // checked is slightly different from how send data is generated to induce an error.
+    unsigned d = (unsigned)portRNG->generateNextUInt32() & dataMask; 
     if ( d != data[i] ) {
       output.fatal(CALL_INFO, -1,
           "%s expected data[%" PRIu32 "] %" PRIu32 " does not match actual %" PRIu32 "\n",
@@ -198,7 +206,11 @@ void GridNode::sendData(){
     data.push_back(port);
     data.push_back(r);
     for( unsigned i=2; i<r; i++ ){
-      data.push_back((unsigned)(rng[portname[port]]->generateNextUInt32()));
+      uint64_t d = (unsigned)(rng[portname[port]]->generateNextUInt32());
+      // This is to introduce an infrequent mismatch between sender and receiver
+      d = d & ( 0xfULL | (dataMask<<4) );
+      if (d > dataMax) d = d & dataMask;
+      data.push_back(d);
     }
     output.verbose(CALL_INFO, 5, 0,
                    "%s: sending %zu unsigned values on link %d\n",

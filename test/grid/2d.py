@@ -22,6 +22,7 @@ parser.add_argument("--clocks", type=int, help="number of clocks to run sim", de
 parser.add_argument("--minDelay", type=int, help="min number of clocks between transmissions", default=50)
 parser.add_argument("--maxDelay", type=int, help="max number of clocks between transmissions", default=100)
 parser.add_argument("--rngSeed", type=int, help="seed for random number generator", default=1223)
+parser.add_argument("--demoBug", type=int, help="induce bug for debug demonstration", default=0)
 parser.add_argument("--verbose", type=int, help="verbosity level", default=1)
 args = parser.parse_args()
 
@@ -41,7 +42,8 @@ comp_params = {
   "maxDelay" : args.maxDelay,
   "clocks" : args.clocks,
   "rngSeed" : args.rngSeed,
-  "clockFreq" : "1Ghz"
+  "clockFreq" : "1Ghz",
+  "demoBug" : args.demoBug,
 }
 
 class GRIDNODE():
