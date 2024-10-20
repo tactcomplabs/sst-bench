@@ -20,7 +20,7 @@
 #include <sstream>
 #include <unistd.h>
 
-namespace SST::Probe {
+namespace SSTDEBUG::Probe {
 
 ProbeControl::ProbeControl( SST::Component * comp, SST::Output * out,
     int mode, int startCycle, int endCycle, int bufferSize, 
@@ -541,4 +541,4 @@ ProbeSocket::match(std::string in, CMD cmd)
     return (str2cmd.at(in) == cmd);
 }
 
-} // namespace SST
+} // namespace SSTDEBUG

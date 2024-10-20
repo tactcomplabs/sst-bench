@@ -11,7 +11,7 @@
 #include "dbgcli.h"
 #include "kgdbg.h"
 
-namespace SST::DbgCLI{
+namespace SSTDEBUG::DbgCLI{
 
 //------------------------------------------
 // DbgCLI
@@ -67,7 +67,7 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   // setup the links
   for( unsigned i=0; i<numPorts; i++ ){
     linkHandlers.push_back(configureLink("port"+std::to_string(i),
-                                         new Event::Handler2<DbgCLI,
+                                         new SST::Event::Handler2<DbgCLI,
                                          &DbgCLI::handleEvent>(this)));
   }
 
@@ -100,7 +100,7 @@ void DbgCLI::finish(){
 void DbgCLI::init( unsigned int phase ){
 }
 
-void DbgCLI::printStatus( Output& out ){
+void DbgCLI::printStatus( SST::Output& out ){
   assert(false);
 }
 

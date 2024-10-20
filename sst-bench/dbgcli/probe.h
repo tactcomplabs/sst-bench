@@ -9,8 +9,8 @@
 // information, see the LICENSE file in the top level directory of the
 // distribution.
 
-#ifndef SST_CORE_DEBUG_PROBE_H
-#define SST_CORE_DEBUG_PROBE_H
+#ifndef SST_DEBUG_PROBE_H
+#define SST_DEBUG_PROBE_H
 
 #include <iostream>
 #include <map>
@@ -22,7 +22,7 @@
 #include <netinet/in.h>
 #include <vector>
 
-namespace SST::Probe {
+namespace SSTDEBUG::Probe {
 
 class ProbeBufCtl;
 class ProbeSocket;
@@ -350,5 +350,5 @@ private:
 
 }; //class ProbeSocket
 
-} // namespace SST::Probe
-#endif /* SST_CORE_DEBUG_PROBE_H */
+} // namespace SSTDEBUG::Probe
+#endif /* SST_DEBUG_PROBE_H */

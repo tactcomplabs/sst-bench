@@ -8,8 +8,8 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#ifndef _SST_CHKPNT_H_
-#define _SST_CHKPNT_H_
+#ifndef _SSTDEBUG_DBGCLI_H_
+#define _SSTDEBUG_DBGCLI_H_
 
 // -- Standard Headers
 #include <vector>
@@ -38,9 +38,9 @@
 // -- Debug Probe
 #include "probe.h"
 
-using namespace SST::Probe;
+using namespace SSTDEBUG::Probe;
 
-namespace SST::DbgCLI {
+namespace SSTDEBUG::DbgCLI {
 
 class DbgCLI_Probe;
 
@@ -71,7 +71,7 @@ private:
   }
 
   /// DbgCLIEvent: serialization implementor
-  ImplementSerializable(SST::DbgCLI::DbgCLIEvent);
+  ImplementSerializable(SSTDEBUG::DbgCLI::DbgCLIEvent);
 
 };  // class DbgCLIEvent
 
@@ -96,7 +96,7 @@ public:
   void init( unsigned int phase ) override;
 
   /// DbgCLI: standard SST component printStatus
-  void printStatus(Output& out) override;
+  void printStatus(SST::Output& out) override;
 
   /// DbgCLI: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );
@@ -170,12 +170,12 @@ public:
   void handle_chkpt_probe_action();
   
   /// DbgCLI: serialization implementations
-  ImplementSerializable(SST::DbgCLI::DbgCLI)
+  ImplementSerializable(SSTDEBUG::DbgCLI::DbgCLI)
 
 private:
   // -- internal handlers
   SST::Output    output;                          ///< SST output handler
-  TimeConverter* timeConverter;                   ///< SST time conversion handler
+  SST::TimeConverter* timeConverter;                   ///< SST time conversion handler
   SST::Clock::HandlerBase* clockHandler;          ///< Clock Handler
 
   // -- parameters
@@ -245,10 +245,10 @@ public:
   // trace buffer
   std::shared_ptr<ProbeBuffer<event_atts_t>> probeBuffer;
 
-};
+}; // class DbgCLI_Probe
 
-}   // namespace SST::DbgCLI
+}  // namespace SSTDEBUG::DbgCLI
 
-#endif  // _SST_CHKPNT_H_
+#endif  // _SSTDEBUG_DBGCLI_H_
 
 // EOF
