@@ -187,6 +187,7 @@ private:
   uint64_t curCycle;                              ///< current cycle delay
   // -- probing
   unsigned traceMode;                             ///< 0-none, 1-send, 2-recv, 3-both
+  unsigned cliType;                               ///< 0-serializer-entry, 1-initiateInteractive
 
   // -- Component probe state object
  std::unique_ptr<DbgCLI_Probe> probe_;

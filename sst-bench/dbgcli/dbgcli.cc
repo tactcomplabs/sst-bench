@@ -39,6 +39,7 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   clockDelay = params.find<uint64_t>("clockDelay", 1);
   clocks = params.find<uint64_t>("clocks", 1000);
   traceMode = params.find<unsigned>("traceMode", 0);
+  cliType = params.find<unsigned>("cliType", 0);
 
 #if 0
   output.verbose(CALL_INFO, 1, 0, "numPorts=%u\n",numPorts);
@@ -116,7 +117,7 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(mersenne)
   SST_SER(linkHandlers)
 
-  if (ser.mode() == SST::Core::Serialization::serializer::PACK) {
+  if ( (cliType==0) && (ser.mode() == SST::Core::Serialization::serializer::PACK) ) {
     handle_chkpt_probe_action();
   }
 
