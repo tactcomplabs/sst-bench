@@ -10,6 +10,8 @@
 set(DbgCLISrcs
   dbgcli.cc
   dbgcli.h
+  probe.cc
+  probe.h
 )
 
 add_library(dbgcli SHARED ${DbgCLISrcs})

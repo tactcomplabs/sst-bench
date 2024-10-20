@@ -9,16 +9,8 @@
 // information, see the LICENSE file in the top level directory of the
 // distribution.
 
-#include "sst_config.h"
-
 #include "probe.h"
 #include "kgdbg.h"
-
-#include <assert.h>
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
-#include <unistd.h>
 
 namespace SSTDEBUG::Probe {
 
@@ -48,7 +40,7 @@ ProbeControl::ProbeControl( SST::Component * comp, SST::Output * out,
     out_->verbose(CALL_INFO,1,0,"probeBufferSize=%d\n", bufferSize_);
     out_->verbose(CALL_INFO,1,0,"probePort=%d\n", port_);
     out_->verbose(CALL_INFO,1,0,"probePostDelay=%d\n", postDelayCounter_);
-    out_->verbose(CALL_INFO,1,0,"cliControl=%llx\n", cliControl_.v);
+    out_->verbose(CALL_INFO,1,0,"cliControl=%" PRIx64 "\n", cliControl_.v);
 
     postDelayInitCount_ = postDelayCounter_;
     useDelayCounter_ = (postDelayCounter_ >= 0);
@@ -418,7 +410,7 @@ ProbeSocket::RESULT ProbeSocket::cli_handler() {
                 try {
                     uint64_t n = std::stol(args[1]);
                     probeControl_->cliControl(n);
-                } catch (std::exception e) {
+                } catch (std::exception& e) {
                     std::cout << "Could not set cliControl. " << e.what() << std::endl;
                 }
             }
@@ -463,7 +455,7 @@ ProbeSocket::RESULT ProbeSocket::cli_handler() {
                     continueSim = true;
                     runEventCounter_ = n;
                     response << "continuing sim for " << n << " events";;
-                } catch (std::exception e) {
+                } catch (std::exception& e) {
                     std::cout << "could not set number of events. " << e.what() << std::endl;
                     response << "?";
                 }

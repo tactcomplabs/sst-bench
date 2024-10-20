@@ -13,19 +13,27 @@
 
 namespace kgdbg {
 
+static inline void spin(const char* id = "") {
+  std::cout << id << " spinning" << std::endl;
+  unsigned long spinner = 1;
+  while( spinner > 0 ) {
+    spinner++;
+    usleep(100000);
+    if( spinner % 10 == 0 )  // breakpoint here
+      std::cout << "." << std::flush;
+  }
+  std::cout << std::endl;
+}
+
 static inline void spinner( const char* id, bool cond = true ) {
   if( !std::getenv( id ) )
     return;
   if( !cond )
     return;
-  unsigned long spinner = 1;
-  while( spinner > 0 ) {
-    std::cout << id << " spinning PID " << getpid() << std::endl;
-    spinner++;
-    sleep( 5 );
-  }
-  std::cout << std::endl;
+  spin(id);
 }
+
+
 }  //namespace kgdbg
 
 #endif  //_KGDBG_H
