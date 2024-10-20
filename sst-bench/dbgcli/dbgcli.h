@@ -27,7 +27,6 @@
 #include <sst/core/interfaces/simpleNetwork.h>
 #include <sst/core/link.h>
 #include <sst/core/output.h>
-#include <sst/core/probe.h>
 #include <sst/core/statapi/stataccumulator.h>
 #include <sst/core/subcomponent.h>
 #include <sst/core/timeConverter.h>
@@ -35,6 +34,9 @@
 #include <sst/core/rng/distrib.h>
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
+
+// -- Debug Probe
+#include "probe.h"
 
 using namespace SST::Probe;
 
@@ -165,7 +167,7 @@ public:
   void serialize_order(SST::Core::Serialization::serializer& ser) override;
 
   /// DbgCLI: Update debug control state object on checkpoint
-  void handle_chkpt_probe_action() override;
+  void handle_chkpt_probe_action();
   
   /// DbgCLI: serialization implementations
   ImplementSerializable(SST::DbgCLI::DbgCLI)

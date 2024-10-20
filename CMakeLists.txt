@@ -87,6 +87,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
 
 #-- SST-Bench Paths
 #set(SSTBENCH_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sstdata/include" CACHE PATH "SST-Data include path")
+include_directories(SST_SRC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 #---------------------------------------------
 # TARGET OPTIONS

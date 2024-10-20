@@ -9,7 +9,7 @@
 //
 
 #include "dbgcli.h"
-#include "sst/core/kgdbg.h"
+#include "kgdbg.h"
 
 namespace SST::DbgCLI{
 
@@ -48,7 +48,7 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   output.verbose(CALL_INFO, 1, 0, "clocks=%llu\n", clocks);
 #endif
 
-  output.verbose(CALL_INFO, 1, 0, "traceMode=%llu\n", traceMode);
+  output.verbose(CALL_INFO, 1, 0, "traceMode=%" PRIu32 "\n", traceMode);
   if (traceMode & 1) output.verbose(CALL_INFO, 1, 0, "tracing SEND events\n");
   if (traceMode & 2) output.verbose(CALL_INFO, 1, 0, "tracing RECV events\n");
   if (traceMode>2) 
@@ -115,6 +115,11 @@ void DbgCLI::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(curCycle)
   SST_SER(mersenne)
   SST_SER(linkHandlers)
+
+  if (ser.mode() == SST::Core::Serialization::serializer::PACK) {
+    handle_chkpt_probe_action();
+  }
+
 }
 
 void DbgCLI::handle_chkpt_probe_action()
