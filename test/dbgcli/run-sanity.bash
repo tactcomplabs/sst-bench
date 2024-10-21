@@ -9,15 +9,10 @@ cd run
 # 0b0000_0100 : 0x04  Every probe sample
 # 0b0000_0010 : 0x02  Every probe sample from trigger onward
 # 0b0000_0001 : 0x01  Every probe state change
-export CLI_CONTROL=64
-export PROBE_PORT=10000
-export PROBE_START_CYCLE=3000000
-export PROBE_END_CYCLE=8000000
-export PROBE_POST_DELAY=10
-export PROBE_BUFFER_SIZE=1024
-sst --checkpoint-sim-period=1us ../dbgcli-sanity.py &
+
+sst --checkpoint-sim-period=1us ../dbgcli-sanity.py -- --probePort=10000 --cliControl=64  --probeStartCycle=3000000 --probeEndCycle=8000000 --probePostDelay=10 --probeBufferSize=1024 &
 sleep 2
-../dbgcli-client.py <<EOF
+../dbgcli-client.py --probePort=10000<<EOF
 echo hello there sst component
 echo help
 help

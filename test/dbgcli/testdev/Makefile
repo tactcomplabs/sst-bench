@@ -53,16 +53,6 @@ run: $(LOGS)
 # sst checkpoint sampling period: 1us
 # sample:  		cp1 send events, cp0 recv events
 # trigger:  	max payload size
-# 
-# PROBE_CP0=0 (probeMode=0)
-# PROBE_CP1=0 (probeMode=0)
-# PROBE_START_CYCLE=0  (probeStartCycle=0)   # start of 1st checkpoint
-# PROBE_END_CYCLE=0    (probeEndCycle=0)     # no limit
-# PROBE_BUFFER_SIZE=16 (probeBufferSize=16)
-# PROBE_POST_DELAY=8   (probePostDelay=8)
-# PROBE_PORT=10000     (probePort=10000)     # cp0 10000, cp1 10001, ...
-# CLI_CONTROL_CP0=0    (cliControl=0) 
-# CLI_CONTROL_CP1=0    (cliControl=0) 
 
 # cliControl determines when to break into interactive mode
 # 0b0100_0000 : 0x40 : 64 Every checkpoint
@@ -73,33 +63,33 @@ run: $(LOGS)
 # 0b0000_0001 : 0x01 : 01 Every probe state change
 # 0b0000_0000 : 0x00 : 00 Disabled
 
-# For testing always have PROBE_CP0 and PROBE_CP1 enabled
-ENVOPTS = PROBE_CP0=1 PROBE_CP1=1 
+# For testing always have --probeC0 and --probeC1 enabled
+CFGOPTS = --probeC0=1 --probeC1=1 
 
 # Test: basic.0.* : check trigger and buffering
-$(OUTDIR)/basic.0.0/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=0
-$(OUTDIR)/basic.0.1/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=1
-$(OUTDIR)/basic.0.2/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=2
-$(OUTDIR)/basic.0.3/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=3
-$(OUTDIR)/basic.0.4/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=4
-$(OUTDIR)/basic.0.5/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=5
-$(OUTDIR)/basic.0.6/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=6
-$(OUTDIR)/basic.0.7/run.log:   ENVOPTS += PROBE_BUFFER_SIZE=4 PROBE_POST_DELAY=7
+$(OUTDIR)/basic.0.0/run.log:   CFGOPTS += --probeBufferSize=4 --probePostDelay=0
+$(OUTDIR)/basic.0.1/run.log:   CFGOPTS += --probeBufferSize=4 --probePostDelay=1
+$(OUTDIR)/basic.0.2/run.log:   CFGOPTS += --probeBufferSize=4 --probePostDelay=2
+$(OUTDIR)/basic.0.3/run.log:   CFGOPTS += --probeBufferSize=4 --probePostDelay=3
+$(OUTDIR)/basic.0.4/run.log:   CFGOPTS += --probeBufferSize=4 --probePostDelay=4
+$(OUTDIR)/basic.0.5/run.log:   CFGOPTS += --probeBufferSize=4 --probePostDelay=5
+$(OUTDIR)/basic.0.6/run.log:   CFGOPTS += --probeBufferSize=4 --probePostDelay=6
+$(OUTDIR)/basic.0.7/run.log:   CFGOPTS += --probeBufferSize=4 --probePostDelay=7
 
 # Test: cli0x40.* : check break to CLI at every checkpoint
-$(OUTDIR)/cli0x40.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=64
-$(OUTDIR)/cli0x20.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=32
-$(OUTDIR)/cli0x10.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=16
-$(OUTDIR)/cli0x04.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=4
-$(OUTDIR)/cli0x02.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=2
-$(OUTDIR)/cli0x01.0/run.log:   ENVOPTS += PROBE_START_CYCLE=3000000 CLI_CONTROL_CP1=1  
+$(OUTDIR)/cli0x40.0/run.log:   CFGOPTS += --probeStartCycle=3000000 --cliControlC1=64
+$(OUTDIR)/cli0x20.0/run.log:   CFGOPTS += --probeStartCycle=3000000 --cliControlC1=32
+$(OUTDIR)/cli0x10.0/run.log:   CFGOPTS += --probeStartCycle=3000000 --cliControlC1=16
+$(OUTDIR)/cli0x04.0/run.log:   CFGOPTS += --probeStartCycle=3000000 --cliControlC1=4
+$(OUTDIR)/cli0x02.0/run.log:   CFGOPTS += --probeStartCycle=3000000 --cliControlC1=2
+$(OUTDIR)/cli0x01.0/run.log:   CFGOPTS += --probeStartCycle=3000000 --cliControlC1=1  
 
 # TODO does --output-directory actually work in sst? Post a bug if no
 # Run command
 %.log: $(SSTCFG)
 	@mkdir -p $(@D)
 	@echo Running $(basename $@) in $(@D)
-	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) $(SST) $(SSTOPTS) $(SSTCFG) > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
+	( cd $(@D) && $(MPIOPTS) $(SST) $(SSTOPTS) $(SSTCFG) -- $(CFGOPTS) > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
 	@echo "### " $@":" `cat $(@D)/run.status`
 
 RUNSCRIPT ?= $(PWD)/client-run5.bash
@@ -108,7 +98,7 @@ RUNSCRIPT ?= $(PWD)/client-run5.bash
 # %.log: $(SSTCFG)
 # 	@mkdir -p $(@D)
 # 	@echo Running $(basename $@) in $(@D)
-# 	( cd $(@D) && $(ENVOPTS) $(MPIOPTS) SST="$(SST)" SSTOPTS="$(SSTOPTS)" SSTCFG=$(SSTCFG) $(RUNSCRIPT) > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
+# 	( cd $(@D) && $(CFGOPTS) $(MPIOPTS) SST="$(SST)" SSTOPTS="$(SSTOPTS)" SSTCFG=$(SSTCFG) $(RUNSCRIPT) > run.log && (echo "pass" > run.status; $(DOT2PDF)) || echo "fail" > run.status )
 # 	@echo "### " $@":" `cat $(@D)/run.status`
 
 check: run

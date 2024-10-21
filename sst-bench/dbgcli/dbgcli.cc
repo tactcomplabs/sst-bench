@@ -40,14 +40,12 @@ DbgCLI::DbgCLI(SST::ComponentId_t id, const SST::Params& params ) :
   clocks = params.find<uint64_t>("clocks", 1000);
   traceMode = params.find<unsigned>("traceMode", 0);
   cliType = params.find<unsigned>("cliType", 0);
-
-#if 0
+  
   output.verbose(CALL_INFO, 1, 0, "numPorts=%u\n",numPorts);
   output.verbose(CALL_INFO, 1, 0, "minData=%llu\n", minData);
   output.verbose(CALL_INFO, 1, 0, "maxData=%llu\n", maxData);
   output.verbose(CALL_INFO, 1, 0, "clockDelay=%llu\n", clockDelay);
   output.verbose(CALL_INFO, 1, 0, "clocks=%llu\n", clocks);
-#endif
 
   output.verbose(CALL_INFO, 1, 0, "traceMode=%" PRIu32 "\n", traceMode);
   if (traceMode & 1) output.verbose(CALL_INFO, 1, 0, "tracing SEND events\n");

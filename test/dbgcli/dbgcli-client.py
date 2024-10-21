@@ -8,15 +8,13 @@
 #
 # run-client.py
 
-import os
+import argparse
 import socket
-import sys
 
 from enum import Enum
 
 BUFFER_SIZE = 4096
 HOST = "127.0.0.1"
-PROBE_PORT = int(os.getenv("PROBE_PORT", 0))
 
 class State(Enum):
     INIT = 0
@@ -29,11 +27,11 @@ def decode(msg):
     if cmd=="disconnect" or cmd=="quit" or cmd=="exit" or cmd=="bye":
         state = State.DISCONNECT
 
-def client_program():
+def client_program(probePort):
     global state
     client_socket = socket.socket()
-    print(f"Connecting to {HOST}:{PROBE_PORT}")
-    client_socket.connect( (HOST, PROBE_PORT) )
+    print(f"Connecting to {HOST}:{probePort}")
+    client_socket.connect( (HOST, probePort) )
 
     # socket server identification
     state = State.INIT
@@ -90,8 +88,16 @@ def client_program():
     client_socket.close()
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description="dbgcli-client")
+    parser.add_argument("--probePort", type=int, help="sst probe starting socket. 0=None", required=True)
+    args = parser.parse_args()
+    print("dbgcli-client configuration:")
+    for arg in vars(args):
+        print("\t", arg, " = ", getattr(args, arg))
+
     try:
-        client_program()
+        client_program(args.probePort)
     except Exception as err:
         print(f"disconnected: {err=}, {type(err)=}")
     else:

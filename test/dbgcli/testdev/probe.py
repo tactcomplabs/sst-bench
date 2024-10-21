@@ -8,31 +8,36 @@
 # dbgcli-test1.py
 #
 
-import os
+import argparse
 import sst
 
-# PROBE controls
-PROBE_CP0    = int(os.getenv("PROBE_CP0", 0))
-PROBE_CP1    = int(os.getenv("PROBE_CP1", 0))
-
-PROBE_START_CYCLE = int(os.getenv("PROBE_START_CYCLE", 0))
-PROBE_END_CYCLE   = int(os.getenv("PROBE_END_CYCLE", 0))
-PROBE_BUFFER_SIZE = int(os.getenv("PROBE_BUFFER_SIZE", 16))
-PROBE_POST_DELAY  = int(os.getenv("PROBE_POST_DELAY", 8))
-
-# Interactive mode controls
-PROBE_PORT = int(os.getenv("PROBE_PORT", 10000))
-
-# cliControl determines when to break into interactive mode
+parser = argparse.ArgumentParser(description="debug probe demo")
+parser.add_argument("--probeC0", type=int, help="enable probe for comp0", default=0)
+parser.add_argument("--probeC1", type=int, help="enable probe for comp1", default=0)
+parser.add_argument("--probeStartCycle", type=int, help="cycle to initiate debug probe. 0=Off", default=0)
+parser.add_argument("--probeEndCycle", type=int, help="cycle to end debug probe. 0=Never", default=0)
+parser.add_argument("--probeBufferSize", type=int, help="number of records in circular buffer", default=16)
+parser.add_argument("--probePostDelay", type=int, help="number of events to capture after trigger event", default=8)
+parser.add_argument("--probePort", type=int, help="sst probe starting socket. 0=None", default=10000 )
+parser.add_argument("--verbose", type=int, help="verbosity. 5=send/recv", default=1)
 # 0b0100_0000 : 0x40 : 64 Every checkpoint
 # 0b0010_0000 : 0x20 : 32 Every checkpoint when probe is active
 # 0b0001_0000 : 0x10 : 16 Every checkpoint sync state change
 # 0b0000_0100 : 0x04 : 04 Every probe sample
 # 0b0000_0010 : 0x02 : 02 Every probe sample from trigger onward
-# 0b0000_0001 : 0x01 : 01 Every probe state change
-
-CLI_CONTROL_CP0 = int(os.getenv("CLI_CONTROL_CP0", 0))
-CLI_CONTROL_CP1 = int(os.getenv("CLI_CONTROL_CP1", 0))
+# 0b0000_0001 : 0x01 : 01 Every probe state change,
+parser.add_argument("--cliControlC0", type=int, help="comp0 event types on which to break into interactive mode"
+" [64 Every checkpoint]"
+" [32 Every checkpoint when probe is active]"
+" [16 Every checkpoint sync state change]"
+" [04 Every probe sample]"
+" [02 Every probe sample from trigger onward]"
+" [01 Every probe state change]", default=0)
+parser.add_argument("--cliControlC1", type=int, help="see above but for comp1", default=0)
+args = parser.parse_args()
+print("debug probe demo configuration:")
+for arg in vars(args):
+  print("\t", arg, " = ", getattr(args, arg))
 
 # Component custom trace controls
 TRACE_SEND = 1
@@ -41,11 +46,9 @@ TRACE_RECV = 2
 MIN_DATA = 1
 MAX_DATA = 100
 
-VERBOSE = int(os.getenv("VERBOSE", 1))
-
 cp0 = sst.Component("cp0", "dbgcli.DbgCLI")
 cp0.addParams({
-  "verbose"    : VERBOSE,
+  "verbose"    : args.verbose,
   "numPorts"   : 1,
   "minData"    : MIN_DATA,
   "maxData"    : MAX_DATA,
@@ -56,18 +59,18 @@ cp0.addParams({
   # component specific probe controls
   "traceMode"  : TRACE_RECV,
   # common probe controls
-  "probeMode"       : PROBE_CP0,
-  "probeStartCycle" : PROBE_START_CYCLE,
-  "probeEndCycle"   : PROBE_END_CYCLE,
-  "probeBufferSize" : PROBE_BUFFER_SIZE,
-  "probePostDelay"  : PROBE_POST_DELAY,
-  "probePort"       : PROBE_PORT,
-  "cliControl"      : CLI_CONTROL_CP0,
+  "probeMode"       : args.probeC0,
+  "probeStartCycle" : args.probeStartCycle,
+  "probeEndCycle"   : args.probeEndCycle,
+  "probeBufferSize" : args.probeBufferSize,
+  "probePostDelay"  : args.probePostDelay,
+  "probePort"       : args.probePort,
+  "cliControl"      : args.cliControlC0,
 })
 
 cp1 = sst.Component("cp1", "dbgcli.DbgCLI")
 cp1.addParams({
-  "verbose"    : VERBOSE,
+  "verbose"    : args.verbose,
   "numPorts"   : 1,
   "minData"    : MIN_DATA,
   "maxData"    : MAX_DATA,
@@ -78,13 +81,13 @@ cp1.addParams({
   # component specific probe controls
   "traceMode"  : TRACE_SEND,
   # common probe controls
-  "probeMode"       : PROBE_CP1,
-  "probeStartCycle" : PROBE_START_CYCLE,
-  "probeEndCycle"   : PROBE_END_CYCLE,
-  "probeBufferSize" : PROBE_BUFFER_SIZE,
-  "probePostDelay"  : PROBE_POST_DELAY,
-  "probePort"      : PROBE_PORT+1,
-  "cliControl"     : CLI_CONTROL_CP1,
+  "probeMode"       : args.probeC1,
+  "probeStartCycle" : args.probeStartCycle,
+  "probeEndCycle"   : args.probeEndCycle,
+  "probeBufferSize" : args.probeBufferSize,
+  "probePostDelay"  : args.probePostDelay,
+  "probePort"       : args.probePort + 1,
+  "cliControl"      : args.cliControlC1,
 })
 
 link0 = sst.Link("link0")
