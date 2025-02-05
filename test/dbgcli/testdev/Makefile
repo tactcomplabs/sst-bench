@@ -42,7 +42,7 @@ LOGS   := $(addsuffix /run.log,$(addprefix $(OUTDIR)/,$(TLIST)))
 TARGS  := $(LOGS)
 
 # Recipes
-all: $(TARGS)
+all: $(TARGS) check
 run: $(LOGS)
 
 #
