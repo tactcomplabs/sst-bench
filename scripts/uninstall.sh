@@ -7,7 +7,6 @@
 sst-register -u msgperf
 sst-register -u microcomp
 sst-register -u chkpnt
-sst-register -u dbgcli
 sst-register -u largestat
 sst-register -u largestatchkpnt
 sst-register -u microcomplink
@@ -22,7 +21,6 @@ if test -f "$CONFIG"; then
   sed -i.bak '/msgperf/d' $CONFIG
   sed -i.bak '/microcomp/d' $CONFIG
   sed -i.bak '/chkpnt/d' $CONFIG
-  sed -i.bak '/dbgcli/d' $CONFIG
   sed -i.bak '/largestat/d' $CONFIG
   sed -i.bak '/largestatchkpnt/d' $CONFIG
   sed -i.bak '/microcomplink/d' $CONFIG
