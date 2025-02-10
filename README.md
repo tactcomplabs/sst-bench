@@ -1,15 +1,4 @@
-# sst-bench (cli branch)
-
-To use this development branch you must build a compatible version of sst using
-
-   git clone git@github.com:kpgriesser/sst-core-kg.git
-   cd sst-core-kg
-   git checkout cli
-   ./autogen.sh
-   mkdir build
-   cd build
-   ../configure --prefix=$SST_CORE_HOME
-   
+# sst-bench
 
 ## Getting Started
 
@@ -79,11 +68,6 @@ cmake -DSSTBENCH_ENABLE_TESTING=ON ../
 make -j
 make install
 make test
-```
-
-A special set of long tests that may create extremely large files can be excluded using:
-```
-ctest -E large
 ```
 
 ## Special Runtime Notes
