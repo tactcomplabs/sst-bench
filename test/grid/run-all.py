@@ -46,13 +46,13 @@ if __name__ == '__main__':
         norun = "--norun"
     
     # permute x,y,threads
-    cmd=f"{prog} {norun} --maxthreads={cpus} --maxrow={gridlen} --maxcols={gridlen}  --numBytes=1024 --minData=1024 --maxData=65536 --period=1000 --clocks=10000"
+    cmd=f"{prog} {norun} --maxthreads={cpus} --maxrow={gridlen} --maxcols={gridlen}  --numBytes=1024 --minData=1024 --maxData=65536 --simPeriod=1000 --clocks=10000"
     untimed_run(cmd)
 
     # TODO 
     if platform.system() != "Darwin":
         # permute x,y,ranks
-        cmd=f"{prog} {norun} --maxranks={cpus} --maxrow={gridlen} --maxcols={gridlen}  --numBytes=1024 --minData=1024 --maxData=65536 --period=1000 --clocks=10000"
+        cmd=f"{prog} {norun} --maxranks={cpus} --maxrow={gridlen} --maxcols={gridlen}  --numBytes=1024 --minData=1024 --maxData=65536 --simPeriod=1000 --clocks=10000"
         untimed_run(cmd)
 
     # Whew!
