@@ -70,9 +70,9 @@ make install
 make test
 ```
 
-A special set of long tests that may create extremely large files are enabled using:
+A special set of long tests that may create extremely large files can be excluded using:
 ```
-cmake -DSSTBENCH_ENABLE_LARGE_TESTS=ON ../
+ctest -E large
 ```
 
 ## Special Runtime Notes
