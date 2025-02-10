@@ -70,6 +70,11 @@ make install
 make test
 ```
 
+A special set of long tests that may create extremely large files are enabled using:
+```
+cmake -DSSTBENCH_ENABLE_LARGE_TESTS=ON ../
+```
+
 ## Special Runtime Notes
 
 ### TCL-DBG Benchmark

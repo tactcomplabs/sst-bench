@@ -99,8 +99,9 @@ if(SSTBENCH_ENABLE_SSTDBG)
 endif()
 
 #-- Testing Options
+option(SSTBENCH_ENABLE_LARGE_TESTS "Enable Large Tests" OFF)
 option(SSTBENCH_ENABLE_TESTING "Enable Testing" OFF)
-if(SSTBENCH_ENABLE_TESTING)
+if(SSTBENCH_ENABLE_TESTING OR SSTBENCH_ENABLE_LARGE_TESTS)
   enable_testing()
   add_subdirectory(test)
 endif()
