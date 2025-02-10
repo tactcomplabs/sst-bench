@@ -23,8 +23,9 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   add_subdirectory(restore)
   message(STATUS "[SST-BENCH] Enabling RESTART testing")
   add_subdirectory(restart)
+  message(STATUS "[SST-BENCH] Enabling GRID testing")
+  add_subdirectory(grid)
 endif()
-
 
 if(${SST_MAJOR_VERSION} EQUAL 14)
   if(${SST_MINOR_VERSION} GREATER_EQUAL 1)
