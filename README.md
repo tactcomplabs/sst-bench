@@ -70,6 +70,11 @@ make install
 make test
 ```
 
+A special set of long tests that may create extremely large files can be excluded using:
+```
+ctest -E large
+```
+
 ## Special Runtime Notes
 
 ### TCL-DBG Benchmark

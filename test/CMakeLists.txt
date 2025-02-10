@@ -25,14 +25,17 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   add_subdirectory(restart)
 endif()
 
+
 if(${SST_MAJOR_VERSION} EQUAL 14)
-  if(${SST_MINOR_VERSION} EQUAL 1)
+  if(${SST_MINOR_VERSION} GREATER_EQUAL 1)
     message(STATUS "[SST-BENCH] Enabling LARGE-STATE-CHKPNT testing")
     add_subdirectory(large-stat-chkpnt)
   endif()
 elseif(${SST_MAJOR_VERSION} GREATER 14)
   message(STATUS "[SST-BENCH] Enabling LARGE-STATE-CHKPNT testing")
   add_subdirectory(large-stat-chkpnt)
+else()
+  message(STATUS "[SST-BENCH] sst version 14.1 is minimum requirement to enable LARGE-STATE-CHKPNT")
 endif()
 
 if(${ENABLE_SSTDBG})

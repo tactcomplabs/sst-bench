@@ -1,7 +1,7 @@
 #
 # sst-bench top-level CMake
 #
-# Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
+# Copyright (C) 2017-2025 Tactical Computing Laboratories, LLC
 # All Rights Reserved
 # contact@tactcomplabs.com
 # See LICENSE in the top level directory for licensing details
@@ -15,6 +15,9 @@ endif()
 # Minimum required version of CMake and project information
 cmake_minimum_required(VERSION 3.19)
 project(sstdata CXX)
+
+# Local scripts
+set(SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 
 #-- SST Setup
 execute_process(COMMAND sst-config --prefix
@@ -54,16 +57,17 @@ execute_process(COMMAND sst-config SST_ELEMENT_LIBRARY SST_ELEMENT_LIBRARY_LIBDI
                 OUTPUT_VARIABLE SST_ELEMENT_LIBRARY_LIBDIR
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/sst-major-version.sh
+execute_process(COMMAND ${SCRIPTS}/sst-major-version.sh
                 OUTPUT_VARIABLE SST_MAJOR_VERSION
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/sst-minor-version.sh
+execute_process(COMMAND ${SCRIPTS}/sst-minor-version.sh
                 OUTPUT_VARIABLE SST_MINOR_VERSION
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 message(STATUS "SST MAJOR VERSION=${SST_MAJOR_VERSION}")
+message(STATUS "SST MINOR VERSION=${SST_MINOR_VERSION}")
 
 #-- Compiler Options
 # Compiler Options
