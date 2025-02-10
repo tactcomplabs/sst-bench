@@ -1,7 +1,7 @@
 #
 # sst-bench top-level CMake
 #
-# Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
+# Copyright (C) 2017-2025 Tactical Computing Laboratories, LLC
 # All Rights Reserved
 # contact@tactcomplabs.com
 # See LICENSE in the top level directory for licensing details
@@ -67,6 +67,7 @@ execute_process(COMMAND ${SCRIPTS}/sst-minor-version.sh
 )
 
 message(STATUS "SST MAJOR VERSION=${SST_MAJOR_VERSION}")
+message(STATUS "SST MINOR VERSION=${SST_MINOR_VERSION}")
 
 #-- Compiler Options
 # Compiler Options
@@ -99,9 +100,8 @@ if(SSTBENCH_ENABLE_SSTDBG)
 endif()
 
 #-- Testing Options
-option(SSTBENCH_ENABLE_LARGE_TESTS "Enable Large Tests" OFF)
 option(SSTBENCH_ENABLE_TESTING "Enable Testing" OFF)
-if(SSTBENCH_ENABLE_TESTING OR SSTBENCH_ENABLE_LARGE_TESTS)
+if(SSTBENCH_ENABLE_TESTING)
   enable_testing()
   add_subdirectory(test)
 endif()
