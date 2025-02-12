@@ -25,6 +25,7 @@ SST 14.0.0 checkpoint/restart functionality
 * *large-stat* : Tests the creation of instantiation of a variable number of unsigned 
 64bit statistics for very simple components.  Designed to test large blocks of 
 statistics values for simple components.
+* *grid* : Generates a configurable 2 dimensional grid network with configurable component and data transfer parameters. Designed to profile simulation performance by sweeping component counts, data sizes, and thread counts.
 
 ## Prerequisites
 
