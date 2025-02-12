@@ -1,3 +1,18 @@
+/*
+cptsizes.sql
+
+Usage:
+    sqlite3 restart-all.db < cptsizes.sql
+
+Output:
+    siminfo.csv: simulation information
+    cptsizes.csv: checkpoint size information
+
+Keys:
+    simid
+*/
+
+
 create temp table cptsizes as select * from restart t1 join chkpnt t2 on t1.simid=t2.simid;
 create temp table rpt as select simid, size/1000 as kb, basetime, cpttime, (cpttime-basetime) as delta,  simtime as rsttime from cptsizes;
 

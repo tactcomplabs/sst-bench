@@ -1,3 +1,18 @@
+/*
+genrpt.sql
+
+Usage:
+    sqlite3 restart-all.db < genrpt.sql
+
+Output:
+    siminfo.csv: simulation information
+    chkpnt.csv:  checkpoint simulation times
+    restart.csv: restart simulation times
+
+Keys:
+    simid
+*/
+
 .mode csv
 .headers on
 .output chkpnt.csv

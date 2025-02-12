@@ -25,7 +25,10 @@ def untimed_run(cmd):
         exit(rc)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="run all tests and generate performance data")
+    parser = argparse.ArgumentParser(
+        prog="run-all.py",
+        description="WIP: run all tests and generate performance data",
+        epilog='Results will be appended to to sqlite3 database file, restart.db')
     parser.add_argument("--norun", action="store_true", help="print simulation commands but do not run")
     parser.add_argument("--short", action="store_true", help="run only up to a 2x2 grid")
     args = parser.parse_args()

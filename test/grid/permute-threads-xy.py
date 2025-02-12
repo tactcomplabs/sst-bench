@@ -25,7 +25,10 @@ def untimed_run(cmd, norun):
             sys.exit(1)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart test by permuting x,y dimensions and threads")
+    parser = argparse.ArgumentParser(
+        prog='permute-threads-xy.py',
+        description="run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions and thread count",
+        epilog='Results will be appended to to sqlite3 database file, restart.db')
     parser.add_argument("--maxrows", type=int, help="maximum number of vertical components [1]", default=1)
     parser.add_argument("--maxcols", type=int, help="maximum number of horizontal components [2]", default=2)
     parser.add_argument("--maxranks", type=int, help="maximum number of ranks [1]", default=1)

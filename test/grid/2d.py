@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #
 # Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 # All Rights Reserved
@@ -6,6 +8,7 @@
 # See LICENSE in the top level directory for licensing details
 #
 # 2d.py
+#
 #
 
 import argparse

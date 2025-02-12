@@ -25,7 +25,10 @@ def untimed_run(cmd, norun):
             sys.exit(1)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart test by permuting component size")
+    parser = argparse.ArgumentParser(
+        prog='permute-cptsize.py',
+        description="run 2d grid checkpoint/restart testing, restart-all.py, sweeping component size",
+        epilog='Results will be appended to to sqlite3 database file, restart.db')
     parser.add_argument("--minBytes", type=int, help="minimum component size [1024]", default=1024)
     parser.add_argument("--maxBytes", type=int, help="maximum component size [65536]", default=65536)
     parser.add_argument("--steps", type=int, help="number of runs sweeping data size from 1024 to maxBytes [4]", default=4)

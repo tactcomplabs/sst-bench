@@ -1,7 +1,7 @@
 #!/usr/bin/env python3 
 
 #
-# Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
+# Copyright (C) 2017-2025 Tactical Computing Laboratories, LLC
 # All Rights Reserved
 # contact@tactcomplabs.com
 #
@@ -77,7 +77,10 @@ def untimed_run(cmd):
         sys.exit(1)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="run 2d grid checkpoint/restart testing")
+    parser = argparse.ArgumentParser(
+        prog='restart-all.py',
+        description='run 2d grid checkpoint/restart test',
+        epilog='Results will be appended to to sqlite3 database file, restart.db')
     parser.add_argument("--clocks", type=int, help="number of clocks to run sim [10000]", default=10000)
     parser.add_argument("--db", type=str, help="sqlite database file [restart-all.db]", default="restart-all.db")
     parser.add_argument("--prune", action="store_true", help="remove check checkpoint data files when done")

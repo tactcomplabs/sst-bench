@@ -1,3 +1,19 @@
+/*
+times.sql
+
+Usage:
+    sqlite3 restart-all.db < times.sql
+
+Output:
+    siminfo.csv:   simulation information
+    times.csv:     collected simulation times
+    fulltimes.csv: times with simulation parameters and component count
+
+Keys:
+    simid
+*/
+
+
 CREATE TEMP TABLE times(simid, name, time, kb);
 INSERT INTO times SELECT simid, "base", basetime, 0 FROM chkpnt;
 INSERT INTO times SELECT simid, "cpt", cpttime, 0 FROM chkpnt;
