@@ -20,7 +20,7 @@ if(SSTBENCH_ENABLE_TESTING)
     set_tests_properties(${testName}
       PROPERTIES
       TIMEOUT 30
-      LABELS "all"
+      LABELS "all;elements"
       PASS_REGULAR_EXPRESSION "${passRegex}")
   endforeach(testSrc)
 endif()

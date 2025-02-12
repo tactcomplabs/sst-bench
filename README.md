@@ -29,10 +29,7 @@ statistics values for simple components.
 
 ## Prerequisites
 
-Given that this is an SST external component, the primary prerequisite is a
-current installation of the SST Core. The Rev building infrastructure assumes
-that the `sst-config` tool is installed and can be found in the current PATH
-environment.
+Given that this is an SST external component, the primary prerequisite is a current installation of the SST Core. Some microbenchmarks use components from SST Elements so it is recommended to install that as well. These test case are labeled 'elements' so they can easily be excluded from testing.  The sst-bench building infrastructure assumes that the `sst-config` tool is installed and can be found in the current PATH environment.
 
 *sst-bench* relies upon CMake for building the component source.  The minimum 
 required version for this is `3.19`
@@ -70,10 +67,14 @@ make -j
 make install
 make test
 ```
-
-A special set of long tests that may create extremely large files can be excluded using:
+If SST Elements is not installed, the dependent tests can be excluded using:
 ```
-ctest -E large
+ctest -LE elements
+```
+
+A special set of long tests that may create extremely large files and can be excluded using:
+```
+ctest -LE large
 ```
 
 ## Special Runtime Notes
