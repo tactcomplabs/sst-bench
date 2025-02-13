@@ -17,7 +17,7 @@ if(SSTBENCH_ENABLE_TESTING)
     set(CHKPT_PFX ${testName}_SAVE_)
     add_test(NAME ${testName}_SAVE
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND ${SCRIPTS}/sst-chkpt.sh ${CHKPT_PFX} --checkpoint-period=5us --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/restore ${testSrc})
+      COMMAND ${SCRIPTS}/sst-chkpt.sh ${CHKPT_PFX} --checkpoint-period=5us --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/restart ${testSrc})
     set_tests_properties(${testName}_SAVE
       PROPERTIES
       TIMEOUT 60

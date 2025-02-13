@@ -13,7 +13,7 @@ import sst
 
 cp0 = sst.Component("cp0", "chkpnt.Chkpnt")
 cp0.addParams({
-  "verbose" : 5,
+  "verbose" : 0,
   "numPorts" : 10,
   "minData" : 1,
   "maxData" : 10000,
@@ -25,7 +25,7 @@ cp0.addParams({
 
 cp1 = sst.Component("cp1", "chkpnt.Chkpnt")
 cp1.addParams({
-  "verbose" : 5,
+  "verbose" : 0,
   "numPorts" : 10,
   "minData" : 1,
   "maxData" : 10000,
