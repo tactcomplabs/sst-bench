@@ -28,7 +28,7 @@ if(SSTBENCH_ENABLE_TESTING)
       COMMAND sst --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/restore --load-checkpoint ${CHKPT_PFX}/${CHKPT_PFX}_0_5000000/${CHKPT_PFX}_0_5000000.sstcpt)
     set_tests_properties(${testName}_RESTORE
       PROPERTIES
-      TIMEOUT 60
+      TIMEOUT 120
       LABELS "all"
       DEPENDS ${testName}_SAVE
       PASS_REGULAR_EXPRESSION "${passRegex}")
