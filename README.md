@@ -77,6 +77,12 @@ A special set of long tests that may create extremely large files and can be exc
 ctest -LE large
 ```
 
+Currently, the checkpoint tests may generate a large number of files. To clean up after running tests use
+```
+cd ..
+git clean -f -d
+```
+
 ## Special Runtime Notes
 
 ### TCL-DBG Benchmark

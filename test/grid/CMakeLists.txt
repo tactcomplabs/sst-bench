@@ -19,7 +19,7 @@ if(SSTBENCH_ENABLE_TESTING)
       COMMAND ${SCRIPTS}/sst-chkpt.sh ${CHKPT_PFX} --checkpoint-period=10ns --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/grid ${testSrc})
     set_tests_properties(${testName}_SAVE
       PROPERTIES
-      TIMEOUT 120
+      TIMEOUT 60
       LABELS "all"
       PASS_REGULAR_EXPRESSION "${passRegex}")
     add_test(NAME ${testName}_RESTORE
@@ -27,7 +27,7 @@ if(SSTBENCH_ENABLE_TESTING)
       COMMAND sst --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/grid --load-checkpoint ${CHKPT_PFX}/${CHKPT_PFX}_100_1010000/${CHKPT_PFX}_100_1010000.sstcpt)
     set_tests_properties(${testName}_RESTORE
       PROPERTIES
-      TIMEOUT 120
+      TIMEOUT 60
       LABELS "all"
       DEPENDS ${testName}_SAVE
       PASS_REGULAR_EXPRESSION "${passRegex}")
