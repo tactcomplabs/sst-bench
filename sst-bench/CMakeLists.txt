@@ -1,7 +1,7 @@
 #
 # sst-bench/sst-bench CMake
 #
-# Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
+# Copyright (C) 2017-2025 Tactical Computing Laboratories, LLC
 # All Rights Reserved
 # contact@tactcomplabs.com
 # See LICENSE in the top level directory for licensing details
@@ -26,6 +26,8 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 14)
   add_subdirectory(restore)
   message(STATUS "[SST-BENCH] Enabling RESTART micro-benchmark")
   add_subdirectory(restart)
+  message(STATUS "[SST-BENCH] Enabling GRID micro-benchmark")
+  add_subdirectory(grid)
 endif()
 
 if(${SST_MAJOR_VERSION} EQUAL 14)

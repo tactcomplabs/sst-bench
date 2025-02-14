@@ -25,13 +25,11 @@ SST 14.0.0 checkpoint/restart functionality
 * *large-stat* : Tests the creation of instantiation of a variable number of unsigned 
 64bit statistics for very simple components.  Designed to test large blocks of 
 statistics values for simple components.
+* *grid* : Generates a configurable 2 dimensional grid network with configurable component and data transfer parameters. Designed to profile simulation performance by sweeping component counts, data sizes, and thread counts. See [grid documentation](test/grid/README.md).
 
 ## Prerequisites
 
-Given that this is an SST external component, the primary prerequisite is a
-current installation of the SST Core. The Rev building infrastructure assumes
-that the `sst-config` tool is installed and can be found in the current PATH
-environment.
+Given that this is an SST external component, the primary prerequisite is a current installation of the SST Core. Some microbenchmarks use components from SST Elements so it is recommended to install that as well. These test case are labeled 'elements' so they can easily be excluded from testing.  The sst-bench building infrastructure assumes that the `sst-config` tool is installed and can be found in the current PATH environment.
 
 *sst-bench* relies upon CMake for building the component source.  The minimum 
 required version for this is `3.19`
@@ -68,6 +66,21 @@ cmake -DSSTBENCH_ENABLE_TESTING=ON ../
 make -j
 make install
 make test
+```
+If SST Elements is not installed, the dependent tests can be excluded using:
+```
+ctest -LE elements
+```
+
+A special set of long tests that may create extremely large files and can be excluded using:
+```
+ctest -LE large
+```
+
+Currently, the checkpoint tests may generate a large number of files. To clean up after running tests use
+```
+cd ..
+git clean -f -d
 ```
 
 ## Special Runtime Notes
