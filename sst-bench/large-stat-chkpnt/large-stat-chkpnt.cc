@@ -32,6 +32,9 @@ namespace SST::LargeStatChkpnt{
     // read the remainder of the parameters
     numStats = params.find<uint64_t>( "numStats", 1 );
     numClocks = params.find<uint64_t>( "numClocks", 1);
+    
+    output.verbose( CALL_INFO, 0, 0, "numStats=%" PRIu64 "\n", numStats );
+    output.verbose( CALL_INFO, 0, 0, "numClocks=%" PRIu64 "\n", numClocks );
 
     // initialize the statistics
     for( auto i = 0x00ull; i<numStats; i++ ){

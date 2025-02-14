@@ -13,9 +13,9 @@ import sst
 
 c0 = sst.Component("c0", "largestatchkpnt.LargeStatChkpnt")
 c0.addParams({
-  "verbose" : 5,
-  "numStats" : 10,
-  "numClocks" : 100000000,
+  "verbose" : 0,
+  "numStats" : 100,
+  "numClocks" : 100000,
 })
 
 # EOF

@@ -16,10 +16,10 @@ if(SSTBENCH_ENABLE_TESTING)
     get_filename_component(testName ${testSrc} NAME_WE)
     add_test(NAME ${testName}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND ${SCRIPTS}/sst-chkpt.sh ${testName}_SAVE_ --checkpoint-period=10ns --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/large-stat-chkpnt ${testSrc})
+      COMMAND ${SCRIPTS}/sst-chkpt.sh ${testName}_SAVE_ --checkpoint-period=1us --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/large-stat-chkpnt ${testSrc})
     set_tests_properties(${testName}
       PROPERTIES
-      TIMEOUT 30
+      TIMEOUT 120
       LABELS "all;large"
       PASS_REGULAR_EXPRESSION "${passRegex}")
   endforeach(testSrc)

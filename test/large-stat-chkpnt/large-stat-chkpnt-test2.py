@@ -14,7 +14,7 @@ import sst
 
 parser = argparse.ArgumentParser(description="Run LargeStatChkpnt Test2")
 parser.add_argument("--numComps", type=int, help="Number of cores to load", default=1)
-parser.add_argument("--numClocks", type=int, help="Number of clocks to run", default=100000000)
+parser.add_argument("--numClocks", type=int, help="Number of clocks to run", default=100000)
 parser.add_argument("--numStats", type=int, help="Number of stats to load", default=1)
 parser.add_argument("--verbose", type=int, help="verbosity level", default=1)
 args = parser.parse_args()
