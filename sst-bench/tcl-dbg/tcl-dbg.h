@@ -11,33 +11,27 @@
 #ifndef _SST_TCLDBG_H_
 #define _SST_TCLDBG_H_
 
+// clang-format off
 // -- Standard Headers
 #include <vector>
 #include <queue>
 #include <random>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
+// #include <inttypes.h>
 #include <time.h>
 #include <chrono>
 
 // -- SST Headers
-#include <sst/core/sst_config.h>
-#include <sst/core/component.h>
-#include <sst/core/event.h>
-#include <sst/core/interfaces/simpleNetwork.h>
-#include <sst/core/link.h>
-#include <sst/core/output.h>
-#include <sst/core/statapi/stataccumulator.h>
-#include <sst/core/subcomponent.h>
-#include <sst/core/timeConverter.h>
-#include <sst/core/model/element_python.h>
+#include "SST.h"
 #include <sst/core/rng/distrib.h>
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 
-// -- SST Dbg Headers
-#include <sst/dbg/SSTDebug.h>
+// -- SST Dbg Headers ( included in SST.h )
+//#include <sst/dbg/SSTDebug.h>
+
+// clang-format on
 
 namespace SST::TclDbg{
 

@@ -11,6 +11,7 @@
 #ifndef _SST_GRIDNODE_H_
 #define _SST_GRIDNODE_H_
 
+// clang-format off
 // -- Standard Headers
 #include <map>
 #include <vector>
@@ -18,23 +19,15 @@
 #include <random>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
+// #include <inttypes.h>
 #include <time.h>
 
 // -- SST Headers
-#include <sst/core/sst_config.h>
-#include <sst/core/component.h>
-#include <sst/core/event.h>
-#include <sst/core/interfaces/simpleNetwork.h>
-#include <sst/core/link.h>
-#include <sst/core/output.h>
-#include <sst/core/statapi/stataccumulator.h>
-#include <sst/core/subcomponent.h>
-#include <sst/core/timeConverter.h>
-#include <sst/core/model/element_python.h>
+#include "SST.h"
 #include <sst/core/rng/distrib.h>
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
+// clang-format on
 
 namespace SST::GridNode{
 
@@ -182,6 +175,10 @@ private:
   std::vector<unsigned> state;                    ///< internal data structure
   std::map< std::string, SST::RNG::Random* > rng; ///< per port mersenne twister objects
   SST::RNG::Random* localRNG = 0;                 ///< component local random number generator
+
+  // -- checkpoint debug
+  uint64_t cptBegin;
+  uint64_t cptEnd;
 
   // -- private methods
   /// event handler

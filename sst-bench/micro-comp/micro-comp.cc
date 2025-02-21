@@ -17,7 +17,7 @@ namespace SST::MicroComp{
   //------------------------------------------
   MicroComp::MicroComp(SST::ComponentId_t id, const SST::Params& params ) :
     SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr) {
-    const int Verbosity = params.find< int >( "verbose", 0 );
+    const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
     output.init(
       "MicroComp[" + getName() + ":@p:@t]: ",
       Verbosity, 0, SST::Output::STDOUT );
