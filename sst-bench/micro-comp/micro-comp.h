@@ -11,25 +11,18 @@
 #ifndef _SST_MICROCOMP_H_
 #define _SST_MICROCOMP_H_
 
+// clang-format off
 // -- Standard Headers
 #include <vector>
 #include <queue>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
+// #include <inttypes.h>
 #include <time.h>
 
 // -- SST Headers
-#include <sst/core/sst_config.h>
-#include <sst/core/component.h>
-#include <sst/core/event.h>
-#include <sst/core/interfaces/simpleNetwork.h>
-#include <sst/core/link.h>
-#include <sst/core/output.h>
-#include <sst/core/statapi/stataccumulator.h>
-#include <sst/core/subcomponent.h>
-#include <sst/core/timeConverter.h>
-#include <sst/core/model/element_python.h>
+#include "SST.h"
+// clang-format on
 
 namespace SST::MicroComp{
 
@@ -45,13 +38,13 @@ public:
   ~MicroComp();
 
   /// MicroComp: standard SST component 'setup' function
-  void setup();
+  void setup() override;
 
   /// MicroComp: standard SST component 'finish' function
-  void finish();
+  void finish() override;
 
   /// MicroComp: standard SST component init function
-  void init( unsigned int phase );
+  void init( unsigned int phase ) override;
 
   /// MicroComp: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );

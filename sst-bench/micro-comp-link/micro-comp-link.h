@@ -11,25 +11,18 @@
 #ifndef _SST_MICROCOMPLINK_H_
 #define _SST_MICROCOMPLINK_H_
 
+// clang-format off
 // -- Standard Headers
 #include <vector>
 #include <queue>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
+//#include <inttypes.h>
 #include <time.h>
 
 // -- SST Headers
-#include <sst/core/sst_config.h>
-#include <sst/core/component.h>
-#include <sst/core/event.h>
-#include <sst/core/interfaces/simpleNetwork.h>
-#include <sst/core/link.h>
-#include <sst/core/output.h>
-#include <sst/core/statapi/stataccumulator.h>
-#include <sst/core/subcomponent.h>
-#include <sst/core/timeConverter.h>
-#include <sst/core/model/element_python.h>
+#include "SST.h"
+// clang-format on
 
 namespace SST::MicroCompLink{
 
@@ -89,10 +82,10 @@ public:
   virtual void setMsgHandler( Event::HandlerBase* handler ) = 0;
 
   /// MicroCompLinkAPI: initializes the network
-  virtual void init( unsigned int phase ) = 0;
+  virtual void init( unsigned int phase ) override = 0;
 
   /// MicroCompLinkAPI: setup the network
-  virtual void setup() {}
+  virtual void setup() override {}
 
   /// MicroCompLinkAPI: send a message on the network
   virtual void send( nicEvent *ev, uint64_t dest ) = 0;
@@ -146,25 +139,25 @@ public:
   virtual ~MicroCompLinkNIC();
 
   /// MicroCompLinkNIC: callback to parent on received messages
-  virtual void setMsgHandler( Event::HandlerBase* handler );
+  virtual void setMsgHandler( Event::HandlerBase* handler ) override;
 
   /// MicroCompLinkNIC: init function
-  virtual void init( unsigned int phase );
+  virtual void init( unsigned int phase ) override;
 
   /// MicroCompLinkNIC: setup function
-  virtual void setup();
+  virtual void setup() override;
 
   /// MicroCompLinkNIC: send event to the destination id
-  virtual void send( nicEvent *ev, uint64_t dest );
+  virtual void send( nicEvent *ev, uint64_t dest ) override;
 
   /// MicroCompLinkNIC: retrieve the number of destinations
-  virtual unsigned getNumDestinations();
+  virtual unsigned getNumDestinations() override;
 
   /// MicroCompLinkNIC: get the endpoint's network address
-  virtual SST::Interfaces::SimpleNetwork::nid_t getAddress();
+  virtual SST::Interfaces::SimpleNetwork::nid_t getAddress() override;
 
   /// MicroCompLinkAPI: return the next possible network address (ring topology)
-  virtual uint64_t getNextAddress();
+  virtual uint64_t getNextAddress() override;
 
   /// MicroCompLinkNIC: clock function
   virtual bool clockTick( Cycle_t cycle );
@@ -203,13 +196,13 @@ public:
   ~MicroCompLink();
 
   /// MicroCompLink: standard SST component 'setup' function
-  void setup();
+  void setup() override;
 
   /// MicroCompLink: standard SST component 'finish' function
-  void finish();
+  void finish() override;
 
   /// MicroCompLink: standard SST component 'init' function
-  void init( unsigned int phase );
+  void init( unsigned int phase ) override;
 
   /// MicroCompLink: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );

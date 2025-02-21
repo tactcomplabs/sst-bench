@@ -19,7 +19,7 @@ Restore::Restore(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numBytes(0), clocks(1000){
 
-  const int Verbosity = params.find< int >( "verbose", 0 );
+  const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
   output.init(
     "Restore[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
@@ -30,7 +30,7 @@ Restore::Restore(SST::ComponentId_t id, const SST::Params& params ) :
   primaryComponentDoNotEndSim();
 
   // read the rest of the parameters
-  numBytes = params.find<SST::UnitAlgebra>("numBytes", "64KB").getRoundedValue();
+  numBytes = (uint64_t) params.find<SST::UnitAlgebra>("numBytes", "64KB").getRoundedValue();
   clocks = params.find<uint64_t>("clocks", 1000);
 
   // setup the rng

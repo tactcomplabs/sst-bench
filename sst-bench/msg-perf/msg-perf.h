@@ -11,25 +11,19 @@
 #ifndef _SST_MSGPERF_H_
 #define _SST_MSGPERF_H_
 
+// clang-format off
 // -- Standard Headers
 #include <vector>
 #include <queue>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
+//#include <inttypes.h>
 #include <time.h>
 
 // -- SST Headers
-#include <sst/core/sst_config.h>
-#include <sst/core/component.h>
-#include <sst/core/event.h>
-#include <sst/core/interfaces/simpleNetwork.h>
-#include <sst/core/link.h>
-#include <sst/core/output.h>
-#include <sst/core/statapi/stataccumulator.h>
-#include <sst/core/subcomponent.h>
-#include <sst/core/timeConverter.h>
-#include <sst/core/model/element_python.h>
+#include "SST.h"
+// clang-format on
+
 
 namespace SST::MsgPerf{
 
@@ -89,10 +83,10 @@ public:
   virtual void setMsgHandler( Event::HandlerBase* handler ) = 0;
 
   /// MsgPerfAPI: initializes the network
-  virtual void init( unsigned int phase ) = 0;
+  virtual void init( unsigned int phase ) override = 0;
 
   /// MsgPerfAPI: setup the network
-  virtual void setup() {}
+  virtual void setup() override {}
 
   /// MsgPerfAPI: send a message on the network
   virtual void send( nicEvent *ev, uint64_t dest ) = 0;
@@ -146,25 +140,25 @@ public:
   virtual ~MsgPerfNIC();
 
   /// MsgPerfNIC: callback to parent on received messages
-  virtual void setMsgHandler( Event::HandlerBase* handler );
+  virtual void setMsgHandler( Event::HandlerBase* handler ) override;
 
   /// MsgPerfNIC: init function
-  virtual void init( unsigned int phase );
+  virtual void init( unsigned int phase ) override;
 
   /// MsgPerfNIC: setup function
-  virtual void setup();
+  virtual void setup() override;
 
   /// MsgPerfNIC: send event to the destination id
-  virtual void send( nicEvent *ev, uint64_t dest );
+  virtual void send( nicEvent *ev, uint64_t dest ) override;
 
   /// MsgPerfNIC: retrieve the number of destinations
-  virtual unsigned getNumDestinations();
+  virtual unsigned getNumDestinations() override;
 
   /// MsgPerfNIC: get the endpoint's network address
-  virtual SST::Interfaces::SimpleNetwork::nid_t getAddress();
+  virtual SST::Interfaces::SimpleNetwork::nid_t getAddress() override;
 
   /// MsgPerfAPI: return the next possible network address (ring topology)
-  virtual uint64_t getNextAddress();
+  virtual uint64_t getNextAddress() override;
 
   /// MsgPerfNIC: clock function
   virtual bool clockTick( Cycle_t cycle );
@@ -205,13 +199,13 @@ public:
   ~MsgPerfCPU();
 
   /// MsgPerfCPU: standard SST component 'setup' function
-  void setup();
+  void setup() override;
 
   /// MsgPerfCPU: standard SST component 'finish' function
-  void finish();
+  void finish() override;
 
   /// MsgPerfCPU: standard SST component 'init' function
-  void init( unsigned int phase );
+  void init( unsigned int phase ) override;
 
   /// MsgPerfCPU: standard SST component clock function
   bool clockTick( SST::Cycle_t currentCycle );
