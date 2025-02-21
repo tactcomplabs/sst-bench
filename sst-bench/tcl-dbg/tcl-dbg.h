@@ -28,8 +28,14 @@
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 
-// -- SST Dbg Headers ( included in SST.h )
-//#include <sst/dbg/SSTDebug.h>
+// -- SST Dbg Headers
+// This file is copied into sst core include area from sst-dbg.
+// Fix these warnings if we decide to support sst-dbg.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#include <sst/dbg/SSTDebug.h>
+#pragma GCC diagnostic pop
 
 // clang-format on
 

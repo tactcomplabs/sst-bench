@@ -40,9 +40,6 @@
 #include <sst/core/subcomponent.h>
 #include <sst/core/timeConverter.h>
 #include <sst/core/model/element_python.h>
-// This include is copied into sst install directory from sst-dbg repo.
-// Only used when -DSSTBENCH_ENABLE_SSTDBG enabled with cmake
-#include <sst/dbg/SSTDebug.h>
 // clang-format on
 
 #pragma GCC diagnostic pop
