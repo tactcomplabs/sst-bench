@@ -11,33 +11,33 @@
 #ifndef _SST_TCLDBG_H_
 #define _SST_TCLDBG_H_
 
+// clang-format off
 // -- Standard Headers
 #include <vector>
 #include <queue>
 #include <random>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
+// #include <inttypes.h>
 #include <time.h>
 #include <chrono>
 
 // -- SST Headers
-#include <sst/core/sst_config.h>
-#include <sst/core/component.h>
-#include <sst/core/event.h>
-#include <sst/core/interfaces/simpleNetwork.h>
-#include <sst/core/link.h>
-#include <sst/core/output.h>
-#include <sst/core/statapi/stataccumulator.h>
-#include <sst/core/subcomponent.h>
-#include <sst/core/timeConverter.h>
-#include <sst/core/model/element_python.h>
+#include "SST.h"
 #include <sst/core/rng/distrib.h>
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 
 // -- SST Dbg Headers
+// This file is copied into sst core include area from sst-dbg.
+// Fix these warnings if we decide to support sst-dbg.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #include <sst/dbg/SSTDebug.h>
+#pragma GCC diagnostic pop
+
+// clang-format on
 
 namespace SST::TclDbg{
 

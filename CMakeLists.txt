@@ -14,7 +14,7 @@ endif()
 
 # Minimum required version of CMake and project information
 cmake_minimum_required(VERSION 3.19)
-project(sstdata CXX)
+project(sst-bench CXX)
 
 # Local scripts
 set(SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
@@ -49,10 +49,13 @@ execute_process(COMMAND sst-config --ELEMENT_CXXFLAGS
                 OUTPUT_VARIABLE SST_CXXFLAGS
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+set(CXXFLAGS "${SST_CXXFLAGS}  -fno-stack-protector")
 execute_process(COMMAND sst-config --ELEMENT_LDFLAGS
                 OUTPUT_VARIABLE SST_LDFLAGS
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+set(LDFLAGS "${SST_LDFLAGS}  -fno-stack-protector")
+
 execute_process(COMMAND sst-config SST_ELEMENT_LIBRARY SST_ELEMENT_LIBRARY_LIBDIR
                 OUTPUT_VARIABLE SST_ELEMENT_LIBRARY_LIBDIR
                 OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -70,24 +73,23 @@ message(STATUS "SST MAJOR VERSION=${SST_MAJOR_VERSION}")
 message(STATUS "SST MINOR VERSION=${SST_MINOR_VERSION}")
 
 #-- Compiler Options
-# Compiler Options
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  set(WERROR_FLAG "")
-  set(FP_MODE_FLAG "-ffp-model=strict")
-else()
+option(WERROR "Compile with warnings as errors" ON)
+if (WERROR)
   set(WERROR_FLAG "-Werror")
-  set(FP_MODE_FLAG "-frounding-math")
 endif()
 
-set(LDFLAGS "${SST_LDFLAGS}")
-set(CMAKE_CXX_FLAGS "-std=c++17 ${FP_MODE_FLAG} -O2 -Wall -Wextra ${WERROR_FLAG} -Wvla -Wuninitialized -Wfloat-conversion -Wdouble-promotion -Wno-unused-parameter -Wno-deprecated-declarations ${CMAKE_CXX_FLAGS} -I./ ${LDFLAGS}")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++17 ${FP_MODE_FLAG} -g -pg -O0 -Wall -Wextra ${WERROR_FLAG} -Wvla -Wuninitialized -Wfloat-conversion -Wdouble-promotion -Wno-unused-parameter -Wno-deprecated-declarations -I./ ${LDFLAGS}")
+# Compiler Options
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set(FP_MODE_FLAG "-ffp-model=strict -frounding-math -ftrapping-math")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-command-line-argument")
+  else()
+  set(FP_MODE_FLAG "-frounding-math -ftrapping-math")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-format-attribute -Wvolatile")
+endif()
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
-
-#-- SST-Bench Paths
-#set(SSTBENCH_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sstdata/include" CACHE PATH "SST-Data include path")
+set(CMAKE_CXX_FLAGS "-std=c++17 ${FP_MODE_FLAG} -O2 -Wall -Wextra -Wsuggest-override -Wmissing-noreturn -Wvla -Wuninitialized -Wdouble-promotion -Wsign-conversion -Wconversion -Wno-unused-parameter -Wno-deprecated-declarations -Wno-macro-redefined ${WERROR_FLAG} ${CMAKE_CXX_FLAGS} -I./ ${LDFLAGS} ${REVCPU_COMPILER_MACROS}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall ${REVCPU_COMPILER_MACROS}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall ${REVCPU_COMPILER_MACROS}")
 
 #---------------------------------------------
 # TARGET OPTIONS

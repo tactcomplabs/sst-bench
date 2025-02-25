@@ -18,7 +18,7 @@ namespace SST::MicroCompLink{
   MicroCompLinkNIC::MicroCompLinkNIC( SST::ComponentId_t id, SST::Params& params )
     : MicroCompLinkAPI(id, params){
 
-    int verbosity = params.find<int>("verbose", 0);
+    uint32_t verbosity = params.find<uint32_t>("verbose", 0);
     output.init(
       "MicroCompLinkNIC[" + getName() + ":@p:@t]: ",
       verbosity, 0, SST::Output::STDOUT );
@@ -141,14 +141,14 @@ namespace SST::MicroCompLink{
   void MicroCompLinkNIC::send(nicEvent *event, uint64_t destination){
     SST::Interfaces::SimpleNetwork::Request* req =
       new SST::Interfaces::SimpleNetwork::Request();
-    req->dest = destination;
+    req->dest = (SST::Interfaces::SimpleNetwork::nid_t) destination;
     req->src = iFace->getEndpointID();
     req->givePayload( event );
     sendQ.push(req);
   }
 
   unsigned MicroCompLinkNIC::getNumDestinations(){
-    return endPoints.size();
+    return (unsigned) endPoints.size();
   }
 
   SST::Interfaces::SimpleNetwork::nid_t MicroCompLinkNIC::getAddress(){
@@ -190,7 +190,7 @@ namespace SST::MicroCompLink{
     SST::Component( id ),
     timeConverter(nullptr), clockHandler(nullptr), Nic(nullptr){
 
-    const int Verbosity = params.find< int >( "verbose", 0 );
+    const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
     output.init(
       "MicroCompLink[" + getName() + ":@p:@t]: ",
       Verbosity, 0, SST::Output::STDOUT );
