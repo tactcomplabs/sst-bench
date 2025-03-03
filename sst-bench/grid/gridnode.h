@@ -19,7 +19,6 @@
 #include <random>
 #include <stdio.h>
 #include <stdlib.h>
-// #include <inttypes.h>
 #include <time.h>
 
 // -- SST Headers

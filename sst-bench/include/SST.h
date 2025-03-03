@@ -29,6 +29,7 @@
 #else
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #endif
 
 // The #include order is important, so we prevent clang-format from reordering
