@@ -64,11 +64,11 @@ void Restart::printStatus( Output& out ){
 
 void Restart::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SST_SER(clockHandler)
-  SST_SER(numBytes)
-  SST_SER(clocks)
-  SST_SER(baseSeed)
-  SST_SER(data)
+  SST_SER(clockHandler);
+  SST_SER(numBytes);
+  SST_SER(clocks);
+  SST_SER(baseSeed);
+  SST_SER(data);
 }
 
 bool Restart::clockTick( SST::Cycle_t currentCycle ){
