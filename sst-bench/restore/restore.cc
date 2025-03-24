@@ -66,11 +66,11 @@ void Restore::printStatus( Output& out ){
 
 void Restore::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SST_SER(clockHandler)
-  SST_SER(numBytes)
-  SST_SER(clocks)
-  SST_SER(mersenne)
-  SST_SER(data)
+  SST_SER(clockHandler);
+  SST_SER(numBytes);
+  SST_SER(clocks);
+  SST_SER(mersenne);
+  SST_SER(data);
 }
 
 bool Restore::clockTick( SST::Cycle_t currentCycle ){

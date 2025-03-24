@@ -57,10 +57,10 @@ namespace SST::LargeStatChkpnt{
 
   void LargeStatChkpnt::serialize_order(SST::Core::Serialization::serializer& ser){
     SST::Component::serialize_order(ser);
-    SST_SER(clockHandler)
-    SST_SER(numStats)
-    SST_SER(numClocks)
-    SST_SER(VStat)
+    SST_SER(clockHandler);
+    SST_SER(numStats);
+    SST_SER(numClocks);
+    SST_SER(VStat);
   }
 
   bool LargeStatChkpnt::clockTick( SST::Cycle_t currentCycle ){

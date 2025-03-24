@@ -134,27 +134,27 @@ void GridNode::printStatus( Output& out ){
 
 void GridNode::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SST_SER(cptBegin)
-  SST_SER(clockHandler)
-  SST_SER(numBytes)
-  SST_SER(numPorts)
-  SST_SER(minData)
-  SST_SER(maxData)
-  SST_SER(minDelay)
-  SST_SER(maxDelay)
-  SST_SER(clkDelay)
-  SST_SER(clocks)
-  SST_SER(rngSeed)
-  SST_SER(state)
-  SST_SER(curCycle)
-  SST_SER(portname)
-  SST_SER(rng)
-  SST_SER(localRNG)
-  SST_SER(linkHandlers)
-  SST_SER(demoBug)
-  SST_SER(dataMask)
-  SST_SER(dataMax)
-  SST_SER(cptEnd)
+  SST_SER(cptBegin);
+  SST_SER(clockHandler);
+  SST_SER(numBytes);
+  SST_SER(numPorts);
+  SST_SER(minData);
+  SST_SER(maxData);
+  SST_SER(minDelay);
+  SST_SER(maxDelay);
+  SST_SER(clkDelay);
+  SST_SER(clocks);
+  SST_SER(rngSeed);
+  SST_SER(state);
+  SST_SER(curCycle);
+  SST_SER(portname);
+  SST_SER(rng);
+  SST_SER(localRNG);
+  SST_SER(linkHandlers);
+  SST_SER(demoBug);
+  SST_SER(dataMask);
+  SST_SER(dataMax);
+  SST_SER(cptEnd);
 }
 
 void GridNode::handleEvent(SST::Event *ev){
