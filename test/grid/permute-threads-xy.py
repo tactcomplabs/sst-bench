@@ -25,6 +25,7 @@ def untimed_run(cmd, norun):
             sys.exit(1)
 
 if __name__ == '__main__':
+    print(' '.join(sys.argv))
     parser = argparse.ArgumentParser(
         prog='permute-threads-xy.py',
         description="run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions and thread count",

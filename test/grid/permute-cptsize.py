@@ -25,6 +25,7 @@ def untimed_run(cmd, norun):
             sys.exit(1)
 
 if __name__ == '__main__':
+    print(' '.join(sys.argv))
     parser = argparse.ArgumentParser(
         prog='permute-cptsize.py',
         description="run 2d grid checkpoint/restart testing, restart-all.py, sweeping component size",
@@ -43,6 +44,7 @@ if __name__ == '__main__':
     parser.add_argument("--maxData", type=int, help="Maximum number of dwords transmitted per link [256]", default=256)
     # parser.add_argument("--numBytes", type=int, help="Internal state size (4 byte increments) [16384]", default=16384)
     parser.add_argument("--pdf", action="store_true", help="generate network graph pdf [False]")
+    parser.add_argument("--schema", action="store_true", help="generate checkpoint schema (requires sst-core/schema branch) [False]")
     parser.add_argument("--simPeriod", type=int, help="time in ns between checkpoints. 0 disables. [0]", default=0)
     parser.add_argument("--wallPeriod", type=str, help="time %%H:%%M:%%S between checkpoints. 0 disables. [None]", default=None)
     parser.add_argument("--ranks", type=int, help="specify number of mpi ranks [1]", default=1)
@@ -60,6 +62,10 @@ if __name__ == '__main__':
     else:
         periodOpts = f"--simPeriod={args.simPeriod}"
 
+    schema = ""
+    if args.schema == True:
+        schema = "--schema"
+
     if args.maxBytes < args.minBytes:
         print(f"maxBytes {args.maxBytes} must be greater than minBytes {args.minBytes}")
         sys.exit(1)
@@ -72,6 +78,7 @@ if __name__ == '__main__':
     for bytes in range(args.minBytes, args.maxBytes, stepSize):
         c = f"./restart-all.py --x={args.x} --y={args.y}"
         c = f"{c} --threads={args.threads} --ranks={args.ranks}"
+        c = f"{c} {schema}"
         c = f"{c} --clocks={args.clocks} {periodOpts}"
         c = f"{c} --minDelay={args.minDelay} --maxDelay={args.maxDelay}"
         c = f"{c} --minData={args.minData} --maxData={args.maxData} --numBytes={bytes}"

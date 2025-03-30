@@ -179,7 +179,7 @@ Run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions 
     rm -f restart.db
 
     # preview simulation run commands
-    /permute-threads-xy.py --maxrows=1 --maxcols=4 --maxthreads=3 --clocks=100000 --simPeriod=10000 --norun
+    ./permute-threads-xy.py --maxrows=1 --maxcols=4 --maxthreads=3 --clocks=100000 --simPeriod=10000 --norun
 
         ####
         ./restart-all.py --x=2 --y=1 --threads=2 --clocks=100000 --simPeriod=10000 --minDelay=50 --maxDelay=100 --minData=10 --maxData=256 --numBytes=16384 --rngSeed=1223 --verbose=1  --db=restart-all.db --prune
