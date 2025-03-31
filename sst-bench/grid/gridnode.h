@@ -11,7 +11,6 @@
 #ifndef _SST_GRIDNODE_H_
 #define _SST_GRIDNODE_H_
 
-// clang-format off
 // -- Standard Headers
 #include <map>
 #include <vector>
@@ -20,13 +19,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <iomanip>
 
+// clang-format off
 // -- SST Headers
 #include "SST.h"
 #include <sst/core/rng/distrib.h>
 #include <sst/core/rng/rng.h>
 #include <sst/core/rng/mersenne.h>
 // clang-format on
+
+// TUT selection must be static until sst-core/generalize-serialization PR merged
+#define TUT uint32_t
+// These require Lee generate-schema PR
+// #define TUT StructUint8x4
+// #define TUT VecUint8x4
 
 namespace SST::GridNode{
 
@@ -62,9 +69,179 @@ private:
 };  // class GridNodeEvent
 
 // -------------------------------------------------------
+// GridState
+// -------------------------------------------------------
+template <typename T>
+class GridState : public SST::Core::Serialization::serializable {
+private:
+  std::vector<T> state;
+public:
+  GridState(std::vector<T> data) : state(data) {}
+  void push_back(T d) { state.push_back(d); }
+  size_t size() { return state.size(); }
+  class Iterator {
+    private:
+      typename std::vector<T>::iterator it;
+    public:
+      Iterator(typename std::vector<T>::iterator it) : it(it) {}
+      T& operator*() { return *it;}
+      Iterator& operator++() { ++it; return *this;}
+      bool operator!=(const Iterator& other) const { return it != other.it; }
+  }; // class Iterator
+  Iterator begin() { return Iterator(state.begin()); }
+  Iterator end() { return Iterator(state.end()); }
+  // serialization
+  GridState() {};
+  void serialize_order(SST::Core::Serialization::serializer& ser) override {
+    SST_SER(state);
+  }
+  // This has public and private sections. Put last!                                                                                                         
+  ImplementSerializable(SST::GridNode::GridState<T>);
+}; // class GridState
+
+// ----------------------------------------------------------
+// StructUint8x4: Same size as uint32_t but using 4 elements
+// ----------------------------------------------------------
+struct StructUint8x4 final : public SST::Core::Serialization::serializable {
+  uint8_t a;
+  uint8_t b;
+  uint8_t c;
+  uint8_t d;
+  StructUint8x4(uint64_t n) {
+    a = uint8_t(n);
+    b = uint8_t(n);
+    c = uint8_t(n);
+    d = uint8_t(n);
+  }
+  // operator overloading
+  StructUint8x4 operator++(int) {
+    StructUint8x4 old = *this;
+    a++; b++; c++; d++;
+    return old;
+  }
+  StructUint8x4 operator+=(const StructUint8x4& rhs) {
+    a += rhs.a;
+    b += rhs.b;
+    c += rhs.c;
+    d += rhs.d;
+    return *this;
+  }
+  friend StructUint8x4 operator+(StructUint8x4 lhs, const uint32_t& rhs) {
+    lhs.a += uint8_t(rhs);
+    lhs.b += uint8_t(rhs);
+    lhs.c += uint8_t(rhs);
+    lhs.d += uint8_t(rhs);
+    return lhs;
+  }
+  inline bool operator==(const StructUint8x4& rhs) {
+    bool ea = (a==rhs.a);
+    bool eb = (b==rhs.b);
+    bool ec = (c==rhs.c);
+    bool ed = (d==rhs.d);
+    return ea && eb && ec && ed;
+  }
+  inline bool operator!=(const StructUint8x4& rhs) {
+    return !(*this == rhs);
+  }
+  // special scalar compare
+  inline bool operator==(const uint32_t& rhs) {
+    uint8_t e = uint8_t(rhs);
+    bool ea = (a==e);
+    bool eb = (b==e);
+    bool ec = (c==e);
+    bool ed = (d==e);
+    return ea && eb && ec && ed;
+  }
+  inline bool operator!=(const uint32_t& rhs) {
+    return !(*this == rhs);
+  }
+
+  // serialization
+  StructUint8x4() {};
+  void serialize_order(SST::Core::Serialization::serializer& ser) override {
+    SST_SER(a);
+    SST_SER(b);
+    SST_SER(c);
+    SST_SER(d);
+  };
+  // This has public and private sections. Put last!
+  ImplementSerializable(SST::GridNode::StructUint8x4) ;
+}; // struct StructUint8x4
+
+// StructUint8x4 ostream overload
+std::ostream& operator<<(std::ostream& os, const StructUint8x4& obj) {
+  os << std::hex << std::setfill('0') << std::setw(2) << "{ 0x*" << (uint16_t)obj.a << ",0x*" << (uint16_t)obj.b << ",0x*" << (uint16_t)obj.c << ",0x*" << (uint16_t)obj.d << "}";
+  return os;
+}
+
+// -------------------------------------------------------------
+// VecUint8x4: Same size as uint32_t but using 4 vector elements
+// -------------------------------------------------------------
+struct VecUint8x4 final : public SST::Core::Serialization::serializable {
+  std::vector<uint8_t> vec4 = {0,0,0,0};
+  VecUint8x4(uint64_t n) {
+    vec4.resize(4);
+    for (size_t i=0;i<4;i++)
+      vec4[i] = uint8_t(n);
+  }
+  // operator overloading
+  VecUint8x4 operator++(int) {
+    VecUint8x4 old = *this;
+    for (size_t i=0;i<4;i++)
+      vec4[i]++;
+    return old;
+  }
+  VecUint8x4 operator+=(const VecUint8x4& rhs) {
+    for (size_t i=0;i<4;i++)
+      vec4[i] += rhs.vec4[i];
+    return *this;
+  }
+  friend VecUint8x4 operator+(VecUint8x4 lhs, const uint32_t& rhs) {
+    for (size_t i=0;i<4;i++)
+      lhs.vec4[i] += uint8_t(rhs);
+    return lhs;
+  }
+  inline bool operator==(const VecUint8x4& rhs) {
+    bool res = true;
+    for (size_t i=0;i<4;i++)
+      res &= (vec4[i]==rhs.vec4[i]);
+    return res;
+  }
+  inline bool operator!=(const VecUint8x4& rhs) {
+    return !(*this == rhs);
+  }
+  // special scalar compare
+  inline bool operator==(const uint32_t& rhs) {
+    bool res = true;
+    uint8_t e = uint8_t(rhs);
+    for (size_t i=0;i<4;i++)
+      res &= (vec4[i]==e);
+    return res;
+  }
+  inline bool operator!=(const uint32_t& rhs) {
+    return !(*this == rhs);
+  }
+
+  // serialization
+  VecUint8x4() {};
+  void serialize_order(SST::Core::Serialization::serializer& ser) override {
+    SST_SER(vec4);
+  };
+  // This has public and private sections. Put last!
+  ImplementSerializable(SST::GridNode::VecUint8x4) ;
+}; // struct VecUint8x4
+
+// VecUint8x4 ostream overload
+std::ostream& operator<<(std::ostream& os, const VecUint8x4& obj) {
+  os << std::hex << std::setfill('0') << std::setw(2) << "{ 0x*" << (uint16_t)obj.vec4[0] << ",0x*" << (uint16_t)obj.vec4[1] << ",0x*" << (uint16_t)obj.vec4[2] << ",0x*" << (uint16_t)obj.vec4[3] << "}";
+  return os;
+}
+
+
+// -------------------------------------------------------
 // GridNode
 // -------------------------------------------------------
-class GridNode : public SST::Component{
+class GridNode final : public SST::Component{
 public:
   /// GridNode: top-level SST component constructor
   GridNode( SST::ComponentId_t id, const SST::Params& params );
@@ -171,13 +348,15 @@ private:
   uint64_t clkDelay = 0;                          ///< current clock delay
   std::vector<std::string> portname;              ///< port 0 to numPorts names
   std::vector<SST::Link *> linkHandlers;          ///< LinkHandler objects
-  std::vector<unsigned> state;                    ///< internal data structure
+  GridState<TUT> state;                           ///< internal data structure
   std::map< std::string, SST::RNG::Random* > rng; ///< per port mersenne twister objects
   SST::RNG::Random* localRNG = 0;                 ///< component local random number generator
 
   // -- checkpoint debug
   uint64_t cptBegin;
   uint64_t cptEnd;
+  uint64_t stateBegin;
+  uint64_t stateEnd;
 
   // -- private methods
   /// event handler

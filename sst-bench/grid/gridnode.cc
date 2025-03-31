@@ -9,6 +9,7 @@
 //
 
 #include "gridnode.h"
+// #include "tcldbg.h"
 
 namespace SST::GridNode{
 
@@ -20,6 +21,8 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   numPorts(8), minData(10), maxData(256), minDelay(20), maxDelay(100), clocks(1000),
   curCycle(0), demoBug(0), dataMask(0x1ffffff), dataMax(0x1ffffff) {
   
+  // tcldbg::spinner("GRID_SPINNER", id==0);
+
   uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
   output.init(
     "GridNode[" + getName() + ":@p:@t]: ",
@@ -46,9 +49,10 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   dataMax += demoBug;
   
   // Checkpoint markers
-
-  cptBegin = 0xffb0000000000000UL | (id&0xffffffff)<<16 | 0xb1ffUL;
-  cptEnd = 0xffe0000000000000UL | (id&0xffffffff)<<16 | 0xe1ffUL;
+  cptBegin   = 0xffb0000000000000UL | (id&0xffffffff)<<16 | 0xb1ffUL;
+  cptEnd     = 0xffe0000000000000UL | (id&0xffffffff)<<16 | 0xe1ffUL;
+  stateBegin = 0xeeb0000000000000UL | (id&0xffffffff)<<16 | 0xb1eeUL;
+  stateEnd   = 0xeee0000000000000UL | (id&0xffffffff)<<16 | 0xe1eeUL;
   
   output.verbose(CALL_INFO, 1, 0, 
     "Checkpoint markers for component id %" PRId64 " = [ 0x%" PRIx64 " 0x%" PRIx64 " ]\n",
@@ -124,7 +128,7 @@ void GridNode::init( unsigned int phase ){
                    "%s: initializing internal data at init phase=0\n",
                    getName().c_str());
     for( uint64_t i = 0; i < (numBytes/4ull); i++ ){
-      state.push_back( (unsigned)(i) + rngSeed );
+      state.push_back( (uint32_t)(i) + rngSeed );
     }
   }
 }
@@ -145,7 +149,9 @@ void GridNode::serialize_order(SST::Core::Serialization::serializer& ser){
   SST_SER(clkDelay);
   SST_SER(clocks);
   SST_SER(rngSeed);
+  SST_SER(stateBegin);
   SST_SER(state);
+  SST_SER(stateEnd);
   SST_SER(curCycle);
   SST_SER(portname);
   SST_SER(rng);
@@ -259,17 +265,21 @@ unsigned GridNode::neighbor(unsigned n)
 }
 
 bool GridNode::clockTick( SST::Cycle_t currentCycle ){
-
   // sanity check the array
-  for( uint64_t i = 0; i < (numBytes/4ull); i++ ){
-    if( state[i] != ((unsigned)(i) + rngSeed) ){
+  assert(state.size() == numBytes/4ull);
+  uint64_t i=0;
+  for (auto it=state.begin(); it != state.end(); ++it ) {
+    unsigned expected = (unsigned)(i) + rngSeed;
+    if ( *it != expected ){
       // found a mismatch
+      std::stringstream s;
+      s << *it;
       output.fatal( CALL_INFO, -1,
-                    "Error : found a mismatch data element: element %" PRIu64 " was %d and should have been %d\n",
-                    i, state[i], ((unsigned)(i) + rngSeed));
+                    "Error : found a mismatch data element: element %" PRIu64 " was %s compared with scalar 0x%" PRIx32 "\n",
+                    i, s.str().c_str(), expected );
     }
+    i++;
   }
-
   // check to see whether we need to send data over the links
   curCycle++;
   if( curCycle >= clkDelay ){

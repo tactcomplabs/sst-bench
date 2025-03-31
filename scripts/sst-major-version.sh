@@ -8,6 +8,8 @@
 ver=$(sst --version | awk '{print $3}' | tr -d '()')
 if [ "$ver" == "-dev" ]; then
     echo 99
+elif [ "$ver" == "-dev-schema" ]; then
+    echo 100
 else
     echo $ver | awk '{split($0,a,"."); print a[1]}'
 fi
