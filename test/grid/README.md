@@ -4,6 +4,8 @@
 
 Grid simulation profiling provides a flexible method to quickly generate large networks that generate and transmit randomized data across adjacent links at random time intervals. Additionally, the transmitted data is unique per link and checked at the reciever. Thus, we provide both functional and performance verification for complex sst simulations.
 
+The scripts provide automation for running SST simulations using OpenMPI directly or on Slurm enabled systems. When invoking mpirun directly the simulations can also utlize SST threading options.  When launching Slurm batch scripts only MPI ranks are supported.
+
 ## SST Configuration
 The grid configuration shown below and its sst test driver is defined in the file '2d.py'
 
@@ -36,9 +38,11 @@ The grid configuration shown below and its sst test driver is defined in the fil
 
 ## Simulation Profiling Automation Scripts
 
-Several Python and SQLite3 scripts are provide to sweep parameters for network size, component size, thread count, and x/y dimensions. Data captured during simulation include checkpoint file sizes, checkpoint save times, checkpoint load times, and simulation times. All data is appended to a SQLite3 database file, restart.db, and postprocessed by sqlite3 scripts to generate comma separated report files.
+### Direct MPI Execution
 
-### restart-all.py
+The scripts described in this section directly invoke mpirun. The Python and SQLite3 scripts are provide to sweep parameters for network size, component size, thread count, and x/y dimensions. Data captured during simulation include checkpoint file sizes, checkpoint save times, checkpoint load times, and simulation times. All data is appended to a SQLite3 database file, restart.db, and postprocessed by sqlite3 scripts to generate comma separated report files.
+
+#### restart-all.py
 
 Run a single 2d grid checkpoint/restart test.
 
@@ -66,7 +70,7 @@ Run a single 2d grid checkpoint/restart test.
 
     Results will be appended to to sqlite3 database file, restart.db
 
-### permute-cptsize.py
+#### permute-cptsize.py
 
 Run 2d grid checkpoint/restart testing, restart-all.py, sweeping component size
 
@@ -100,7 +104,7 @@ Run 2d grid checkpoint/restart testing, restart-all.py, sweeping component size
 
     Results will be appended to to sqlite3 database file, restart.db
 
-### permute-threads-xy.py
+#### permute-threads-xy.py
 
 Run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions and thread count
 
@@ -133,7 +137,7 @@ Run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions 
 
     Results will be appended to to sqlite3 database file, restart.db
 
-### cptsizes.sql
+#### cptsizes.sql
 
     Usage:
         sqlite3 restart-all.db < cptsizes.sql
@@ -145,7 +149,7 @@ Run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions 
     Keys:
         simid
 
-### times.sql
+#### times.sql
 
     times.sql
 
@@ -160,7 +164,7 @@ Run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions 
     Keys:
         simid
 
-### genrpt.sql
+#### genrpt.sql
 
     Usage:
         sqlite3 restart-all.db < genrpt.sql
@@ -173,7 +177,7 @@ Run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions 
     Keys:
         simid
 
-## Example
+#### Example
 
     # clear out database file (records are appended)
     rm -f restart.db
@@ -211,4 +215,197 @@ Run 2d grid checkpoint/restart testing, restart-all.py, sweeping x,y dimensions 
     # Query the database interactively
     sqlite3 restart-all.db
 
+### Slurm Automation Scripts
+
+This section describes automation analogous to the previous section but is built on Slurm batch scripts.
+
+All scripts are located under the `slurm` directory.
+
+All scripts have only been tested on TCL's `gizmo` cluster.
+
+All jobs output files are located on the scratch disk partion here:
+```/scratch/${USER}/jobs/${SLURM_JOB_NAME}/${SLURM_JOB_ID}```
+
+#### Slurm Sanity Checks
+
+Two bash scripts are provided to help check the basic functionality of the Slurm pipelines used in the more complex Python scripts. 
+
+
+
+##### slurm-check.sh
+
+This script performs a baseline SST simulation and a simulation with checkpoint enabled. Once these are finished, jobs are submitted to load and run each generated checkpoint.
+
+```
+Usage: ./slurm-check.sh
+```
+
+##### slurm-cpt.sh
+
+This script allows experimentation with generating checkpoints by varying the number of compute nodes and ranks.
+
+```
+Usage: slurm-cpt.sh -N nodes -n ranks
+```
+
+The number of components will be 2 times the number of ranks specified.
+
+#### Parameter Sweep Scripts
+
+##### submit-restart-all.py
+
+This script provides a rich set of controls for submitting SST simulations on Slurm. The pipeline is similar to that in `slurm-check.sh`.
+
+- Baseline simulation with no checkpointing
+- Simulation with checkpointing enabled
+- Simulations to load and continue simulation for all generated checkpoints
+
+
+```
+usage: submit-restart-all.py [-h] [--clocks CLOCKS] [--db DB] [--minDelay MINDELAY] [--maxDelay MAXDELAY]
+                             [--minData MINDATA] [--maxData MAXDATA] [--numBytes NUMBYTES] [--prune]
+                             [--rngSeed RNGSEED] [--verbose VERBOSE] [--x X] [--y Y] [--pdf] [--schema]
+                             (--simPeriod SIMPERIOD | --wallPeriod WALLPERIOD) [--ranks RANKS]
+                             [--cpusPerNode CPUSPERNODE] [--maxNodes MAXNODES] [--jobName JOBNAME] [--noWait]
+
+submit 2d grid checkpoint/restart tests to slurm
+
+options:
+  -h, --help            show this help message and exit
+  --clocks CLOCKS       number of clocks to run sim [10000]
+  --db DB               sqlite database file [restart-all.db]
+  --minDelay MINDELAY   min number of clocks between transmissions [50]
+  --maxDelay MAXDELAY   max number of clocks between transmissions [100]
+  --minData MINDATA     Minimum number of dwords transmitted per link [10]
+  --maxData MAXDATA     Maximum number of dwords transmitted per link [256]
+  --numBytes NUMBYTES   Internal state size (4 byte increments) [16384]
+  --prune               remove check checkpoint data files when done
+  --rngSeed RNGSEED     seed for random number generator [1223]
+  --verbose VERBOSE     sst verbosity level [1]
+  --x X                 number of horizonal components [2]
+  --y Y                 number of vertical components [1]
+  --pdf                 generate network graph pdf
+  --schema              generate checkpoint schema (requires sst-core/schema branch)
+  --simPeriod SIMPERIOD
+                        time in ns between checkpoints
+  --wallPeriod WALLPERIOD
+                        (NOT YET SUPPORTED) time in SECONDS between checkpoints. Mutually exclusive with
+                        simPeriod
+  --noWait              do not wait for jobs to complete [True]
+
+sbatch:
+  --ranks RANKS         specify number of mpi ranks [1]
+  --cpusPerNode CPUSPERNODE
+                        number of processors per node [80]
+  --maxNodes MAXNODES   maximum allowable number of nodes [30]
+  --jobName JOBNAME     sbatch jobname [CPTRST.<datetime>]
+```
+##### Example run
+
+```
+$ ./submit-restart-all.py --simPeriod 2000 --x=100 --y=10 --ranks=100
+```
+
+The output provides information on job submissions
+```
+$ ./submit-restart-all.py --simPeriod 2000 --x=100 --y=10 --ranks=100
+./submit-restart-all.py --simPeriod 2000 --x=100 --y=10 --ranks=100
+	 clocks  =  10000
+	 db  =  restart-all.db
+	 minDelay  =  50
+	 maxDelay  =  100
+	 minData  =  10
+	 maxData  =  256
+	 numBytes  =  16384
+	 prune  =  False
+	 rngSeed  =  1223
+	 verbose  =  0
+	 x  =  100
+	 y  =  10
+	 pdf  =  False
+	 schema  =  False
+	 simPeriod  =  2000
+	 wallPeriod  =  None
+	 ranks  =  100
+	 cpusPerNode  =  80
+	 maxNodes  =  30
+	 jobName  =  CPTRST
+	 noWait  =  False
+[submit-restart-all.py] sbatch --parsable -J CPTRST.250404153025 -N 2 -n 100 grid.slurm  -- --verbose=0 --x=100 --y=10 --clocks=10000 --numBytes=16384 --minData=10 --maxData=256 --minDelay=50 --maxDelay=100
+[submit-restart-all.py] Submitted JobID: 4347
+[submit-restart-all.py] sbatch --parsable -J CPTRST.250404153025 -N 2 -n 100 grid.slurm  --checkpoint-prefix=_cpt_x100y10r100t1c10000sp2000d10_256_50_100_16384_1223 --checkpoint-sim-period=2000ns --checkpoint-name-format=%n_%t/grid -- --verbose=0 --x=100 --y=10 --clocks=10000 --numBytes=16384 --minData=10 --maxData=256 --minDelay=50 --maxDelay=100
+[submit-restart-all.py] Submitted JobID: 4348
+[submit-restart-all.py] sbatch --dependency=afterok:4348 --parsable -J CPTRST.250404153025 -N 2 -n 100 grid.slurm --load-checkpoint ../4348/_cpt_x100y10r100t1c10000sp2000d10_256_50_100_16384_1223/1_2000000/grid.sstcpt
+[submit-restart-all.py] Submitted JobID: 4349
+[submit-restart-all.py] sbatch --dependency=afterok:4348 --parsable -J CPTRST.250404153025 -N 2 -n 100 grid.slurm --load-checkpoint ../4348/_cpt_x100y10r100t1c10000sp2000d10_256_50_100_16384_1223/2_4000000/grid.sstcpt
+[submit-restart-all.py] Submitted JobID: 4350
+[submit-restart-all.py] sbatch --dependency=afterok:4348 --parsable -J CPTRST.250404153025 -N 2 -n 100 grid.slurm --load-checkpoint ../4348/_cpt_x100y10r100t1c10000sp2000d10_256_50_100_16384_1223/3_6000000/grid.sstcpt
+[submit-restart-all.py] Submitted JobID: 4351
+[submit-restart-all.py] sbatch --dependency=afterok:4348 --parsable -J CPTRST.250404153025 -N 2 -n 100 grid.slurm --load-checkpoint ../4348/_cpt_x100y10r100t1c10000sp2000d10_256_50_100_16384_1223/4_8000000/grid.sstcpt
+[submit-restart-all.py] Submitted JobID: 4352
+[submit-restart-all.py] sbatch --dependency=afterok:4348 --parsable -J CPTRST.250404153025 -N 2 -n 100 grid.slurm --load-checkpoint ../4348/_cpt_x100y10r100t1c10000sp2000d10_256_50_100_16384_1223/5_10000000/grid.sstcpt
+[submit-restart-all.py] Submitted JobID: 4353
+[submit-restart-all.py] Waiting on jobs for CPTRST.250404153025 to complete...
+[submit-restart-all.py] Monitor jobs using: sacct -X --name=CPTRST.250404153025
+[submit-restart-all.py] sbatch --dependency=singleton --job-name=CPTRST.250404153025 --wait completion.slurm
+[submit-restart-all.py] Submitted JobID: Submitted batch job 4354
+[submit-restart-all.py] Completed normally
+```
+
+Review the files on the `/scratch` disk:
+
+```
+$ cd /scratch/$USER/jobs
+$ tree .
+
+.
+└── CPTRST.250404153025
+    ├── 4347  ### This is the baseline simulation
+    │   └── log
+    ├── 4348  ### This is the checkpointing simulation
+    │   ├── _cpt_x100y10r100t1c10000sp2000d10_256_50_100_16384_1223
+    │   │   ├── 1_2000000
+    │   │   │   ├── grid_0_0.bin
+    │   │   │   ├── grid_10_0.bin
+    │   │   │   ├── grid_1_0.bin
+    │   │   │   ├── grid_11_0.bin
+    │   │   │   ├── grid_12_0.bin
+    |   |   |   |< ... rest of checkpoint files for 100 ranks >
+    |   |   ├── 2_4000000
+    |   |   |   |< ... checkpoint files>
+    |   |   ├── 3_6000000
+    |   |   |   |< ... checkpoint files>
+    |   |   |-- 4_8000000
+    |   |   |   |< ... checkpoint files>
+    |   |   |-- 5_10000000 
+    |   |   |   |< ... checkpoint files>
+    │   └── log
+    ├── 4349 ### This restarts checkpoint 1_2000000
+    │   └── log
+    ├── 4350 ### This restarts checkpoint 2_4000000
+    │   └── log
+    ├── 4351 ### This restarts checkpoint 4_6000000
+    │   └── log
+    ├── 4352 ### This restarts checkpoint 6_8000000
+    │   └── log
+    └── 4353 ### This restarts checkpoint 8_10000000
+        └── log
+```
+
+To monitor job statistics
+```
+$ sacct -X --name=CPTRST.250404153025
+
+sacct -X --name=CPTRST.250404153025 --format="JobId,NCPUS,Elapsed"
+JobID             NCPUS    Elapsed 
+------------ ---------- ---------- 
+4347                160   00:00:09  ### base simulation
+4348                160   00:00:12  ### checkpoint simulation
+4349                160   00:00:10  ### restart from checkpoint
+4350                160   00:00:08  ### restart from checkpoint 
+4351                160   00:00:09  ### restart from checkpoint
+4352                160   00:00:08  ### restart from checkpoint 
+4353                160   00:00:09  ### restart from checkpoint 
+4354                 80   00:00:00  ### job completion (NOP)
+```
 

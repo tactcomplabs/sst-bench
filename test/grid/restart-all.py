@@ -129,7 +129,13 @@ if __name__ == '__main__':
         shutil.rmtree(pfx)
 
     cptopts = f"--checkpoint-prefix={pfx} {periodOpts}"
-    sstopts = f"--add-lib-path=../../sst-bench/grid"
+
+
+
+    # Invoked scripts and libraries locations are relative to the location of this script
+    SCRIPTDIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+    sstopts = f"--add-lib-path={SCRIPTDIR}/../../sst-bench/grid"
 
     # grid component parameters
     #  verbose: Sets the verbosity level of output  [0]
@@ -165,10 +171,11 @@ if __name__ == '__main__':
     db = sqldb(args, pfx)
 
     # Baseline 
-    cmd=f"{mpiopts} sst {sstopts} {dotopts} {schema} {threadopts} 2d.py -- {progopts}"
+    cmd=f"{mpiopts} sst {sstopts} {dotopts} {schema} {threadopts} {SCRIPTDIR}/2d.py -- {progopts}"
     db.base_run(cmd)
 
-    cmd=f"{mpiopts} sst  {cptopts} {sstopts} {dotopts} {schema} {threadopts} 2d.py -- {progopts}"
+    # Checkpointing run
+    cmd=f"{mpiopts} sst  {cptopts} {sstopts} {dotopts} {schema} {threadopts} {SCRIPTDIR}/2d.py -- {progopts}"
     db.cpt_run(cmd)
 
     if args.pdf == True:
