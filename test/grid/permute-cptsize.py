@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # These are restart-all.py arguments
     parser.add_argument("--clocks", type=int, help="number of clocks to run sim [10000]", default=10000)
     parser.add_argument("--db", type=str, help="sqlite database file [restart-all.db]", default="restart-all.db")
-    # parser.add_argument("--prune", action="store_true", help="remove check checkpoint data files when done [False]")
+    parser.add_argument("--prune", action="store_true", help="remove check checkpoint data files when done [False]")
     parser.add_argument("--minDelay", type=int, help="min number of clocks between transmissions [50]", default=50)
     parser.add_argument("--maxDelay", type=int, help="max number of clocks between transmissions [100]", default=100)
     parser.add_argument("--minData", type=int, help="Minimum number of dwords transmitted per link [10]", default=10)
@@ -66,6 +66,10 @@ if __name__ == '__main__':
     if args.schema == True:
         schema = "--schema"
 
+    prune = ""
+    if args.prune == True:
+        prune = "--prune"
+
     if args.maxBytes < args.minBytes:
         print(f"maxBytes {args.maxBytes} must be greater than minBytes {args.minBytes}")
         sys.exit(1)
@@ -74,16 +78,19 @@ if __name__ == '__main__':
     if stepSize == 0:
         stepSize = 1;
 
+    # Invoked script is located in same directory as this script
+    SCRIPTDIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+
     numSims = 0
     for bytes in range(args.minBytes, args.maxBytes, stepSize):
-        c = f"./restart-all.py --x={args.x} --y={args.y}"
+        c = f"{SCRIPTDIR}/restart-all.py --x={args.x} --y={args.y}"
         c = f"{c} --threads={args.threads} --ranks={args.ranks}"
         c = f"{c} {schema}"
         c = f"{c} --clocks={args.clocks} {periodOpts}"
         c = f"{c} --minDelay={args.minDelay} --maxDelay={args.maxDelay}"
         c = f"{c} --minData={args.minData} --maxData={args.maxData} --numBytes={bytes}"
         c = f"{c} --rngSeed={args.rngSeed}"
-        c = f"{c} --verbose={args.verbose}  --db={args.db} --prune"
+        c = f"{c} --verbose={args.verbose}  --db={args.db} {prune}"
         untimed_run(c, args.norun)
         numSims = numSims + 1
 
