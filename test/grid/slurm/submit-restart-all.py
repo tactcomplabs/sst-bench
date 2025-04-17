@@ -54,6 +54,7 @@ if __name__ == '__main__':
     parser.add_argument("--y", type=int, help="number of vertical components [1]", default=1)
     parser.add_argument("--pdf", action="store_true", help="generate network graph pdf")
     parser.add_argument("--schema", action="store_true", help="generate checkpoint schema (requires sst-core/schema branch)")
+    parser.add_argument("--sstTimingInfoJSON", action="store_true", help="enable sst experimental option --timing-info-json")
 
     simgroup = parser.add_mutually_exclusive_group(required=True)
     simgroup.add_argument("--simPeriod", type=int, help="time in ns between checkpoints", default=0)
@@ -125,7 +126,10 @@ if __name__ == '__main__':
 
     if args.schema == True:
         sstopts += " --gen-checkpoint-schema"
-        
+    
+    if args.sstTimingInfoJSON == True:
+        sstopts += " --timing-info-json"
+
     threadopts=""
     # if args.threads>1:
     #     sstopts += f" -n {args.threads}"

@@ -12,8 +12,8 @@
 
 # gizmo
 #  72 nodes
-#  40 physical cores per nodes
-#  72x40 = 2880 Ranks
+#  40 physical cores per nodes, 80 processes per node
+#  72x40 = 2880 Ranks ( or 5760 using 80 )
 #  Big nodes have a TByte
 
 # NFS (home directory) is 10GbE shared
