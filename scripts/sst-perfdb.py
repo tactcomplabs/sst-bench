@@ -26,13 +26,14 @@ from datetime import datetime
 from enum import Enum
 # from time import sleep
 
-# globals
+# global defaults
 g_pfx = "[sst-perfdb.py]"
 g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
 g_sdl = os.path.abspath(f"{g_scripts}/../test/grid/2d.py")
 g_slurm_script = os.path.abspath(f"{g_scripts}/perf.slurm")
 g_slurm_completion = os.path.abspath(f"{g_scripts}/completion.slurm")
-g_tmpdir = f"/scratch/{os.environ['USER']}/jobs"
+g_scratchdir = f"/scratch/{os.environ['USER']}"
+g_tmpdir = f"{g_scratchdir}/jobs"
 g_cptpfx = "_cpt"
 g_start_time = datetime.now()
 g_id_base = (int(datetime.timestamp(datetime.now())*10) & 0xffffff) << 16
@@ -51,8 +52,12 @@ class JobType(Enum):
     RST  = 3
     COMPLETION = 4
 
+# if scratch directory exists create a jobs directory
 if not os.path.isdir(g_tmpdir):
-    g_tmpdir = "."
+    if os.path.isdir(g_scratchdir):
+        os.mkdir(g_tmpdir)
+    else:
+        g_tmpdir = "."
 
 def range_arg(v):
     # command line range argument type
@@ -237,11 +242,18 @@ class JobManager():
             else:
                 print(f"{g_pfx} error: sbatch failed")
                 sys.exit(1)
-            jobid = self.jutil.res1
+            jobid = self.jutil.res1 # slurm job id
         else:
             cwd=f"{self.rundir}/{id}"
             rc = self.jutil.exec(cmd=jobstr, cwd=cwd, log="log")
             jobid = id
+
+        # Post-processing: Final table updates 
+        # Any records using local ids need to be converted to remote for slurm job
+        # (jobid already is)
+        friend = entry.friend
+        if args.slurm and friend in g_lid2sid:
+            friend = g_lid2sid[entry.friend]
 
         # keep track of jobs up to completion job then run post-processing
         self.wipList.append(jobid)
@@ -250,14 +262,15 @@ class JobManager():
         elif entry.jtype==JobType.COMPLETION:
             self.pp_remote(comp_id=jobid)
 
-        # finish up with final table
         self.sqldb.job_info( jobid=jobid, dataDict={
-            "friend": entry.friend,
+            "friend": friend,
             "jobtype": entry.jtype.name, 
             "jobstring": jobstr, 
             "slurm": args.slurm,
             "cpt_num": entry.cpt_num,
             "cpt_timestamp": entry.cpt_timestamp,
+            "nodeclamp" : args.nodeclamp,
+            "jobnodes"  : entry.nodes,
             "cwd": cwd } )
         self.sqldb.commit()
 

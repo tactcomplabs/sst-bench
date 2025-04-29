@@ -56,6 +56,8 @@ keyDict = {
         "cwd",       # location where job was run
         "cpt_num",   # checkpoint number if RST job type
         "cpt_timestamp", # checkpoint timestamp if RST job type
+        "nodeclamp",  # sets nodes constant if non-zero
+        "jobnodes",   # nodes requests with job submission
     ],
     timingInfoTable : [
         "local_max_rss",
