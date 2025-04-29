@@ -1,3 +1,3 @@
 _cpt_*/
-*.db
+__pycache__/
 
