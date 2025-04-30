@@ -36,7 +36,7 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
 
   // read the rest of the parameters
 
-  numBytes = params.find<uint64_t>("numBytes", 16384);
+  numBytes = params.find<uint64_t>("numBytes", 128);
   numPorts = params.find<unsigned>("numPorts", 8);
   minData = params.find<uint64_t>("minData", 10);
   maxData = params.find<uint64_t>("maxData", 256);
