@@ -9,7 +9,7 @@
 //
 
 #include "gridnode.h"
-// #include "tcldbg.h"
+#include "tcldbg.h"
 
 namespace SST::GridNode{
 
@@ -22,6 +22,7 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   curCycle(0), demoBug(0), dataMask(0x1ffffff), dataMax(0x1ffffff) {
   
   // tcldbg::spinner("GRID_SPINNER", id==0);
+  tcldbg::spinner("GRID_SPINNER");
 
   uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
   output.init(
