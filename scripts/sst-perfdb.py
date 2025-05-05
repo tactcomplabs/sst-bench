@@ -320,7 +320,7 @@ def comp_size(jobmgr, args):
     X = args.comps
     for s in srange:
         for r in rrange:
-            if s >= r:
+            if X >= r:
                 jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=s, minDelay=args.minDelay, maxDelay=args.maxDelay))
 
 
