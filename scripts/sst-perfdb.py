@@ -322,7 +322,21 @@ def comp_size(jobmgr, args):
         for r in rrange:
             if X >= r:
                 jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=s, minDelay=args.minDelay, maxDelay=args.maxDelay))
+            else:
+                print(f"warning: components({X}) is less then ranks({r} ... skipped)")
 
+def link_delay(jobmgr, args):
+    # submit jobs where number of components and data size are constant. Permute link transmission delay and ranks
+    # maxDelay is fixed to delay + 50
+    rrange = args.rrange
+    drange = args.drange
+    X = args.comps
+    for d in drange:
+        for r in rrange:
+            if X >= r:
+                jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=args.numBytes, minDelay=d, maxDelay=d+50))
+            else:
+                print(f"warning: components({X}) is less then ranks({r} ... skipped)")
 
 if __name__ == '__main__':
 
@@ -366,15 +380,25 @@ if __name__ == '__main__':
     parser_ls.add_argument('--rrange', type=range_arg, default=range_arg('1,8,1'), help='rank range [1,8,1]')
 
     # permute component size and ranks, components >= ranks
-    parser_ls = subparsers.add_parser(
+    parser_cs = subparsers.add_parser(
         'comp-size',
-        help="Permute component size and ranks. Components >= ranks",
+        help="Permute component size and ranks. Fixed number of components",
         parents = [parent_parser])
-    parser_ls.set_defaults(func=comp_size)
-    parser_ls.add_argument('--comps', type=int, default=1024, help='number of components [1024]')
-    parser_ls.add_argument('--rrange', type=range_arg, default=range_arg('1,8,1'), help='rank range [1,8,1]')
-    parser_ls.add_argument('--srange', type=range_arg, default=range_arg('16,16400,1024'), help='size range [16,16400,1024] (supercedes numBytes)')
-    
+    parser_cs.set_defaults(func=comp_size)
+    parser_cs.add_argument('--comps', type=int, default=1024, help='number of components [1024]')
+    parser_cs.add_argument('--rrange', type=range_arg, default=range_arg('1,8,1'), help='rank range [1,8,1]')
+    parser_cs.add_argument('--srange', type=range_arg, default=range_arg('16,16400,1024'), help='size range [16,16400,1024]')
+
+    # permute component size and ranks, components >= ranks
+    parser_ld = subparsers.add_parser(
+        'link-delay',
+        help="Permute link delay and ranks. Fixed number of components",
+        parents = [parent_parser])
+    parser_ld.set_defaults(func=link_delay)
+    parser_ld.add_argument('--comps', type=int, default=1024, help='number of components [1024]')
+    parser_ld.add_argument('--rrange', type=range_arg, default=range_arg('1,8,1'), help='rank range [1,8,1]')
+    parser_ld.add_argument('--drange', type=range_arg, default=range_arg('50,1000,10'), help='size range [50,1000,10]')
+
     # validate user input
     args = parser.parse_args()
     if hasattr(args, 'func') == False:
