@@ -333,8 +333,9 @@ def link_delay(jobmgr, args):
     X = args.comps
     for d in drange:
         for r in rrange:
+            dmax = d + abs(drange.step)
             if X >= r:
-                jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=args.numBytes, minDelay=d, maxDelay=d+50))
+                jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=args.numBytes, minDelay=d, maxDelay=dmax))
             else:
                 print(f"warning: components({X}) is less then ranks({r} ... skipped)")
 
@@ -397,7 +398,7 @@ if __name__ == '__main__':
     parser_ld.set_defaults(func=link_delay)
     parser_ld.add_argument('--comps', type=int, default=1024, help='number of components [1024]')
     parser_ld.add_argument('--rrange', type=range_arg, default=range_arg('1,8,1'), help='rank range [1,8,1]')
-    parser_ld.add_argument('--drange', type=range_arg, default=range_arg('50,10000,100'), help='size range [50,10000,100] (maxDelay=minDelay+50)')
+    parser_ld.add_argument('--drange', type=range_arg, default=range_arg('50,10000,100'), help='size range [50,10000,100] (maxDelay=minDelay+|step|)')
 
     # validate user input
     args = parser.parse_args()
