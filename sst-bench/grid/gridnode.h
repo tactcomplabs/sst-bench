@@ -30,9 +30,9 @@
 // clang-format on
 
 // TUT selection must be static until sst-core/generalize-serialization PR merged
-#define TUT uint32_t
+// #define TUT uint32_t
 // These require Lee generate-schema PR
-// #define TUT StructUint8x4
+#define TUT StructUint8x4
 // #define TUT VecUint8x4
 
 namespace SST::GridNode{
