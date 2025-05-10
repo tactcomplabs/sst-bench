@@ -30,10 +30,11 @@
 // clang-format on
 
 // TUT selection must be static until sst-core/generalize-serialization PR merged
-#define TUT uint32_t
+// #define TUT uint32_t
 // These require Lee generate-schema PR
 // #define TUT StructUint8x4
 // #define TUT VecUint8x4
+#define TUT Tuple8x4
 
 namespace SST::GridNode{
 
@@ -234,6 +235,79 @@ struct VecUint8x4 final : public SST::Core::Serialization::serializable {
 // VecUint8x4 ostream overload
 std::ostream& operator<<(std::ostream& os, const VecUint8x4& obj) {
   os << std::hex << std::setfill('0') << std::setw(2) << "{ 0x*" << (uint16_t)obj.vec4[0] << ",0x*" << (uint16_t)obj.vec4[1] << ",0x*" << (uint16_t)obj.vec4[2] << ",0x*" << (uint16_t)obj.vec4[3] << "}";
+  return os;
+}
+
+// -------------------------------------------------------------
+// TupleUint8x4: Same size as uint32_t but using 4 element tuple
+// -------------------------------------------------------------
+struct Tuple8x4 final : public SST::Core::Serialization::serializable {
+  std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> tup4 = {0,0,0,0};
+  Tuple8x4(uint64_t n) {
+    tup4 = { n,n,n,n };
+  }
+  // operator overloading
+  Tuple8x4 operator++(int) {
+    Tuple8x4 old = *this;
+    for (size_t i=0;i<4;i++)
+      tup4 = { std::get<0>(tup4) + 1, std::get<1>(tup4) + 1, std::get<2>(tup4) + 1, std::get<3>(tup4) + 1 };
+    return old;
+  }
+  Tuple8x4 operator+=(const Tuple8x4& rhs) {
+    tup4 = { 
+      std::get<0>(tup4) + std::get<0>(rhs.tup4),
+      std::get<1>(tup4) + std::get<1>(rhs.tup4),
+      std::get<2>(tup4) + std::get<2>(rhs.tup4),
+      std::get<3>(tup4) + std::get<3>(rhs.tup4),
+    };
+    return *this;
+  }
+  friend Tuple8x4 operator+(Tuple8x4 lhs, const uint32_t& rhs) {
+    lhs.tup4 = { 
+      std::get<0>(lhs.tup4) + uint8_t(rhs),
+      std::get<1>(lhs.tup4) + uint8_t(rhs),
+      std::get<2>(lhs.tup4) + uint8_t(rhs),
+      std::get<3>(lhs.tup4) + uint8_t(rhs),
+    }; 
+    return lhs;
+  }
+  inline bool operator==(const Tuple8x4& rhs) {
+    bool res = true;
+    res &= std::get<0>(tup4)==std::get<0>(rhs.tup4);
+    res &= std::get<1>(tup4)==std::get<1>(rhs.tup4);
+    res &= std::get<2>(tup4)==std::get<2>(rhs.tup4);
+    res &= std::get<3>(tup4)==std::get<3>(rhs.tup4);
+    return res;
+  }
+  inline bool operator!=(const Tuple8x4& rhs) {
+    return !(*this == rhs);
+  }
+  // special scalar compare
+  inline bool operator==(const uint32_t& rhs) {
+    bool res = true;
+    uint8_t e = uint8_t(rhs);
+    res &= std::get<0>(tup4)==e;
+    res &= std::get<1>(tup4)==e;
+    res &= std::get<2>(tup4)==e;
+    res &= std::get<3>(tup4)==e;
+    return res;
+  }
+  inline bool operator!=(const uint32_t& rhs) {
+    return !(*this == rhs);
+  }
+
+  // serialization
+  Tuple8x4() {};
+  void serialize_order(SST::Core::Serialization::serializer& ser) override {
+    SST_SER(tup4);
+  };
+  // This has public and private sections. Put last!
+  ImplementSerializable(SST::GridNode::Tuple8x4) ;
+}; // struct Tuple8x4
+
+// Tuple8x4 ostream overload
+std::ostream& operator<<(std::ostream& os, const Tuple8x4& obj) {
+  os << std::hex << std::setfill('0') << std::setw(2) << "{ 0x*" << uint16_t{std::get<0>(obj.tup4)} << ",0x*" << uint16_t {std::get<1>(obj.tup4)} << ",0x*" << uint16_t {std::get<2>(obj.tup4)} << ",0x*" << uint16_t {std::get<3>(obj.tup4)} << "}";
   return os;
 }
 
