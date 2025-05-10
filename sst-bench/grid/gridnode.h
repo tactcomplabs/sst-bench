@@ -29,12 +29,11 @@
 #include <sst/core/rng/mersenne.h>
 // clang-format on
 
-// TUT selection must be static until sst-core/generalize-serialization PR merged
-// #define TUT uint32_t
-// These require Lee generate-schema PR
+// TUT selection
+#define TUT uint32_t
 // #define TUT StructUint8x4
 // #define TUT VecUint8x4
-#define TUT Tuple8x4
+// #define TUT Tuple8x4
 
 namespace SST::GridNode{
 
