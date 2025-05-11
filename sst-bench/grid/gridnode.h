@@ -34,7 +34,7 @@
 // #define TUT StructUint8x4
 // #define TUT VecUint8x4
 // #define TUT Tuple8x4
-#define TUT PairPair
+// #define TUT PairPair
 
 namespace SST::GridNode{
 
