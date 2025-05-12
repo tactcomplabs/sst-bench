@@ -72,7 +72,7 @@ def range_arg(v):
     return range(*values)
 
 class JobEntry():
-    def __init__(self, *, slurm:bool, ranks:int, threads:int, x:int, y:int, clocks:int, predecessors:list = []):
+    def __init__(self, *, slurm:bool, ranks:int, threads:int, x:int, y:int, clocks:int, numBytes: int, minDelay: int, maxDelay: int, predecessors:list = []):
         self.jtype = JobType.BASE
         self.predecessors = predecessors
         self.ranks = ranks
@@ -81,7 +81,7 @@ class JobEntry():
         self.sstopts = f"--num-threads={self.threads} --output-json=config.json"
         self.sstopts += f" --print-timing-info --timing-info-json=timing.json"
         self.sdl = g_sdl
-        self.sdlopts = f"-- --x={x} --y={y} --clocks={clocks}"
+        self.sdlopts = f"-- --x={x} --y={y} --clocks={clocks} --numBytes={numBytes} --minDelay={minDelay} --maxDelay={maxDelay}"
         self.cptid = 0
         self.cptfile = ""
         self.friend = 0
@@ -311,7 +311,33 @@ def linear_scaling(jobmgr, args):
     ratio = args.ratio
     for r in rrange:
         X = r * ratio
-        jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks))
+        jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=args.numBytes, minDelay=args.minDelay, maxDelay=args.maxDelay))
+
+def comp_size(jobmgr, args):
+    # submit jobs where number of components is constant and we permute the data size and ranks
+    rrange = args.rrange
+    srange = args.srange
+    X = args.comps
+    for s in srange:
+        for r in rrange:
+            if X >= r:
+                jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=s, minDelay=args.minDelay, maxDelay=args.maxDelay))
+            else:
+                print(f"warning: components({X}) is less then ranks({r} ... skipped)")
+
+def link_delay(jobmgr, args):
+    # submit jobs where number of components and data size are constant. Permute link transmission delay and ranks
+    # maxDelay is fixed to delay + 50
+    rrange = args.rrange
+    drange = args.drange
+    X = args.comps
+    for d in drange:
+        for r in rrange:
+            dmax = d + abs(drange.step)
+            if X >= r:
+                jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=args.numBytes, minDelay=d, maxDelay=dmax))
+            else:
+                print(f"warning: components({X}) is less then ranks({r} ... skipped)")
 
 if __name__ == '__main__':
 
@@ -324,21 +350,28 @@ if __name__ == '__main__':
         epilog='This script currently requires json-timing-info branch from git@github.com:tactcomplabs/sst-core.git' )
     # common args
     parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser.add_argument("--cpt", action="store_true", help="run baseline and checkpoint simulations")
-    parent_parser.add_argument("--cptrst", action="store_true", help="run baseline, checkpoint, and restart simulations")
-    parent_parser.add_argument("--clocks", type=int, default=1000000, help="sst clock cycles to run [1000000]")
-    parent_parser.add_argument("--db", type=str, default="timing.db", help="sqlite database file to be created or updated [timing.db]")
-    parent_parser.add_argument("--nodeclamp", type=int, default=0, help="distribute threads evenly across a fixed number of specified nodes. [0-minimize]")
-    parent_parser.add_argument("--logging", action="store_true", help="print debug logging messages")
-    parent_parser.add_argument("--jobname", type=str, default="sst-perf", help="name associated with all jobs [sst-perf]")
-    parent_parser.add_argument("--norun", action="store_true", help="print job commands but do not run them")
-    parent_parser.add_argument("--tmpdir", type=str, default=g_tmpdir, help=f"temporary area for running jobs. [{g_tmpdir}]")
-    parent_parser.add_argument("--simperiod", type=int, default=100000, help=f"checkpoint simulation period in ns")
-    parent_parser.add_argument("--slurm", action="store_true", help="launch slurm jobs instead of local ones")
-    parent_parser.add_argument("--noprompt", action="store_true", help="do not prompt user to confirm launching jobs")
+    job_seq_group = parent_parser.add_argument_group('job sequence control')
+    job_seq_group.add_argument("--cpt", action="store_true", help="run baseline and checkpoint simulations")
+    job_seq_group.add_argument("--cptrst", action="store_true", help="run baseline, checkpoint, and restart simulations")
+    job_seq_group.add_argument("--simperiod", type=int, default=100000, help=f"checkpoint simulation period in ns")
+    sdl_group = parent_parser.add_argument_group('SDL controls')
+    sdl_group.add_argument("--clocks", type=int, default=1000000, help="sst clock cycles to run [1000000]")
+    sdl_group.add_argument("--numBytes", type=int, default=16384, help="Size of component state in bytes [16384]")
+    sdl_group.add_argument("--minDelay", type=int, default=50, help="minimum delay between transfers [50]")
+    sdl_group.add_argument("--maxDelay", type=int, default=100, help="maximum delay between transfers [100]")
+    cfg_group = parent_parser.add_argument_group('Simulation configuration control')
+    cfg_group.add_argument("--db", type=str, default="timing.db", help="sqlite database file to be created or updated [timing.db]")
+    cfg_group.add_argument("--jobname", type=str, default="sst-perf", help="name associated with all jobs [sst-perf]")
+    cfg_group.add_argument("--logging", action="store_true", help="print debug logging messages")
+    cfg_group.add_argument("--nodeclamp", type=int, default=0, help="distribute threads evenly across a fixed number of specified nodes. [0-minimize]")
+    cfg_group.add_argument("--noprompt", action="store_true", help="do not prompt user to confirm launching jobs")
+    cfg_group.add_argument("--norun", action="store_true", help="print job commands but do not run them")
+    cfg_group.add_argument("--slurm", action="store_true", help="launch slurm jobs instead of using local mpirun")
+    cfg_group.add_argument("--tmpdir", type=str, default=g_tmpdir, help=f"temporary area for running jobs. [{g_tmpdir}]")
     # sub-parsers
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help='available subcommands. Use {subcommand --help} for more detail')
-    # linear-scaling
+    
+    # linear-scaling of ranks to number of components
     parser_ls = subparsers.add_parser(
         'linear-scaling',
         help="Test with number of components proportional to number of ranks",
@@ -346,7 +379,27 @@ if __name__ == '__main__':
     parser_ls.set_defaults(func=linear_scaling)
     parser_ls.add_argument('--ratio', type=int, default=1, help='components/ranks [1]')
     parser_ls.add_argument('--rrange', type=range_arg, default=range_arg('1,8,1'), help='rank range [1,8,1]')
-    
+
+    # permute component size and ranks, components >= ranks
+    parser_cs = subparsers.add_parser(
+        'comp-size',
+        help="Permute component size and ranks. Fixed number of components",
+        parents = [parent_parser])
+    parser_cs.set_defaults(func=comp_size)
+    parser_cs.add_argument('--comps', type=int, default=1024, help='number of components [1024]')
+    parser_cs.add_argument('--rrange', type=range_arg, default=range_arg('1,8,1'), help='rank range [1,8,1]')
+    parser_cs.add_argument('--srange', type=range_arg, default=range_arg('16,16400,1024'), help='size range [16,16400,1024]')
+
+    # permute component size and ranks, components >= ranks
+    parser_ld = subparsers.add_parser(
+        'link-delay',
+        help="Permute link delay and ranks. Fixed number of components",
+        parents = [parent_parser])
+    parser_ld.set_defaults(func=link_delay)
+    parser_ld.add_argument('--comps', type=int, default=1024, help='number of components [1024]')
+    parser_ld.add_argument('--rrange', type=range_arg, default=range_arg('1,8,1'), help='rank range [1,8,1]')
+    parser_ld.add_argument('--drange', type=range_arg, default=range_arg('50,10000,100'), help='size range [50,10000,100] (maxDelay=minDelay+|step|)')
+
     # validate user input
     args = parser.parse_args()
     if hasattr(args, 'func') == False:
