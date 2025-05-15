@@ -30,9 +30,9 @@
 // clang-format on
 
 // Static TUT selection
-#define TUT uint32_t
+// #define TUT uint32_t
 // #define TUT StructUint8x4
-// #define TUT VecUint8x4
+#define TUT VecUint8x4
 // #define TUT Tuple8x4
 // #define TUT PairPair
 
