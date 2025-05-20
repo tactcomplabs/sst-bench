@@ -72,6 +72,7 @@ keyDict = {
         "global_mempool_size",
         "global_active_activities",
         "global_current_tv_depth",
+        "global_max_tv_depth",
         "max_build_time",
         "max_run_time",
         "max_total_time",
