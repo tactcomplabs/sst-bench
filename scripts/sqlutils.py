@@ -301,7 +301,7 @@ class SlurmObj():
         d['elapsed'] = jDict['time']['elapsed']
         d['cpus'] = jDict['required']['CPUs']
         if jDict['state']['current'] != "COMPLETED":
-            print(f"error: job {d['job_id']} state is {jDict['state']['current']}")
+            print(f"error: job {d['slurm_id']} state is {jDict['state']['current']}")
             sys.exit(1)
         for t in jDict['tres']['allocated']:
             if t['type'] == "node":
