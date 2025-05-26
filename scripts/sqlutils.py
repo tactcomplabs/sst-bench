@@ -72,6 +72,7 @@ keyDict = {
         "global_mempool_size",
         "global_active_activities",
         "global_current_tv_depth",
+        "global_max_tv_depth",
         "max_build_time",
         "max_run_time",
         "max_total_time",
@@ -300,7 +301,7 @@ class SlurmObj():
         d['elapsed'] = jDict['time']['elapsed']
         d['cpus'] = jDict['required']['CPUs']
         if jDict['state']['current'] != "COMPLETED":
-            print(f"error: job {d['job_id']} state is {jDict['state']['current']}")
+            print(f"error: job {d['slurm_id']} state is {jDict['state']['current']}")
             sys.exit(1)
         for t in jDict['tres']['allocated']:
             if t['type'] == "node":
