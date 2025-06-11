@@ -175,6 +175,7 @@ std::ostream& operator<<(std::ostream& os, const StructUint8x4& obj) {
   return os;
 }
 
+#ifdef VecUint8x4
 // -------------------------------------------------------------
 // VecUint8x4: Same size as uint32_t but using 4 vector elements
 // -------------------------------------------------------------
@@ -237,7 +238,9 @@ std::ostream& operator<<(std::ostream& os, const VecUint8x4& obj) {
   os << std::hex << std::setfill('0') << std::setw(2) << "{ 0x*" << (uint16_t)obj.vec4[0] << ",0x*" << (uint16_t)obj.vec4[1] << ",0x*" << (uint16_t)obj.vec4[2] << ",0x*" << (uint16_t)obj.vec4[3] << "}";
   return os;
 }
+#endif
 
+#ifdef Tuple8x4
 // -------------------------------------------------------------
 // TupleUint8x4: Same size as uint32_t but using 4 element tuple
 // -------------------------------------------------------------
@@ -310,7 +313,9 @@ std::ostream& operator<<(std::ostream& os, const Tuple8x4& obj) {
   os << std::hex << std::setfill('0') << std::setw(2) << "{ 0x*" << uint16_t{std::get<0>(obj.tup4)} << ",0x*" << uint16_t {std::get<1>(obj.tup4)} << ",0x*" << uint16_t {std::get<2>(obj.tup4)} << ",0x*" << uint16_t {std::get<3>(obj.tup4)} << "}";
   return os;
 }
+#endif //Tuple8x4
 
+#ifdef PairPair
 // -------------------------------------------------------------
 // PairPair: Same size as uint32_t but using a pair of pairs
 // -------------------------------------------------------------
@@ -380,6 +385,7 @@ std::ostream& operator<<(std::ostream& os, const PairPair& obj) {
   os << std::hex << std::setfill('0') << std::setw(2) << "{ 0x*" << uint16_t{obj.pairpair.first.first} << ",0x*" << uint16_t {obj.pairpair.first.second} << ",0x*" << uint16_t {obj.pairpair.second.first} << ",0x*" << uint16_t {obj.pairpair.second.second} << "}";
   return os;
 }
+#endif //PairPair
 
 // -------------------------------------------------------
 // GridNode
