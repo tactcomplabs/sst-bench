@@ -9,6 +9,7 @@
 //
 
 #include "gridnode.h"
+#include "tcldbg.h"
 
 namespace SST::GridNode{
 
@@ -20,7 +21,10 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   numPorts(8), minData(10), maxData(256), minDelay(20), maxDelay(100), clocks(1000),
   curCycle(0), demoBug(0), dataMask(0x1ffffff), dataMax(0x1ffffff) {
   
-  const int Verbosity = params.find< int >( "verbose", 0 );
+  // tcldbg::spinner("GRID_SPINNER", id==0);
+  tcldbg::spinner("GRID_SPINNER");
+
+  uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
   output.init(
     "GridNode[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
@@ -31,6 +35,7 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
   primaryComponentDoNotEndSim();
 
   // read the rest of the parameters
+
   numBytes = params.find<uint64_t>("numBytes", 16384);
   numPorts = params.find<unsigned>("numPorts", 8);
   minData = params.find<uint64_t>("minData", 10);
@@ -43,6 +48,16 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
 
   // bug injection
   dataMax += demoBug;
+  
+  // Checkpoint markers
+  cptBegin   = 0xffb0000000000000UL | (id&0xffffffff)<<16 | 0xb1ffUL;
+  cptEnd     = 0xffe0000000000000UL | (id&0xffffffff)<<16 | 0xe1ffUL;
+  stateBegin = 0xeeb0000000000000UL | (id&0xffffffff)<<16 | 0xb1eeUL;
+  stateEnd   = 0xeee0000000000000UL | (id&0xffffffff)<<16 | 0xe1eeUL;
+  
+  output.verbose(CALL_INFO, 1, 0, 
+    "Checkpoint markers for component id %" PRId64 " = [ 0x%" PRIx64 " 0x%" PRIx64 " ]\n",
+    id, cptBegin, cptEnd );
 
   // sanity check the params
   if (minData < 10) {
@@ -80,13 +95,13 @@ GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
     // Each port has unique random sequence.
     // However, across components the data for each corresponding port will be the same.
     // To add the complimentary port's component info to the seed could be a future enhancement.
-    int n = i<4 ? i : neighbor(i);
+    unsigned n = i<4 ? i : neighbor(i);
     rng.insert( {portname[i], new SST::RNG::MersenneRNG(n + rngSeed)} );
     #endif
   }
   
   // local random number generator. These can run independently for each component.
-  localRNG = new SST::RNG::MersenneRNG(id + rngSeed);
+  localRNG = new SST::RNG::MersenneRNG(unsigned(id) + rngSeed);
   clkDelay = localRNG->generateNextUInt32() % (maxDelay-minDelay+1) + minDelay;
 
   // constructor complete
@@ -114,7 +129,7 @@ void GridNode::init( unsigned int phase ){
                    "%s: initializing internal data at init phase=0\n",
                    getName().c_str());
     for( uint64_t i = 0; i < (numBytes/4ull); i++ ){
-      state.push_back( (unsigned)(i) + rngSeed );
+      state.push_back( (uint32_t)(i) + rngSeed );
     }
   }
 }
@@ -124,25 +139,29 @@ void GridNode::printStatus( Output& out ){
 
 void GridNode::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SST_SER(clockHandler)
-  SST_SER(numBytes)
-  SST_SER(numPorts)
-  SST_SER(minData)
-  SST_SER(maxData)
-  SST_SER(minDelay)
-  SST_SER(maxDelay)
-  SST_SER(clkDelay)
-  SST_SER(clocks)
-  SST_SER(rngSeed)
-  SST_SER(state)
-  SST_SER(curCycle)
-  SST_SER(portname)
-  SST_SER(rng)
-  SST_SER(localRNG)
-  SST_SER(linkHandlers)
-  SST_SER(demoBug)
-  SST_SER(dataMask)
-  SST_SER(dataMax)
+  SST_SER(cptBegin);
+  SST_SER(clockHandler);
+  SST_SER(numBytes);
+  SST_SER(numPorts);
+  SST_SER(minData);
+  SST_SER(maxData);
+  SST_SER(minDelay);
+  SST_SER(maxDelay);
+  SST_SER(clkDelay);
+  SST_SER(clocks);
+  SST_SER(rngSeed);
+  SST_SER(stateBegin);
+  SST_SER(state);
+  SST_SER(stateEnd);
+  SST_SER(curCycle);
+  SST_SER(portname);
+  SST_SER(rng);
+  SST_SER(localRNG);
+  SST_SER(linkHandlers);
+  SST_SER(demoBug);
+  SST_SER(dataMask);
+  SST_SER(dataMax);
+  SST_SER(cptEnd);
 }
 
 void GridNode::handleEvent(SST::Event *ev){
@@ -162,8 +181,8 @@ void GridNode::handleEvent(SST::Event *ev){
   assert(send_port < (portname.size()/2)); // TODO unrestrict bidirectional links
   unsigned rcv_port = neighbor(send_port);
   auto portRNG = rng[portname[rcv_port]];
-  unsigned range = maxData - minData + 1;
-  unsigned r = portRNG->generateNextUInt32() % range + minData;
+  size_t range = maxData - minData + 1;
+  uint32_t r = portRNG->generateNextUInt32() % uint32_t(range) + uint32_t(minData);
   if (r != data.size()) {
     output.fatal(CALL_INFO, -1,
                   "%s expected data size %" PRIu32 " does not match actual size %zu\n",
@@ -176,7 +195,7 @@ void GridNode::handleEvent(SST::Event *ev){
   }
   for (unsigned i=2; i<r; i++){
     // checked is slightly different from how send data is generated to induce an error.
-    unsigned d = (unsigned)portRNG->generateNextUInt32() & dataMask; 
+    unsigned d = (unsigned)portRNG->generateNextUInt32() & (unsigned)dataMask; 
     if ( d != data[i] ) {
       output.fatal(CALL_INFO, -1,
           "%s expected data[%" PRIu32 "] %" PRIu32 " does not match actual %" PRIu32 "\n",
@@ -194,8 +213,8 @@ void GridNode::sendData(){
   for( unsigned port=0; port<(numPorts/2); port++ ){
     // generate a new payload
     std::vector<unsigned> data;
-    unsigned range = maxData - minData + 1;
-    unsigned r = rng[portname[port]]->generateNextUInt32() % range + minData;
+    size_t range = maxData - minData + 1;
+    unsigned r = rng[portname[port]]->generateNextUInt32() % (uint32_t)range + (uint32_t)minData;
     // Outbound data sequence
     // [0] sending port number
     // [1] number of ints
@@ -203,11 +222,11 @@ void GridNode::sendData(){
     data.push_back(port);
     data.push_back(r);
     for( unsigned i=2; i<r; i++ ){
-      uint64_t d = (unsigned)(rng[portname[port]]->generateNextUInt32());
+      uint64_t d = (uint64_t)(rng[portname[port]]->generateNextUInt32());
       // This is to introduce an infrequent mismatch between sender and receiver
       d = d & ( 0xfULL | (dataMask<<4) );
       if (d > dataMax) d = d & dataMask;
-      data.push_back(d);
+      data.push_back(unsigned(d));
     }
     output.verbose(CALL_INFO, 5, 0,
                    "%s: sending %zu unsigned values on link %d\n",
@@ -247,23 +266,27 @@ unsigned GridNode::neighbor(unsigned n)
 }
 
 bool GridNode::clockTick( SST::Cycle_t currentCycle ){
-
   // sanity check the array
-  for( uint64_t i = 0; i < (numBytes/4ull); i++ ){
-    if( state[i] != ((unsigned)(i) + rngSeed) ){
+  assert(state.size() == numBytes/4ull);
+  uint64_t i=0;
+  for (auto it=state.begin(); it != state.end(); ++it ) {
+    unsigned expected = (unsigned)(i) + rngSeed;
+    if ( *it != expected ){
       // found a mismatch
+      std::stringstream s;
+      s << *it;
       output.fatal( CALL_INFO, -1,
-                    "Error : found a mismatch data element: element %" PRIu64 " was %d and should have been %d\n",
-                    i, state[i], ((unsigned)(i) + rngSeed));
+                    "Error : found a mismatch data element: element %" PRIu64 " was %s compared with scalar 0x%" PRIx32 "\n",
+                    i, s.str().c_str(), expected );
     }
+    i++;
   }
-
   // check to see whether we need to send data over the links
   curCycle++;
   if( curCycle >= clkDelay ){
     sendData();
     curCycle = 0;
-    clkDelay = localRNG->generateNextUInt32() % (maxDelay-minDelay+1) + minData;
+    clkDelay = localRNG->generateNextUInt32() % (maxDelay-minDelay+1) + minDelay;
   }
 
   // check to see if we've reached the completion state

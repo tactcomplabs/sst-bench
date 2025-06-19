@@ -7,6 +7,9 @@
 # See LICENSE in the top level directory for licensing details
 #
 
+#-- Include Paths
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 message(STATUS "[SST-BENCH] Enabling MSG-PERF micro-benchmark")
 add_subdirectory(msg-perf)
 

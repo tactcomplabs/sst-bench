@@ -21,7 +21,7 @@ TclDbg::TclDbg(SST::ComponentId_t id, const SST::Params& params ) :
   curCycle(0), statBytes(nullptr), statTiming(nullptr),
   mersenne(nullptr), Dbg(nullptr) {
 
-  const int Verbosity = params.find< int >( "verbose", 0 );
+  const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
   output.init(
     "TclDbg[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
@@ -105,8 +105,8 @@ void TclDbg::serialize_order(SST::Core::Serialization::serializer& ser){
 void TclDbg::updateData(){
   // generate new data
   data.clear();
-  unsigned range = maxData - minData + 1;
-  unsigned r = rand() % range + minData;
+  uint64_t range = maxData - minData + 1;
+  uint64_t r = (unsigned)rand() % range + minData;
   for( unsigned i=0; i<r; i++ ){
     data.push_back((unsigned)(mersenne->generateNextUInt32()));
   }

@@ -19,7 +19,7 @@ Restart::Restart(SST::ComponentId_t id, const SST::Params& params ) :
   SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numBytes(0), clocks(1000), baseSeed(1223) {
 
-  const int Verbosity = params.find< int >( "verbose", 0 );
+  const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
   output.init(
     "Restart[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
@@ -30,7 +30,7 @@ Restart::Restart(SST::ComponentId_t id, const SST::Params& params ) :
   primaryComponentDoNotEndSim();
 
   // read the rest of the parameters
-  numBytes = params.find<SST::UnitAlgebra>("numBytes", "64KB").getRoundedValue();
+  numBytes = (uint64_t)params.find<SST::UnitAlgebra>("numBytes", "64KB").getRoundedValue();
   clocks = params.find<uint64_t>("clocks", 1000);
   baseSeed = params.find<unsigned>("baseSeed", "1223");
 
@@ -64,11 +64,11 @@ void Restart::printStatus( Output& out ){
 
 void Restart::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SST_SER(clockHandler)
-  SST_SER(numBytes)
-  SST_SER(clocks)
-  SST_SER(baseSeed)
-  SST_SER(data)
+  SST_SER(clockHandler);
+  SST_SER(numBytes);
+  SST_SER(clocks);
+  SST_SER(baseSeed);
+  SST_SER(data);
 }
 
 bool Restart::clockTick( SST::Cycle_t currentCycle ){

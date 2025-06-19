@@ -9,6 +9,13 @@
 
 file(GLOB RESTORE_TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.py)
 
+# Checkpoint numbering version dependent
+if(${SST_MAJOR_VERSION} GREATER 14)
+  set(CPT_N 1)
+else()
+  set(CPT_N 0)
+endif()
+
 if(SSTBENCH_ENABLE_TESTING)
   set (passRegex "Simulation is complete")
 
@@ -25,7 +32,7 @@ if(SSTBENCH_ENABLE_TESTING)
       PASS_REGULAR_EXPRESSION "${passRegex}")
     add_test(NAME ${testName}_RESTORE
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND sst --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/restore --load-checkpoint ${CHKPT_PFX}/${CHKPT_PFX}_0_5000000/${CHKPT_PFX}_0_5000000.sstcpt)
+      COMMAND sst --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/restore --load-checkpoint ${CHKPT_PFX}/${CHKPT_PFX}_${CPT_N}_5000000/${CHKPT_PFX}_${CPT_N}_5000000.sstcpt)
     set_tests_properties(${testName}_RESTORE
       PROPERTIES
       TIMEOUT 60

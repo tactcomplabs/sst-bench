@@ -19,7 +19,7 @@ namespace SST::MsgPerf{
     : MsgPerfAPI(id, params), timeConverter(nullptr), clockHandler(nullptr),
       iFace(nullptr), msgHandler(nullptr), initBcastSent(false), numDest(0) {
 
-    int verbosity = params.find<int>("verbose", 0);
+    uint32_t verbosity = params.find<uint32_t>("verbose", 0);
     output.init(
       "MsgPerfNIC[" + getName() + ":@p:@t]: ",
       verbosity, 0, SST::Output::STDOUT );
@@ -150,14 +150,14 @@ namespace SST::MsgPerf{
   void MsgPerfNIC::send(nicEvent *event, uint64_t destination){
     SST::Interfaces::SimpleNetwork::Request* req =
       new SST::Interfaces::SimpleNetwork::Request();
-    req->dest = destination;
+    req->dest = (SST::Interfaces::SimpleNetwork::nid_t) destination;
     req->src = iFace->getEndpointID();
     req->givePayload( event );
     sendQ.push(req);
   }
 
   unsigned MsgPerfNIC::getNumDestinations(){
-    return endPoints.size();
+    return (unsigned)endPoints.size();
   }
 
   SST::Interfaces::SimpleNetwork::nid_t MsgPerfNIC::getAddress(){
@@ -199,7 +199,7 @@ namespace SST::MsgPerf{
     sendStatPtr(0), recvStatPtr(0),
     timeConverter(nullptr), clockHandler(nullptr), Nic(nullptr){
 
-    const int Verbosity = params.find< int >( "verbose", 0 );
+    const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
     output.init(
       "MsgPerfCPU[" + getName() + ":@p:@t]: ",
       Verbosity, 0, SST::Output::STDOUT );
@@ -214,9 +214,9 @@ namespace SST::MsgPerf{
     primaryComponentDoNotEndSim();
 
     // read all the remaining parameters
-    startSize = params.find<SST::UnitAlgebra>("startSize", "8B").getRoundedValue();
-    endSize = params.find<SST::UnitAlgebra>("endSize", "16B").getRoundedValue();
-    stepSize = params.find<SST::UnitAlgebra>("stepSize", "1B").getRoundedValue();
+    startSize = (uint64_t) params.find<SST::UnitAlgebra>("startSize", "8B").getRoundedValue();
+    endSize = (uint64_t) params.find<SST::UnitAlgebra>("endSize", "16B").getRoundedValue();
+    stepSize = (uint64_t) params.find<SST::UnitAlgebra>("stepSize", "1B").getRoundedValue();
     iters = params.find<uint64_t>("iters", 1);
     clockDelay = params.find<uint64_t>("clockDelay", 100);
 

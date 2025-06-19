@@ -85,6 +85,9 @@ git clean -f -d
 
 ## Special Runtime Notes
 
+### Benchmark Scale
+Be mindful of the simulation input size when scaling tests near the limits of physical memory or compute capacity.  Several benchmarks exhibit exponential memory growth.
+
 ### TCL-DBG Benchmark
 
 The `tcl-dbg` micro benchmark is designed to test the report the cost of using 

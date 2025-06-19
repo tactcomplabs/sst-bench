@@ -20,7 +20,7 @@ Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
   numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
   curCycle(0) {
 
-  const int Verbosity = params.find< int >( "verbose", 0 );
+  const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
   output.init(
     "Chkpnt[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
@@ -75,15 +75,15 @@ void Chkpnt::printStatus( Output& out ){
 
 void Chkpnt::serialize_order(SST::Core::Serialization::serializer& ser){
   SST::Component::serialize_order(ser);
-  SST_SER(clockHandler)
-  SST_SER(numPorts)
-  SST_SER(minData)
-  SST_SER(maxData)
-  SST_SER(clockDelay)
-  SST_SER(clocks)
-  SST_SER(curCycle)
-  SST_SER(mersenne)
-  SST_SER(linkHandlers)
+  SST_SER(clockHandler);
+  SST_SER(numPorts);
+  SST_SER(minData);
+  SST_SER(maxData);
+  SST_SER(clockDelay);
+  SST_SER(clocks);
+  SST_SER(curCycle);
+  SST_SER(mersenne);
+  SST_SER(linkHandlers);
 }
 
 void Chkpnt::handleEvent(SST::Event *ev){
@@ -99,8 +99,8 @@ void Chkpnt::sendData(){
   for( unsigned i=0; i<numPorts; i++ ){
     // generate a new payload
     std::vector<unsigned> data;
-    unsigned range = maxData - minData + 1;
-    unsigned r = rand() % range + minData;
+    uint64_t range = maxData - minData + 1;
+    uint64_t r = (uint64_t)rand() % range + minData;
     for( unsigned i=0; i<r; i++ ){
       data.push_back((unsigned)(mersenne->generateNextUInt32()));
     }

@@ -18,7 +18,7 @@ namespace SST::LargeStatChkpnt{
   LargeStatChkpnt::LargeStatChkpnt(SST::ComponentId_t id, const SST::Params& params ) :
     SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
     numStats(1), numClocks(1) {
-    const int Verbosity = params.find< int >( "verbose", 0 );
+    const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
     output.init(
       "LargeStatChkpnt[" + getName() + ":@p:@t]: ",
       Verbosity, 0, SST::Output::STDOUT );
@@ -57,10 +57,10 @@ namespace SST::LargeStatChkpnt{
 
   void LargeStatChkpnt::serialize_order(SST::Core::Serialization::serializer& ser){
     SST::Component::serialize_order(ser);
-    SST_SER(clockHandler)
-    SST_SER(numStats)
-    SST_SER(numClocks)
-    SST_SER(VStat)
+    SST_SER(clockHandler);
+    SST_SER(numStats);
+    SST_SER(numClocks);
+    SST_SER(VStat);
   }
 
   bool LargeStatChkpnt::clockTick( SST::Cycle_t currentCycle ){
