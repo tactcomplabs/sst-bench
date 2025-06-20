@@ -14,6 +14,10 @@
 
 # SST_BENCH_HOME is a required environment variable
 # SST_BENCH_HOME=~/work/sst-bench
+if [[ -z "${SST_BENCH_HOME}" ]]; then
+    echo "error: SST_BENCH_HOME is undefined" >&2
+    exit 1
+fi
 SST_PERFDB=$(realpath ${SST_BENCH_HOME}/scripts/sst-perfdb.py)
 HOSTINFO=$(realpath ${SST_BENCH_HOME}/scripts/hostinfo.sh)
 
@@ -58,8 +62,11 @@ ${HOSTINFO} > host.info || exit 1
 # Select run of baseline simulation, checkpoint simulation, and all restart from checkpoint simulations.
 CPTOPT="--cptrst"
 
+# Distribute threads across a fixed number of nodes (slurm only)
+# CLAMP="--nodeclamp=2"
+
 # optional temporary directory for running jobs
-# TMPDIR="--tmpdir=/scratch/${USER}/jobs"
+# JOBDIR="--tmpdir=/scratch/${USER}/jobs"
 
 # permute number of components per rank across all ranks
 for r in $(seq 1 10); do
@@ -69,7 +76,7 @@ for r in $(seq 1 10); do
     echo "Launching ratio $ratio "
     echo "#######################"
     echo 
-    $SST_PERFDB linear-scaling --jobname="${NAME}" $CPTOPT --db="${DB}" --ratio="${ratio}" --rrange=2,9,2 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt  --minDelay=${MINDELAY} --maxDelay=${MAXDELAY} ${SLURM} ${NORUN} ${TMPDIR} ${CLAMP}
+    $SST_PERFDB linear-scaling --jobname="${NAME}" $CPTOPT --db="${DB}" --ratio="${ratio}" --rrange=2,9,2 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt  --minDelay=${MINDELAY} --maxDelay=${MAXDELAY} ${SLURM} ${NORUN} ${JOBDIR} ${CLAMP}
     if [ $? != 0 ]; then
        echo "Job failed with an error"
        exit 1

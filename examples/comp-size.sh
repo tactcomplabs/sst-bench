@@ -14,6 +14,10 @@
 
 # SST_BENCH_HOME is a required environment variable
 # SST_BENCH_HOME=~/work/sst-bench
+if [[ -z "${SST_BENCH_HOME}" ]]; then
+    echo "error: SST_BENCH_HOME is undefined" >&2
+    exit 1
+fi
 SST_PERFDB=$(realpath ${SST_BENCH_HOME}/scripts/sst-perfdb.py)
 HOSTINFO=$(realpath ${SST_BENCH_HOME}/scripts/hostinfo.sh)
 
@@ -62,9 +66,9 @@ CPTOPT="--cptrst"
 # CLAMP="--nodeclamp=2"
 
 # optional temporary directory for running jobs
-# TMPDIR="--tmpdir=/scratch/${USER}/jobs"
+# JOBDIR="--tmpdir=/scratch/${USER}/jobs"
 
-$SST_PERFDB comp-size --jobname="${NAME}" ${CPTOPT} --db="${DB}" --comps="${COMPS}" --srange=1000,11000,5000 --rrange=2,9,2 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt --minDelay="${MINDELAY}" --maxDelay="${MAXDELAY}" ${SLURM} ${NORUN} ${TMPDIR} ${CLAMP}
+$SST_PERFDB comp-size --jobname="${NAME}" ${CPTOPT} --db="${DB}" --comps="${COMPS}" --srange=1000,11000,5000 --rrange=2,9,2 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt --minDelay="${MINDELAY}" --maxDelay="${MAXDELAY}" ${SLURM} ${NORUN} ${JOBDIR} ${CLAMP}
 
 if [ $? != 0 ]; then
     echo "Job failed with an error"
