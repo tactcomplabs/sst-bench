@@ -367,7 +367,8 @@ if __name__ == '__main__':
     cfg_group.add_argument("--noprompt", action="store_true", help="do not prompt user to confirm launching jobs")
     cfg_group.add_argument("--norun", action="store_true", help="print job commands but do not run them")
     cfg_group.add_argument("--slurm", action="store_true", help="launch slurm jobs instead of using local mpirun")
-    cfg_group.add_argument("--tmpdir", type=str, default=g_tmpdir, help=f"temporary area for running jobs. [{g_tmpdir}]")
+    #cfg_group.add_argument("--tmpdir", type=str, default=g_tmpdir, help=f"temporary area for running jobs. [{g_tmpdir}]")
+    cfg_group.add_argument("--tmpdir", type=str, default=".", help=f"temporary area for running jobs. [{g_tmpdir}]")
     # sub-parsers
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help='available subcommands. Use {subcommand --help} for more detail')
     
