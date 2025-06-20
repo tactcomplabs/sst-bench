@@ -239,7 +239,7 @@ comp-size-mpi
 ## List of parameter sweep scripts
 
 All of the scripts listed below are run the same way as the previous examples but provide different parameter sweep features.
-The bash scripts are intended to be easy to modify. For information on the foundational Pythone scripts refer to the [grid documentation](test/grid/README.md).
+The bash scripts are intended to be easy to modify. Foundational Python3 scripts commands provide `--help` option for more information on controlling the grid simulation.
 
 -   comp-size.sh        Vary the size of the component and the number or ranks
 -   link-delay.sh       Vary the number of clocks between data transfers of links and the number of ranks
