@@ -32,8 +32,11 @@ g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
 g_sdl = os.path.abspath(f"{g_scripts}/../test/grid/2d.py")
 g_slurm_script = os.path.abspath(f"{g_scripts}/perf.slurm")
 g_slurm_completion = os.path.abspath(f"{g_scripts}/completion.slurm")
-g_scratchdir = f"/scratch/{os.environ['USER']}"
-g_tmpdir = f"{g_scratchdir}/jobs"
+# Originally thought this would be a nice default but maybe not for everyone
+# g_scratchdir = f"/scratch/{os.environ['USER']}"
+# g_tmpdir = f"{g_scratchdir}/jobs"
+g_scratchdir = os.path.abspath(".")
+g_tmpdir = g_scratchdir
 g_cptpfx = "_cpt"
 g_start_time = datetime.now()
 g_id_base = (int(datetime.timestamp(datetime.now())*10) & 0xffffff) << 16
@@ -145,7 +148,7 @@ class JobEntry():
     def getJobString(self, norun = False):
         # only called when submitting runs to ensure previous slurm ids are available
         if self.jtype == JobType.COMPLETION:
-            jobstring = f"{g_sbatch} --parsable --wait --dependency=singleton --job-name={args.jobname} {g_slurm_completion} -r {g_scripts} -d {args.db}"
+            jobstring = f"{g_sbatch} --parsable --wait --dependency=singleton --job-name={args.jobname} {g_slurm_completion} -r {g_scripts} -R {g_tmpdir} -d {args.db}"
             return jobstring
         if self.jtype == JobType.RST:
             sid = self.getsid(args.slurm, self.cptid, norun)
@@ -161,7 +164,7 @@ class JobEntry():
                 for lid in self.predecessors:
                     deps += f":{self.getsid(True, lid, norun)}"
             wait = "--wait"  # TODO this should be optional
-            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.procs} -J {args.jobname} {g_slurm_script} -r {g_scripts} -d {args.db} {sst_cmd}"
+            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.procs} -J {args.jobname} {g_slurm_script} -r {g_scripts} -d {args.db} -R {g_tmpdir} {sst_cmd}"
         return jobstring
 
 class JobManager():
@@ -367,8 +370,7 @@ if __name__ == '__main__':
     cfg_group.add_argument("--noprompt", action="store_true", help="do not prompt user to confirm launching jobs")
     cfg_group.add_argument("--norun", action="store_true", help="print job commands but do not run them")
     cfg_group.add_argument("--slurm", action="store_true", help="launch slurm jobs instead of using local mpirun")
-    #cfg_group.add_argument("--tmpdir", type=str, default=g_tmpdir, help=f"temporary area for running jobs. [{g_tmpdir}]")
-    cfg_group.add_argument("--tmpdir", type=str, default=".", help=f"temporary area for running jobs. [{g_tmpdir}]")
+    cfg_group.add_argument("--tmpdir", type=str, default=g_tmpdir, help=f"temporary area for running jobs. [{g_tmpdir}]")
     # sub-parsers
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help='available subcommands. Use {subcommand --help} for more detail')
     
