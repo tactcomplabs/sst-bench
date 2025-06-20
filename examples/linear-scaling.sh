@@ -24,10 +24,9 @@ HOSTINFO=$(realpath ${SST_BENCH_HOME}/scripts/hostinfo.sh)
 # NORUN="--norun"
 
 # NAME is used in directory/file naming convention
-NAME=comp-size-example
+NAME=linear-scaling-example
 
 # For this example, these are fixed parameters
-# components        10                          # Number of components
 # link_delay        10000,11000 (random)        # Delay between link transmissions
 # clocks            10000                       # Number of clocks to simulate
 # cpt-sim-period     5000                       # Number of clocks between checkpoints
@@ -38,7 +37,6 @@ NAME=comp-size-example
 
 # The ratio of the number of components per rank is permuted from 1 to 10 in an outer loop
 
-COMPS=40
 MINDELAY=10000
 MAXDELAY=11000
 CLOCKS=10000
@@ -63,8 +61,6 @@ CPTOPT="--cptrst"
 # optional temporary directory for running jobs
 # TMPDIR="--tmpdir=/scratch/${USER}/jobs"
 
-$SST_PERFDB comp-size --jobname="${NAME}" ${CPTOPT} --db="${DB}" --comps="${COMPS}" --srange=1000,11000,5000 --rrange=2,9,2 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt --minDelay="${MINDELAY}" --maxDelay="${MAXDELAY}" ${SLURM} ${NORUN} ${TMPDIR} ${CLAMP}
-
 # permute number of components per rank across all ranks
 for r in $(seq 1 10); do
     ratio=$(( $r*1 ))
@@ -73,7 +69,7 @@ for r in $(seq 1 10); do
     echo "Launching ratio $ratio "
     echo "#######################"
     echo 
-    $SST_PERFDB linear-scaling --jobname="${NAME}" $CPTOPT --db="${DB}" --ratio="${ratio}" --rrange=2,9,2 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt  --minDelay=${MINDELAY} --maxDelay=${MAXDELAY} ${SLURM} ${NORUN} ${TMPDIR}
+    $SST_PERFDB linear-scaling --jobname="${NAME}" $CPTOPT --db="${DB}" --ratio="${ratio}" --rrange=2,9,2 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt  --minDelay=${MINDELAY} --maxDelay=${MAXDELAY} ${SLURM} ${NORUN} ${TMPDIR} ${CLAMP}
     if [ $? != 0 ]; then
        echo "Job failed with an error"
        exit 1
