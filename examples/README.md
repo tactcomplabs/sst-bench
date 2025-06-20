@@ -156,6 +156,8 @@ comp-size-mpi
 ## Example 2: comp-size.sh (slurm)
 
 Create another run directory and copy the same script as Example 1.
+This is run from the management node so no need to perform `salloc`.
+
 ```
 mkdir run2 && cd run2
 cp $SST_BENCH_HOME/examples/comp-size.sh .
