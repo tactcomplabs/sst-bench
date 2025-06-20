@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# comp-size.sh
+# link-delay.sh
 #
 # Copyright (C) 2017-2025 Tactical Computing Laboratories, LLC
 # All Rights Reserved
@@ -24,23 +24,27 @@ HOSTINFO=$(realpath ${SST_BENCH_HOME}/scripts/hostinfo.sh)
 # NORUN="--norun"
 
 # NAME is used in directory/file naming convention
-NAME=comp-size-example
+NAME=link-delay-example
 
 # For this example, these are fixed parameters
 # components        10                          # Number of components
 # link_delay        10000,11000 (random)        # Delay between link transmissions
+# num_bytes         2048                        # Number of bytes per data transfer over link
 # clocks            10000                       # Number of clocks to simulate
 # cpt-sim-period     5000                       # Number of clocks between checkpoints
 
 # Parameter sweep variables set with sst_perfdb command line
-# srange    1000 to 11000 step 5000     # Number of state elements per component
-# rrange    2 to 8 step 2               # Sweep of ranks
+# drange    250 to 25 step -25     # Sweep delay clocks between link transmission.
+# rrange    8 to 9 step 1          # Sweep of ranks ( fixed at 8 ranks in this case )
+
 
 COMPS=40
 MINDELAY=10000
 MAXDELAY=11000
+NUMBYTES=2048
 CLOCKS=10000
 SIMPERIOD=5000
+
 
 # DB is the name of the sqlite database file. 
 DB=timing.db
@@ -64,7 +68,7 @@ CPTOPT="--cptrst"
 # optional temporary directory for running jobs
 # TMPDIR="--tmpdir=/scratch/${USER}/jobs"
 
-$SST_PERFDB comp-size --jobname="${NAME}" ${CPTOPT} --db="${DB}" --comps="${COMPS}" --srange=1000,11000,5000 --rrange=2,9,2 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt --minDelay="${MINDELAY}" --maxDelay="${MAXDELAY}" ${SLURM} ${NORUN} ${TMPDIR} ${CLAMP}
+$SST_PERFDB link-delay --jobname="${NAME}" ${CPTOPT} --db="${DB}" --comps="${COMPS}" --numBytes="${NUMBYTES}" --drange=250,25,-25 --rrange=8,9,1 --clocks="${CLOCKS}" --simperiod="${SIMPERIOD}" --noprompt ${SLURM} ${NORUN} ${TMPDIR} ${CLAMP}
 
 if [ $? != 0 ]; then
     echo "Job failed with an error"

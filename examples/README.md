@@ -98,6 +98,8 @@ Results:
 $ ls
 alldata.csv  basecpt.csv  base.csv  comp-size-mpi/  comp-size.sh*  cpt.csv  cptrst.csv  host.info  rst.csv  timing.db
 ```
+The file `timing.db` is an sqlite3 data base file. 
+The `.csv` files are generated using the scripts under `examples/sql`.
 
 ```
 $ tree comp-size-mpi 
@@ -191,6 +193,9 @@ host.info       slurm-46370.out  slurm-46379.out  slurm-46388.out  slurm-46397.o
 log             slurm-46371.out  slurm-46380.out  slurm-46389.out  slurm-46398.out
 ```
 
+The file `timing.db` is an sqlite3 data base file. 
+The `.csv` files are generated using the scripts under `examples/sql`.
+
 ```
 $ tree comp-size-mpi
 comp-size-mpi
@@ -231,6 +236,19 @@ comp-size-mpi
 ├── 46370                             # the next baseline simulation
 ```
 
+## List of parameter sweep scripts
+
+All of the scripts listed below are run the same way as the previous examples but provide different parameter sweep features.
+The bash scripts are intended to be easy to modify. For information on the foundational Pythone scripts refer to the [grid documentation](test/grid/README.md).
+
+-   comp-size.sh        Vary the size of the component and the number or ranks
+-   link-delay.sh       Vary the number of clocks between data transfers of links and the number of ranks
+-   linear-scaling.sh    Vary the ratio of components per rank and the number of ranks
+
 ## Known issues
 
-- When using slurm the `sacct` command must be available so slurm job statistics can be gathered. This will be optional in a future release
+These issues are planned to be addressed in future releases.
+
+- When using slurm:
+    1. The `sacct` command must be available so slurm job statistics can be gathered.
+    2. The host information captured in the database file is for the management node and not the node the simulation is actually run on.
