@@ -25,7 +25,8 @@ SST 14.0.0 checkpoint/restart functionality
 * *large-stat* : Tests the creation of instantiation of a variable number of unsigned 
 64bit statistics for very simple components.  Designed to test large blocks of 
 statistics values for simple components.
-* *grid* : Generates a configurable 2 dimensional grid network with configurable component and data transfer parameters. Designed to profile simulation performance by sweeping component counts, data sizes, and thread counts. See [grid documentation](test/grid/README.md).
+* *grid* : Generates a configurable 2 dimensional grid network with configurable component and data transfer parameters. Compile options are provided for testing different container data types for evaluating checkpointing performance. 
+* *sst-bench examples* : Example scripts for launching parameter sweep experiments under Slurm management or sst-bench provided job management for single MPI enabled systems. See [examples/README.md](examples/README.md) for more information.
 
 ## Prerequisites
 
