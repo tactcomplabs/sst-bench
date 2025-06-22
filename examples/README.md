@@ -245,6 +245,14 @@ The bash scripts are intended to be easy to modify. Foundational Python3 scripts
 -   link-delay.sh       Vary the number of clocks between data transfers of links and the number of ranks
 -   linear-scaling.sh    Vary the ratio of components per rank and the number of ranks
 
+## Slurm considerations
+
+The  following slurm scripts, located in `$SST_BENCH_HOME/scripts` will need to be customized for the target system.
+```
+perf.slurm
+completion.slurm
+```
+
 ## Known issues
 
 These issues are planned to be addressed in future releases.
