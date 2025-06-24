@@ -14,11 +14,15 @@ usage() {
     -d specify sqlite3 database file
     -r full path to script directory
     -p delete (prune) run directory when simulation completes" 1>&2
+    -R full path to run directory
     exit 1
 }
 
-while getopts "pd:r:" opt; do
+while getopts "pd:r:R:h" opt; do
     case $opt in
+        h)
+            usage
+            ;;
         d)
             DB="${OPTARG}"
             ;;
@@ -28,6 +32,9 @@ while getopts "pd:r:" opt; do
         r)
             SCRIPTS="${OPTARG}"
             ;;
+        R)
+            RUNDIR="${OPTARG}"
+            ;;    
         *)
             usage
             ;;
@@ -43,7 +50,8 @@ fi
 #
 # Navigate to job run directory following convention
 #
-RUNDIR=/scratch/${USER}/jobs/${SLURM_JOB_NAME}
+# RUNDIR=/scratch/${USER}/jobs/${SLURM_JOB_NAME}
+RUNDIR=${RUNDIR}/${SLURM_JOB_NAME}
 cd ${RUNDIR} || exit 1
 
 #
