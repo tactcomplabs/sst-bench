@@ -41,7 +41,7 @@ fi
 while [ $MINT -le $MAXT ]
 do
   echo "executing $MINT threads"
-  TIMING=`sst -v -n $MINT --model-options="$MODEL_OPTIONS" $SDL | grep "Total time:" | awk '{print $3}'`
+  TIMING=`sst -v --num-threads=$MINT --model-options="$MODEL_OPTIONS" $SDL | grep "Total time:" | awk '{print $3}'`
   echo "$MINT,$TIMING" >> $OUTFILE 2>&1
   MINT=$(($MINT + 1))
 done
