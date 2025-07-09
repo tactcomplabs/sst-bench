@@ -41,6 +41,11 @@ if(${SST_14_1_MIN})
   add_subdirectory(grid)
 endif()
 
+if(${SST_MAJOR_VERSION} GREATER_EQUAL 15)
+  message(STATUS "[SST-BENCH] Enabling NOODLE testing")
+  add_subdirectory(noodle)
+endif()
+
 if(${ENABLE_SSTDBG})
   message(STATUS "[SST-BENCH] Enabling TCL-DBG testing")
   add_subdirectory(tcl-dbg)

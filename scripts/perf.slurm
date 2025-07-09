@@ -29,11 +29,12 @@ usage() {
     echo "Usage: perf.slurm -r path2Scripts -d sqlite3.db -- {commandToRun}
     -r full path to post-processing scripts
     -d full path to persistent sqlite3 database file
+    -R full path to run directory
     -- {command}" 1>&2
     exit 1
 }
 
-while getopts "r:d:h" opt; do
+while getopts "r:d:R:h" opt; do
     case $opt in
         h)
             usage
@@ -44,7 +45,9 @@ while getopts "r:d:h" opt; do
         d)
             DB="${OPTARG}"
             ;;
-        
+        R)
+            RUNDIR="${OPTARG}"
+            ;;        
         \?)
             echo "Invalid option: -$OPTARG" >&2
             usage
@@ -77,12 +80,16 @@ fi
 
 # TODO use --tmpdir
 #-- cd to scratch run directory
-RUNDIR=/scratch/${USER}/jobs/${SLURM_JOB_NAME}/${SLURM_JOB_ID}
+# RUNDIR=/scratch/${USER}/jobs/${SLURM_JOB_NAME}/${SLURM_JOB_ID}
+RUNDIR=${RUNDIR}/${SLURM_JOB_NAME}/${SLURM_JOB_ID}
 if [ -d "${RUNDIR}" ]; then
-    rm -rf ${RUNDIR}
+    echo "Warning: Found ${RUNDIR}. May have stale data"
+    # rm -rf ${RUNDIR}/*
+else
+    mkdir -p ${RUNDIR} || exit 2
 fi
-mkdir -p ${RUNDIR}
-cd ${RUNDIR}
+
+cd ${RUNDIR} || exit 3
 
 # -- `prun` will execute MPI applications using the correct hosts
 echo "[perf.slurm] Launching prun $*"
