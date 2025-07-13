@@ -2,10 +2,7 @@
 
 ## Overview
 
-TODO
-- example charts
-- flow diagram
-- directory structure
+![Flow](imgs/sst-perfdb.png)
 
 ## System Requirements
 
@@ -88,7 +85,10 @@ Setup:
 
 To run:
 ```
-$ ./comp-size.sh
+$ mkdir run1 && cd run1
+$ cp $SST_BENCH_HOME/examples/comp-size.sh
+# Modify the local copy of the script to customize behaviors
+$ ./comp-size.sh 
 ```
 
 The jobs will be run serially to permute the component state size and number of ranks. Each job will be run without checkpointing, with checkpointing enabled, and restarting from each checkpoint. 
@@ -253,10 +253,217 @@ perf.slurm
 completion.slurm
 ```
 
+## SDL: 2d.py
+
+The system under test is provided by `$SST_BENCH_HOME/test/grid/2d.py`. Currently there is no option to override this.
+
+This SDL provides a flexible system where the user can control the number of components, the size of the data managed by each component, the frequency of link transmissions, and the size of the data transmitted.  Additional checking is performance on the internal data to ensure checkpoint restart is functioning correctly.
+
+![component](imgs/component.png)
+
+This system is realized as a configurable 2D mesh network with multiple links connecting nodes. Links at the end of rows and columns wrap around to the first element of the corresonding row or column. A typical use is to create a simple toroid by setting the number of rows to 1. The number of columns will then represent the total number of components as shown below.
+
+![torus](imgs/torus.png)
+
+The specific controls provided by the SDL are described in the built-in help.
+
+```
+$ sst 2d.py -- --help
+usage: sstsim.x [-h] [--x X] [--y Y] [--numBytes NUMBYTES] [--minData MINDATA] [--maxData MAXDATA] [--clocks CLOCKS] [--minDelay MINDELAY] [--maxDelay MAXDELAY] [--rngSeed RNGSEED]
+                [--demoBug DEMOBUG] [--verbose VERBOSE]
+
+2d grid network test 1 with checkpoint/restart checks
+
+options:
+  -h, --help           show this help message and exit
+  --x X                number of horizonal components
+  --y Y                number of vertical components
+  --numBytes NUMBYTES  Internal state size (4 byte increments)
+  --minData MINDATA    Minimum number of dwords transmitted per link
+  --maxData MAXDATA    Maximum number of dwords transmitted per link
+  --clocks CLOCKS      number of clocks to run sim
+  --minDelay MINDELAY  min number of clocks between transmissions
+  --maxDelay MAXDELAY  max number of clocks between transmissions
+  --rngSeed RNGSEED    seed for random number generator
+  --verbose VERBOSE    verbosity level
+```
+
+## Parameter Sweep Script: sst-perfdb.py
+
+The example scripts all utilize `$SST_BENCH_HOME/scripts/sst-perfdb.py` which manages the parameter sweep jobs and aggregates simulation results into a `sqlite3` file. It is intended to be extremely general and modular but currently it is tied closely to the SDL, `$SST_BENCH_HOME/test/grid/2d.py`.
+
+Additional features of `sst-perfdb.py` include:
+
+- A single front-end to launch mpirun or slurm based parameter sweep simulations and capture all data in a single persistent sqlite3 file.
+- Built-in parameter sweep controls. Because the `sqlite3` file is persistent, scripting can be used to provide additional parameter sweep capabilities.
+- A Python3 job utility class that is used to launch locally with mpirun, batching using slurm, or other shell commands.
+- A Job manager that queues up jobs, submits them, and gathers performance data.
+- JSON and Sqlite3 utilities used to gather data in JSON files and populate a persistent sqlite3 database file.
+- Methods to extend performance tests by adding commands to a single Python script which allows extending 'built-in' tests.
+- Ability to control how processes are distributed across nodes.
+- Built-in in job sequencing for:
+    - single simulation with no checkpoints
+    - simulation with and without checkpoints
+    - simulation with and without checkpoints followed by restarting all checkpointed simulations.
+- Job Throttling: Slurm jobs are currently serialized and are limited to a maximum of 4 nodes. (This limit may be relaxed in the future.)
+
+General usage is provided using `sst-perfdb.py --help`.
+
+```
+$ sst-perfdb.py --help
+
+usage: sst-perfdb.py [-h] {linear-scaling,comp-size,link-delay} ...
+
+Simulation parameter sweeps and SST performance database generation
+
+options:
+  -h, --help            show this help message and exit
+
+subcommands:
+  {linear-scaling,comp-size,link-delay}
+                        available subcommands. Use {subcommand --help} for more detail
+    linear-scaling      Test with number of components proportional to number of ranks
+    comp-size           Permute component size and ranks. Fixed number of components
+    link-delay          Permute link delay and ranks. Fixed number of components
+
+This script currently requires `v15.0.0.tcl` branch from git@github.com:tactcomplabs/sst-core.git
+```
+
+Each subcommand has a custom set of options. Use `sst-perfdb.py <subcommand> --help` for more information.
+
+### Linear Scaling
+
+Test with number of components proportional to number of ranks.
+
+```
+$ sst-perfdb.py linear-scaling --help
+
+usage: sst-perfdb.py linear-scaling [-h] [--cpt] [--cptrst] [--simperiod SIMPERIOD] [--clocks CLOCKS] [--numBytes NUMBYTES]
+                                    [--minDelay MINDELAY] [--maxDelay MAXDELAY] [--db DB] [--jobname JOBNAME] [--logging]
+                                    [--nodeclamp NODECLAMP] [--noprompt] [--norun] [--slurm] [--tmpdir TMPDIR] [--ratio RATIO]
+                                    [--rrange RRANGE]
+
+options:
+  -h, --help            show this help message and exit
+  --ratio RATIO         components/ranks [1]
+  --rrange RRANGE       rank range [1,8,1]
+
+job sequence control:
+  --cpt                 run baseline and checkpoint simulations
+  --cptrst              run baseline, checkpoint, and restart simulations
+  --simperiod SIMPERIOD
+                        checkpoint simulation period in ns
+
+SDL controls:
+  --clocks CLOCKS       sst clock cycles to run [1000000]
+  --numBytes NUMBYTES   Size of component state in bytes [16384]
+  --minDelay MINDELAY   minimum delay between transfers [50]
+  --maxDelay MAXDELAY   maximum delay between transfers [100]
+
+Simulation configuration control:
+  --db DB               sqlite database file to be created or updated [timing.db]
+  --jobname JOBNAME     name associated with all jobs [sst-perf]
+  --logging             print debug logging messages
+  --nodeclamp NODECLAMP
+                        distribute threads evenly across a fixed number of specified nodes. [0-minimize]
+  --noprompt            do not prompt user to confirm launching jobs
+  --norun               print job commands but do not run them
+  --slurm               launch slurm jobs instead of using local mpirun
+  --tmpdir TMPDIR       temporary area for running jobs. [current working directory]
+```
+
+### Component Size
+
+Permute component size and ranks. Fixed number of components.
+
+```
+$ sst-perfdb.py comp-size --help
+
+usage: sst-perfdb.py comp-size [-h] [--cpt] [--cptrst] [--simperiod SIMPERIOD] [--clocks CLOCKS] [--numBytes NUMBYTES]
+                               [--minDelay MINDELAY] [--maxDelay MAXDELAY] [--db DB] [--jobname JOBNAME] [--logging]
+                               [--nodeclamp NODECLAMP] [--noprompt] [--norun] [--slurm] [--tmpdir TMPDIR] [--comps COMPS]
+                               [--rrange RRANGE] [--srange SRANGE]
+
+options:
+  -h, --help            show this help message and exit
+  --comps COMPS         number of components [1024]
+  --rrange RRANGE       rank range [1,8,1]
+  --srange SRANGE       size range [16,16400,1024]
+
+job sequence control:
+  --cpt                 run baseline and checkpoint simulations
+  --cptrst              run baseline, checkpoint, and restart simulations
+  --simperiod SIMPERIOD
+                        checkpoint simulation period in ns
+
+SDL controls:
+  --clocks CLOCKS       sst clock cycles to run [1000000]
+  --numBytes NUMBYTES   Size of component state in bytes [16384]
+  --minDelay MINDELAY   minimum delay between transfers [50]
+  --maxDelay MAXDELAY   maximum delay between transfers [100]
+
+Simulation configuration control:
+  --db DB               sqlite database file to be created or updated [timing.db]
+  --jobname JOBNAME     name associated with all jobs [sst-perf]
+  --logging             print debug logging messages
+  --nodeclamp NODECLAMP
+                        distribute threads evenly across a fixed number of specified nodes. [0-minimize]
+  --noprompt            do not prompt user to confirm launching jobs
+  --norun               print job commands but do not run them
+  --slurm               launch slurm jobs instead of using local mpirun
+  --tmpdir TMPDIR       temporary area for running jobs. [current working directory]
+```
+
+### Link Delay
+
+Permute link delay and ranks. Fixed number of components.
+
+```
+$ sst-perfdb.py link-delay --help
+
+usage: sst-perfdb.py link-delay [-h] [--cpt] [--cptrst] [--simperiod SIMPERIOD] [--clocks CLOCKS] [--numBytes NUMBYTES]
+                                [--minDelay MINDELAY] [--maxDelay MAXDELAY] [--db DB] [--jobname JOBNAME] [--logging]
+                                [--nodeclamp NODECLAMP] [--noprompt] [--norun] [--slurm] [--tmpdir TMPDIR] [--comps COMPS]
+                                [--rrange RRANGE] [--drange DRANGE]
+
+options:
+  -h, --help            show this help message and exit
+  --comps COMPS         number of components [1024]
+  --rrange RRANGE       rank range [1,8,1]
+  --drange DRANGE       size range [50,10000,100] (maxDelay=minDelay+|step|)
+
+job sequence control:
+  --cpt                 run baseline and checkpoint simulations
+  --cptrst              run baseline, checkpoint, and restart simulations
+  --simperiod SIMPERIOD
+                        checkpoint simulation period in ns
+
+SDL controls:
+  --clocks CLOCKS       sst clock cycles to run [1000000]
+  --numBytes NUMBYTES   Size of component state in bytes [16384]
+  --minDelay MINDELAY   minimum delay between transfers [50]
+  --maxDelay MAXDELAY   maximum delay between transfers [100]
+
+Simulation configuration control:
+  --db DB               sqlite database file to be created or updated [timing.db]
+  --jobname JOBNAME     name associated with all jobs [sst-perf]
+  --logging             print debug logging messages
+  --nodeclamp NODECLAMP
+                        distribute threads evenly across a fixed number of specified nodes. [0-minimize]
+  --noprompt            do not prompt user to confirm launching jobs
+  --norun               print job commands but do not run them
+  --slurm               launch slurm jobs instead of using local mpirun
+  --tmpdir TMPDIR       temporary area for running jobs. [current working directory]
+```
+
+### Performance Considerations
+
+- Use --minDelay and --maxDelay with values > 1000 to achieve better scaling.
+- Use --norun option before launching parameter sweep simulations to get a count of the total number of simulations that will be launched.
+
 ## Known issues
 
 These issues are planned to be addressed in future releases.
 
-- When using slurm:
-    1. The `sacct` command must be available so slurm job statistics can be gathered.
-    2. The host information captured in the database file is for the management node and not the node the simulation is actually run on.
+- The SDL is currently hardcoded to $SST_BENCH_HOME/test/grid/2d.py. 
+- When using slurm, the host information captured in the database file is for the management node and not the node the simulation is actually run on.
