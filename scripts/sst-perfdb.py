@@ -10,13 +10,10 @@
 # sst-perfdb.py
 #
 
-# Current restrictions:
-# - All jobs are serialized. Once gizmo supports max TDP we can unleash this.
-# - Hardcoded to us test/grid/2d.py. Some work needed to make more general
-
 import argparse
 import jobutils
 import os
+import shutil
 import sqlutils
 import sys
 
@@ -48,6 +45,9 @@ g_lid2sid = {}   # map local id to slurm id
 # be gentle on gizmo
 g_max_nodes = 4
 g_proc_per_node = 36
+
+# not all slurm systems support sacct
+g_sacct = shutil.which('sacct')
 
 class JobType(Enum):
     BASE = 1
@@ -299,13 +299,14 @@ class JobManager():
         self.sqldb.commit()
 
     def pp_remote(self, comp_id:int):
-        for id in self.wipList:
-            if id != comp_id:
-                rundir=f"{g_tmpdir}/{self.jobname}/{id}"
-                cmd=f"sacct -l -j {id} --json"
-                self.jutil.exec(cmd=cmd, cwd=rundir, log="slurm.json")
-                self.sqldb.slurm_info(jobid=id, jobpath=rundir)
-        self.sqldb.commit()
+        if g_sacct != None:
+            for id in self.wipList:
+                if id != comp_id:
+                    rundir=f"{g_tmpdir}/{self.jobname}/{id}"
+                    cmd=f"sacct -l -j {id} --json"
+                    self.jutil.exec(cmd=cmd, cwd=rundir, log="slurm.json")
+                    self.sqldb.slurm_info(jobid=id, jobpath=rundir)
+            self.sqldb.commit()
         self.wipList = []
 
 def linear_scaling(jobmgr, args):
@@ -350,7 +351,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         prog='sst-perfdb.py',
         description='Simulation parameter sweeps and SST performance database generation',
-        epilog='This script currently requires json-timing-info branch from git@github.com:tactcomplabs/sst-core.git' )
+        epilog='This script currently requires `v15.0.0.tcl` branch from git@github.com:tactcomplabs/sst-core.git' )
     # common args
     parent_parser = argparse.ArgumentParser(add_help=False)
     job_seq_group = parent_parser.add_argument_group('job sequence control')
@@ -370,7 +371,7 @@ if __name__ == '__main__':
     cfg_group.add_argument("--noprompt", action="store_true", help="do not prompt user to confirm launching jobs")
     cfg_group.add_argument("--norun", action="store_true", help="print job commands but do not run them")
     cfg_group.add_argument("--slurm", action="store_true", help="launch slurm jobs instead of using local mpirun")
-    cfg_group.add_argument("--tmpdir", type=str, default=g_tmpdir, help=f"temporary area for running jobs. [{g_tmpdir}]")
+    cfg_group.add_argument("--tmpdir", type=str, default=g_tmpdir, help=f"temporary area for running jobs. [current working directory]")
     # sub-parsers
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help='available subcommands. Use {subcommand --help} for more detail')
     
