@@ -43,6 +43,11 @@ elseif(${SST_MAJOR_VERSION} GREATER 14)
   add_subdirectory(large-stat-chkpnt)
 endif()
 
+if(${SST_MAJOR_VERSION} GREATER_EQUAL 15)
+  message(STATUS "[SST-BENCH] Enabling NOODLE micro-benchmark")
+  add_subdirectory(noodle)
+endif()
+
 if(${ENABLE_SSTDBG})
   message(STATUS "[SST-BENCH] Enabling TCL-DBG micro-benchmark")
   add_subdirectory(tcl-dbg)
