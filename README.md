@@ -26,6 +26,8 @@ SST 14.0.0 checkpoint/restart functionality
 64bit statistics for very simple components.  Designed to test large blocks of 
 statistics values for simple components.
 * *grid* : Generates a configurable 2 dimensional grid network with configurable component and data transfer parameters. Compile options are provided for testing different container data types for evaluating checkpointing performance. 
+* *noodle* : Generates randomly connected components using a configurable number of 
+ports per component and randomly sends a configurable number of message payloads per cycle.
 * *sst-bench examples* : Example scripts for launching parameter sweep experiments under Slurm management or sst-bench provided job management for single MPI enabled systems. See [examples/README.md](examples/README.md) for more information.
 
 ## Prerequisites
