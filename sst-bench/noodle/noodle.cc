@@ -24,9 +24,30 @@ Noodle::Noodle(SST::ComponentId_t id, const SST::Params& params ) :
   output.init(
     "Noodle[" + getName() + ":@p:@t]: ",
     Verbosity, 0, SST::Output::STDOUT );
-  const std::string cpuClock = params.find< std::string >("clockFreq", "1GHz");
+
+  // determine our target clock frequency
   clockHandler  = new SST::Clock::Handler2<Noodle,&Noodle::clockTick>(this);
-  timeConverter = registerClock(cpuClock, clockHandler);
+  if( params.contains("randClockRange") ){
+    // derive the target clock frequency range and randomly select a new clock frequency
+    const std::string clockRange = params.find<std::string>("randClockRange", "1-2");
+    size_t dashPos = clockRange.find('-');
+    float minValue = std::stof(clockRange.substr(0, dashPos));
+    float maxValue = std::stof(clockRange.substr(dashPos + 1));
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist(minValue, maxValue);
+    float randomValue = dist(gen);
+    std::string randomValueString = std::to_string(randomValue) + "GHz";
+    timeConverter = registerClock(randomValueString, clockHandler);
+    output.verbose( CALL_INFO, 5, 0, "Clock frequency set to: %s\n",
+                    randomValueString.c_str() );
+  }else{
+    // use the standard clockFreq parameter or the default value of 1GHz
+    const std::string cpuClock = params.find<std::string>("clockFreq", "1GHz");
+    timeConverter = registerClock(cpuClock, clockHandler);
+  }
+
+  // register our component
   registerAsPrimaryComponent();
   primaryComponentDoNotEndSim();
 
@@ -46,11 +67,12 @@ Noodle::Noodle(SST::ComponentId_t id, const SST::Params& params ) :
 
   // setup the port handlers
   portname.resize(numPorts);
+  linkHandlers.resize(numPorts);
   for( uint64_t i=0; i<numPorts; i++ ){
     portname[i] = "port" + std::to_string(i);
-    linkHandlers.push_back(configureLink("port"+std::to_string(i),
-                                         new Event::Handler2<Noodle,
-                                         &Noodle::handleEvent>(this)));
+    linkHandlers[i] = configureLink("port"+std::to_string(i),
+                                    new Event::Handler2<Noodle,
+                                    &Noodle::handleEvent>(this));
   }
 
   // setup the local random number generator
