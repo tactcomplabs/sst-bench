@@ -105,6 +105,7 @@ public:
     {"portsPerClock",       "Sets the number of ports to send per clock", "1" },
     {"clocks",              "Sets the number of clocks to execute",       "10000"},
     {"rngSeed",             "Sets the RNG seed",                          "31337"},
+    {"randClockRange",      "Overrides 'clockFreq' and sets randomly frequencies in the target range (in GHz)", "1-2"},
   )
 
   // -------------------------------------------------------
