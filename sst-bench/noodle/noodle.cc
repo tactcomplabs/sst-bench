@@ -67,11 +67,12 @@ Noodle::Noodle(SST::ComponentId_t id, const SST::Params& params ) :
 
   // setup the port handlers
   portname.resize(numPorts);
+  linkHandlers.resize(numPorts);
   for( uint64_t i=0; i<numPorts; i++ ){
     portname[i] = "port" + std::to_string(i);
-    linkHandlers.push_back(configureLink("port"+std::to_string(i),
-                                         new Event::Handler2<Noodle,
-                                         &Noodle::handleEvent>(this)));
+    linkHandlers[i] = configureLink("port"+std::to_string(i),
+                                    new Event::Handler2<Noodle,
+                                    &Noodle::handleEvent>(this));
   }
 
   // setup the local random number generator
