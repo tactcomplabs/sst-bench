@@ -5,7 +5,7 @@
 #
 # See LICENSE in the top level directory for licensing details
 #
-# noodle-test1.py
+# noodle-test2.py
 #
 
 import os
