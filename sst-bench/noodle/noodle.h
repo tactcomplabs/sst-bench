@@ -150,7 +150,7 @@ public:
   }
 
   /// Noodle: serialization implementations
-  ImplementSerializable(SST::Noodle::Noodle)
+  ImplementSerializable(SST::Noodle::Noodle);
 
 private:
   // -- internal handlers

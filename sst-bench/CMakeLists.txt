@@ -45,7 +45,9 @@ endif()
 
 if(${SST_MAJOR_VERSION} GREATER_EQUAL 15)
   message(STATUS "[SST-BENCH] Enabling NOODLE micro-benchmark")
+  message(STATUS "[SST-BENCH] Enabling SPAGHETTI micro-benchmark")
   add_subdirectory(noodle)
+  add_subdirectory(spaghetti)
 endif()
 
 if(${ENABLE_SSTDBG})
