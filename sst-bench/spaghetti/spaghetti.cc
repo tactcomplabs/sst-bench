@@ -106,7 +106,10 @@ void Spaghetti::sendData(){
       // delays are restrict to 8 bits of precision. 
       // 0 MHz is illegal
       uint32_t freq = localRNG->generateNextUInt32() & 0b111;
-      if (freq==0) freq=1;
+      if (freq==0) {
+        std::cout << "HIT 0" << std::endl;
+        freq=1;
+      }
       TimeConverter tc = getTimeConverter(std::to_string(freq) + "MHz");
       SimTime_t delay = (SimTime_t)(localRNG->generateNextUInt32() & 0b11111111);
       linkHandlers[i]->send(delay, tc, se);
