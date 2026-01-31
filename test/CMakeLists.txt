@@ -46,6 +46,8 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 15)
   message(STATUS "[SST-BENCH] Enabling SPAGHETTI testing")
   add_subdirectory(noodle)
   add_subdirectory(spaghetti)
+  message(STATUS "[SST-BENCH] Enabling HPE-PHOLD testing")
+  add_subdirectory(hpe-phold)
 endif()
 
 if(${ENABLE_SSTDBG})
