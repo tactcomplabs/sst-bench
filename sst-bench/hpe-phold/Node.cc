@@ -1,5 +1,3 @@
-#include <sst/core/sst_config.h>
-#include <sst/core/interfaces/stringEvent.h>
 #include <cmath>
 #include "Node.h"
 
@@ -46,7 +44,7 @@ Node::Node(SST::ComponentId_t id, SST::Params& params)
     timeToRun = params.find<std::string>("timeToRun");
     eventDensity = params.find<double>("eventDensity");
 
-    int componentSize = params.find<int>("componentSize", 0);
+    unsigned componentSize = params.find<unsigned>("componentSize", 0);
     if (componentSize == 0) {
         additionalData = nullptr;
     } else {
@@ -57,9 +55,9 @@ Node::Node(SST::ComponentId_t id, SST::Params& params)
     numLinks = (2 * numRings + 1) * (2 * numRings + 1);
 
     // Use SST's Mersenne RNG for proper checkpoint serialization
-    rng = new SST::RNG::MersenneRNG(myId);
+    rng = new SST::RNG::MersenneRNG((unsigned)myId);
 
-    links = std::vector<SST::Link*>(numLinks);
+    links = std::vector<SST::Link*>((unsigned)numLinks);
 
     setupLinks<Node>();
 
@@ -99,7 +97,7 @@ void Node::setup()
 
     // At this point, counter is in [0,1). Every 1/counter components
     // should get an extra event.
-    int period = 1.0 / counter;
+    int period = int(1.0/counter);
     if (myId % period == 0) {
         auto ev = createEvent();
         auto recipient = movementFunction();
@@ -133,9 +131,9 @@ SST::Interfaces::StringEvent* Node::createEvent()
     // Use SST RNG to generate uniform random [0,1) for comparison with
     // largeEventFraction.
     double random_val = rng->nextUniform();
-    auto size = (random_val < largeEventFraction) ? largePayload
-                                                 : smallPayload;
-    std::string str(size, 'a'); // payload filled with 'a'
+    auto size = (random_val < (double)largeEventFraction) ? (int) largePayload
+                                                 : (int) smallPayload;
+    std::string str((size_t)size, 'a'); // payload filled with 'a'
     SST::Interfaces::StringEvent* ev =
         new SST::Interfaces::StringEvent(str);
     return ev;
@@ -171,7 +169,7 @@ size_t Node::movementFunction()
 {
     // Use SST RNG to generate uniform integer in range [0, numLinks-1]
     uint32_t random_val = rng->generateNextUInt32();
-    return random_val % numLinks;
+    return random_val % (unsigned)numLinks;
 }
 
 // Base class has no additional delay.
@@ -195,7 +193,7 @@ SST::SimTime_t ExponentialNode::timestepIncrementFunction()
     // Use SST RNG for exponential distribution.
     auto v = -1.0 * log(rng->nextUniform());
     // Convert ns to ps via *1000.
-    return v * multiplier * 1000;
+    return (SST::SimTime_t)(v * multiplier) * 1000;
 }
 
 UniformNode::UniformNode(SST::ComponentId_t id, SST::Params& params)
@@ -212,7 +210,7 @@ SST::SimTime_t UniformNode::timestepIncrementFunction()
     auto v = rng->nextUniform();
     auto increment = min + (max - min) * v;
     // Convert ns to ps via *1000.
-    return increment * 1000;
+    return (SST::SimTime_t)increment * 1000;
 }
 
 #ifdef ENABLE_SSTCHECKPOINT

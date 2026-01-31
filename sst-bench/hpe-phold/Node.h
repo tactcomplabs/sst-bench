@@ -6,11 +6,12 @@
 #ifndef _pholdNode_H
 #define _pholdNode_H
 
-#include <sst/core/component.h>
-#include <sst/core/link.h>
-#include <sst/core/sst_types.h>
-#include <sst/core/serialization/serialize.h>
-#include <sst/core/rng/mersenne.h>
+#include "SST.h"
+// #include <sst/core/component.h>
+// #include <sst/core/link.h>
+// #include <sst/core/sst_types.h>
+// #include <sst/core/serialization/serialize.h>
+// #include <sst/core/rng/mersenne.h>
 #ifdef ENABLE_SSTDBG
 #include <sst/dbg/SSTDebug.h>
 #endif
@@ -85,7 +86,7 @@ public:
     {
         // Configure ports named port0..portN. If configuration fails the
         // pointer will be nullptr.
-        for (int i = 0; i < static_cast<int>(links.size()); i++) {
+        for (size_t i = 0; i < links.size(); i++) {
             std::string portName = "port" + std::to_string(i);
             auto* evHandler = new SST::Event::Handler2<
                 Node, &Node::handleEvent>(this);
@@ -104,7 +105,7 @@ public:
     double eventDensity;
     std::string timeToRun;
     int smallPayload, largePayload;
-    float largeEventFraction;
+    double largeEventFraction;
     char* additionalData;
 
     int recvCount;
