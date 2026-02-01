@@ -28,6 +28,7 @@ statistics values for simple components.
 * *grid* : Generates a configurable 2 dimensional grid network with configurable component and data transfer parameters. Compile options are provided for testing different container data types for evaluating checkpointing performance. 
 * *noodle* : Generates randomly connected components using a configurable number of 
 ports per component and randomly sends a configurable number of message payloads per cycle.
+* *hpe-phold* : Port of PHOLD benchmark from https://github.com/hpc-ai-adv-dev/sst-benchmarks based on Fujimoto's 1990 paper [Performance of Time Warp Under Synthetic Workloads](https://gdo149.llnl.gov/attachments/20776356/24674621.pdf).
 * *sst-bench examples* : Example scripts for launching parameter sweep experiments under Slurm management or sst-bench provided job management for single MPI enabled systems. See [examples/README.md](examples/README.md) for more information.
 
 ## Prerequisites
