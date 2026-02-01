@@ -7,14 +7,12 @@
 #define _pholdNode_H
 
 #include "SST.h"
-// #include <sst/core/component.h>
-// #include <sst/core/link.h>
-// #include <sst/core/sst_types.h>
-// #include <sst/core/serialization/serialize.h>
-// #include <sst/core/rng/mersenne.h>
+
 #ifdef ENABLE_SSTDBG
 #include <sst/dbg/SSTDebug.h>
 #endif
+
+#define ENABLE_SSTCHECKPOINT
 
 class Node : public SST::Component {
 public:
@@ -38,7 +36,7 @@ public:
     void serialize_order(
         SST::Core::Serialization::serializer& ser) override;
     // Default constructor for checkpointing - initialize members
-    Node() : rng(nullptr), numLinks(0) {}
+    Node() : numLinks(0), rng(nullptr) {}
 #endif
 
     // Register the component
