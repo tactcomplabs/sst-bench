@@ -16,7 +16,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+// #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wsuggest-override"
 #pragma GCC diagnostic ignored "-Wdouble-promotion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -38,6 +38,7 @@
 #include <sst/core/component.h>
 #include <sst/core/event.h>
 #include <sst/core/interfaces/simpleNetwork.h>
+#include <sst/core/interfaces/stringEvent.h>
 #include <sst/core/link.h>
 #include <sst/core/output.h>
 #include <sst/core/rng/distrib.h>
