@@ -351,7 +351,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         prog='sst-perfdb.py',
         description='Simulation parameter sweeps and SST performance database generation',
-        epilog='This script currently requires `v15.0.0.tcl` branch from git@github.com:tactcomplabs/sst-core.git' )
+        epilog='This script is deprecated and is being replaced by sst-sweeper.py' )
     # common args
     parent_parser = argparse.ArgumentParser(add_help=False)
     job_seq_group = parent_parser.add_argument_group('job sequence control')
