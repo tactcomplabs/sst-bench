@@ -162,21 +162,30 @@ class JobEntry():
         return jobstring
 
 class JobManager():
-    def __init__(self, args):
-        self.args = args
+    def __init__(self, clocks, options, sim_control_params, job_sequencer_params ):
+        print("\nCreating Job Manager")
+        self.clocks = clocks
+
+        self.logging = options['logging']
+        self.noprompt = options['noprompt']
+        self.norun = options['norun']
+        self.slurm = options['slurm']
+
+        self.db = sim_control_params['db']
+        self.jobname = sim_control_params['jobname']
+        self.tmpdir = sim_control_params['tmpdir']
+        self.nodeclamp = sim_control_params['nodeclamp']
+
+        seq = job_sequencer_params['seq']
+        self.do_restart = seq=='BASE_CPT_RST'
+        self.do_checkpoint = seq=='BASE_CPT' or self.do_restart
+        self.simperiod = job_sequencer_params['simperiod']
+
         self.next_id = g_id_base
         self.joblist = OrderedDict()
         self.wipList = []
         self.jutil = jobutils.JobUtil("jutil")
-        # find a suitable temporary directory
-        tdir=args.tmpdir
-        if len(tdir) == 0:
-            tdir = "."
-        if not os.path.isdir(tdir):
-                tdir = "."
-        self.tmpdir = os.path.abspath(tdir)
         # determine unique job name for run directory
-        self.jobname=args.jobname
         rdir=f"{self.tmpdir}/{self.jobname}"
         self.rundir=rdir
         i=0
@@ -189,7 +198,7 @@ class JobManager():
         os.makedirs(self.rundir)
         # print(f"{g_pfx} Jobs will run in: {self.rundir}")
         # database
-        self.sqldb = sqlutils.sqldb(args.db, args.logging)
+        self.sqldb = sqlutils.sqldb(self.db, self.logging)
     def add_job(self, entry:JobEntry):
         id = self.next_id
         self.joblist[id] = entry
@@ -197,36 +206,34 @@ class JobManager():
         return id
     def add_job_sequence(self, baseEntry:JobEntry):
         # base sim
-        id_base = jobmgr.add_job(baseEntry)
-        if self.args.cpt or self.args.cptrst:
-            # checkpoint sim
+        id_base = self.jobmgr.add_job(baseEntry)
+        if self.do_checkpoint:
             cptEntry=copy(baseEntry)
-            cptEntry.cpt(args.simperiod, id_base)
-            id_cpt = jobmgr.add_job(cptEntry)
+            cptEntry.cpt(self.simperiod, id_base)
+            id_cpt = self.jobmgr.add_job(cptEntry)
             # predict checkpoint file names for restart
-            numCpts = int(args.clocks / args.simperiod)
-            period = int(args.simperiod * 1000) # ns to ps
+            numCpts = int(clocks / self.simperiod)
+            period = int(self.simperiod * 1000) # ns to ps
             timestamp = (numCpts+1) * period
-            if self.args.cptrst:
+            if self.do_restart:
                 # schedule shortest restart runs first 
                 for n in range(numCpts, 0, -1):
                     timestamp = timestamp - period
-                    # cpt = f"../{id_cpt}/{g_cptpfx}/{n}_{timestamp}/grid.sstcpt"
                     cpt = f"{g_cptpfx}/{n}_{timestamp}/grid.sstcpt"
                     rstEntry = copy(baseEntry)
                     rstEntry.rst(id_cpt, cpt, n, timestamp)
-                    jobmgr.add_job(rstEntry)
+                    self.jobmgr.add_job(rstEntry)
         # slurm completion creates barrier and can perform post-processing
-        if args.slurm:
+        if self.slurm:
             compEntry=copy(baseEntry)
             compEntry.completion()
-            jobmgr.add_job(compEntry)
+            self.jobmgr.add_job(compEntry)
     def run(self, *, id:int, entry:JobEntry):
-        jobstr = entry.getJobString(args.norun)
+        jobstr = entry.getJobString(self.norun)
         print(f"{g_pfx} job {id} {jobstr}")
-        if args.norun:
+        if self.norun:
             return
-        if args.slurm:
+        if self.slurm:
             cwd = "."        
             rc = self.jutil.exec(cmd=jobstr, cwd=cwd)
             if rc == 0:
@@ -245,12 +252,12 @@ class JobManager():
         # Any records using local ids need to be converted to remote for slurm job
         # (jobid already is)
         friend = entry.friend
-        if args.slurm and friend in g_lid2sid:
+        if self.slurm and friend in g_lid2sid:
             friend = g_lid2sid[entry.friend]
 
         # keep track of jobs up to completion job then run post-processing
         self.wipList.append(jobid)
-        if args.slurm == False:
+        if self.slurm == False:
             self.pp_local(id=jobid, cwd=cwd)
         elif entry.jtype==JobType.COMPLETION:
             self.pp_remote(comp_id=jobid)
@@ -259,22 +266,21 @@ class JobManager():
             "friend": friend,
             "jobtype": entry.jtype.name, 
             "jobstring": jobstr, 
-            "slurm": args.slurm,
+            "slurm": self.slurm,
             "cpt_num": entry.cpt_num,
             "cpt_timestamp": entry.cpt_timestamp,
-            "nodeclamp" : args.nodeclamp,
+            "nodeclamp" : self.nodeclamp,
             "jobnodes"  : entry.nodes,
             "cwd": cwd } )
         self.sqldb.commit()
     def launch(self):
         print(f"{g_pfx} starting {len(self.joblist)} jobs in {self.rundir}")
-        if self.args.noprompt == False:
+        if self.noprompt == False:
             print("continue?")
             resp = input("[Yn]")
             if resp != "Y" and resp != "y":
                 print("exiting...")
                 sys.exit(0)
-
         while len(self.joblist)>0:
             j=self.joblist.popitem(False)
             self.run(id=j[0], entry=j[1])
@@ -295,7 +301,6 @@ class JobManager():
                     self.sqldb.slurm_info(jobid=id, jobpath=rundir)
             self.sqldb.commit()
         self.wipList = []
-
 def linear_scaling(jobmgr, args):
     # submit jobs where number of x components is proportional to the rank
     rrange = args.rrange
@@ -334,8 +339,9 @@ class JsonParams():
     def __init__(self, jsonFile: str):
         self.json = None
         self.errors = []
+        self.sdl_required = ['clocks']
         self.sweep_required = ['name', 'desc', 'ranks', 'threadsPerRank']
-        self.sweep_optional = ['depvar', 'factor', 'sdl']
+        self.sweep_optional = ['depvar', 'sdl']
         if jsonFile == None:
             return
         if not os.path.isfile(jsonFile):
@@ -358,6 +364,9 @@ class JsonParams():
             self.errors.append('error: json missing sim_controls group')
         if 'sdl_params' in self.json:
             self.sdl_params = self.json['sdl_params']
+            for r in self.sdl_required:
+                if r not in self.sdl_params:
+                    self.errors.append(f"error: missing {r}' in sdl_params")
         else:
             self.errors.append('error: json missing sdl_params group')
         if 'sweeps' not in self.json:
@@ -378,15 +387,49 @@ class JsonParams():
                 # check for unknown keys
                 for k in sweep:
                     if k not in self.sweep_required + self.sweep_optional:
-                        self.errors.append(f"error: unknown key '{k}' in sweep '{key}'")
+                        self.errors.append(f"error: unknown key '{k}' in sweep '{key}'")    
                 n += 1
-
+    def sweep_short_help(self) -> str:
+        if self.json == None:
+            return ""
+        return f"\n{", ".join(self.sweeps.keys())}"
+    def sweep_long_help(self) -> str:
+        s = f"Available sweeps [{len(self.sweeps)}]\n"
+        for sweep in self.sweeps:
+            s += f"  {sweep}\n"
+            for k in self.sweeps[sweep]:
+                if k == 'name':
+                    continue
+                if k == 'sdl':
+                    s += f"  --{k}:\n"
+                    for p in self.sweeps[sweep][k]:
+                        s += f"    --{p}: {self.sweeps[sweep][k][p]}\n"
+                else:
+                    s += f"  --{k}: {self.sweeps[sweep][k]}\n"
+        return s
+    def get_sweep(self, sweep):
+        if sweep not in self.sweeps:
+            return None
+        return self.sweeps[sweep]
+    def sweep_params_str(self, indent, sweep):
+        if sweep not in self.sweeps:
+            return ""
+        lines = []
+        for k in self.sweeps[sweep]:
+            if k == 'name':
+                continue
+            if k == 'sdl':
+                lines.append(f"{' ':{indent}}--{k}:")
+                for p in self.sweeps[sweep][k]:
+                    lines.append(f"  {' ':{indent}}--{p}: {self.sweeps[sweep][k][p]}")
+            else:
+                lines.append(f"{' ':{indent}}--{k}: {self.sweeps[sweep][k]}")
+        return "\n".join(lines)       
     def has_errors(self) -> bool:
         return len(self.errors) > 0
     def error_string(self) -> str:
         return f"Please fix json errors in {self.abspath}:\n" + '\n'.join(self.errors)
-    def value_string(self, group, key) -> str:
-        # return blank for help string when not using jsonFile
+    def defv_str(self, group, key) -> str:
         if self.json == None:
             return ""
         if group in self.json:
@@ -395,8 +438,6 @@ class JsonParams():
                     return f"[{self.json[group][key][0]}]" # default help value string
         self.errors.append(f"error: problem with json.{group}.{key}")
         return f"[???]"
-    def sweep_help(self) -> str:
-        s = f"Available sweeps\n{self.sweeps}"
 
 if __name__ == '__main__':
 
@@ -417,7 +458,7 @@ if __name__ == '__main__':
     # positional arguments
     parser.add_argument('jsonFile', help="JSON sweeper configuration file")
     parser.add_argument('sdlFile', help="Python SST configuration file")
-    parser.add_argument('sweep', help="Name of sweep defined in jsonFile")
+    parser.add_argument('sweep', help=f"Name of sweep from jsonFile {jsonParams.sweep_short_help()}")
 
     # options
     parser.add_argument("--logging", action="store_true",
@@ -433,20 +474,20 @@ if __name__ == '__main__':
     job_seq_group = parser.add_argument_group('job sequencer overrides')
     ALLOWED_SEQ = ['BASE', 'BASE_CPT', 'BASE_CPT_RST']
     job_seq_group.add_argument("--seq", type=str, choices=ALLOWED_SEQ,
-                               help=f"Select simulation sequence {jsonParams.value_string('job_sequencer', 'seq')}")
+                               help=f"Select simulation sequence {jsonParams.defv_str('job_sequencer', 'seq')}")
     job_seq_group.add_argument("--simperiod", type=int, 
-                               help=f"checkpoint simulation period in ns {jsonParams.value_string('job_sequencer', 'simperiod')}")
+                               help=f"checkpoint simulation period in ns {jsonParams.defv_str('job_sequencer', 'simperiod')}")
     
     # "sim_control" overrides
     sim_ctl_group = parser.add_argument_group('sim control overrides')
     sim_ctl_group.add_argument("--db", type=str, 
-                               help=f"sqlite database file to be created or updated {jsonParams.value_string('sim_controls', 'db')}")
+                               help=f"sqlite database file to be created or updated {jsonParams.defv_str('sim_controls', 'db')}")
     sim_ctl_group.add_argument("--jobname", type=str,
-                               help=f"name associated with all jobs {jsonParams.value_string('sim_controls', 'jobname')}")
+                               help=f"name associated with all jobs {jsonParams.defv_str('sim_controls', 'jobname')}")
     sim_ctl_group.add_argument("--tmpdir", type=str,
-                               help=f"temporary area for running jobs {jsonParams.value_string('sim_controls', 'tmpdir')}")
+                               help=f"temporary area for running jobs {jsonParams.defv_str('sim_controls', 'tmpdir')}")
     sim_ctl_group.add_argument("--nodeclamp", type=int,
-                               help=f"distribute threads evenly across specified nodes {jsonParams.value_string('sim_controls', 'nodeclamp')}")
+                               help=f"distribute threads evenly across specified nodes {jsonParams.defv_str('sim_controls', 'nodeclamp')}")
 
     # "sdl_params" overrides
     if jsonParams.json != None and hasattr(jsonParams,'sdl_params'):
@@ -456,7 +497,7 @@ if __name__ == '__main__':
             for opt in sdl_params.keys():
                 # long in tooth to provide more json validation and user visible error messages
                 sdl_params_group.add_argument(f"--{opt}", type=int, 
-                                              help=f"{sdl_params[opt][1]} {jsonParams.value_string('sdl_params', opt)}")
+                                              help=f"{sdl_params[opt][1]} {jsonParams.defv_str('sdl_params', opt)}")
 
     # help text will notify user of any malformed json checking in argument parser creation
     if jsonParams.json == None:
@@ -464,20 +505,36 @@ if __name__ == '__main__':
     elif jsonParams.has_errors():
         parser.epilog = jsonParams.error_string()
     else:
-        parser.epilog = jsonParams.sweep_help()
+        parser.epilog = jsonParams.sweep_long_help()
 
     # Validate positional arguments
     args = parser.parse_args()
     if not os.path.isfile(args.sdlFile):
         print(f"Could not find sdl file {args.sdlFile}")
+        print(parser.usage)
         sys.exit(1)
     if jsonParams.json == None:
         print(f"Invalid json file: {args.jsonFile}")
+        print(parser.usage)
+        sys.exit(1)
+    sweep = jsonParams.get_sweep(args.sweep)
+    if sweep == None:
+        print(f"error: sweep '{args.sweep}' not defined\nPlease select sweep from: {jsonParams.sweep_short_help()}\n")
+        print(parser.usage)
         sys.exit(1)
     if jsonParams.has_errors():
         print(jsonParams.error_string())
+        print(parser.usage)
         sys.exit(1)
-        
+    
+    # collect the boolean options
+    options = {
+        'logging' : args.logging,
+        'noprompt' : args.noprompt,
+        'norun' : args.norun,
+        'slurm' : args.slurm
+    }
+
     #
     # Configuration sets defaults based on json file with command line overrides
     #
@@ -489,26 +546,26 @@ if __name__ == '__main__':
         pprint(jsonParams.sdl_params)
     
     print(f"{os.path.abspath(sys.argv[0])}\nVersion {g_version}")
-    print("positional")
-    print(f"  jsonFile {os.path.abspath(args.jsonFile)}")
-    print(f"  sdlFile {os.path.abspath(args.sdlFile)}")
+    print("\n[positional]")
+    print(f"  {'jsonFile':<10} {os.path.abspath(args.jsonFile)}")
+    print(f"  {'sdlFile':<10} {os.path.abspath(args.sdlFile)}")
+    print(f"  {'sweep':<10} {args.sweep}")
+    print(jsonParams.sweep_params_str(13, args.sweep))
 
-    print("options")
-    print(f"   logging: {args.logging}")
-    print(f"   noprompt: {args.noprompt}")
-    print(f"   norun: {args.norun}")
-    print(f"   slurm: {args.slurm}")
+    print("\n[options]")
+    for o in options:
+        print(f"  {o:<10} {options[o]}")
 
-    print("resolved job_sequencer parameters")
+    print("\n[resolved job_sequencer parameters]")
     job_sequencer_params = {}
     for key in jsonParams.job_sequencer_params:
         v = jsonParams.job_sequencer_params[key][0]
         if key in args_dict and args_dict[key] != None:
             v = args_dict[key]
         job_sequencer_params[key] = v
-        print(f"   {key}: {v}")
+        print(f"  {key:<10} {v}")
 
-    print("resolved sim_controls parameters")
+    print("\n[resolved sim_controls parameters]")
     sim_control_params = {}
     for key in jsonParams.sim_control_params:
         v = jsonParams.sim_control_params[key][0]
@@ -518,17 +575,17 @@ if __name__ == '__main__':
         if key=="db" or key=="tmpdir":
             v = os.path.abspath(v)
         sim_control_params[key] = v
-        print(f"   {key}: {v}")
+        print(f"  {key:<10} {v}")
 
-    print("resolved SDL parameters")
+    print("\n[resolved SDL parameters]")
     sdl_params = {}
     for key in jsonParams.sdl_params:
         v = jsonParams.sdl_params[key][0]
         if key in args_dict and args_dict[key] != None:
             v = args_dict[key]
         sdl_params[key] = v
-        print(f"   {key}: {v}")
-    
+        print(f"  {key:<10} {v}")
+
     #
     # Resolved parameter validation
     #
@@ -540,10 +597,11 @@ if __name__ == '__main__':
         sys.exit(1)
     # Total simulation clocks would be nice to tag in JSON
     if 'clocks' in sdl_params:
-        if sdl_params['clocks'] <= 0:
+        clocks = int(sdl_params['clocks'])
+        if clocks <= 0:
             print("error: clocks must be greater than 0")
             sys.exit(1)
-        if simperiod >= sdl_params['clocks']:
+        if simperiod >= clocks:
             print("error: simperiod must be greater than clocks")
             sys.exit(1)
     # confirm temporary directory exists
@@ -556,15 +614,11 @@ if __name__ == '__main__':
         print(f"error: could not locate database (db) directory: {dirname}")
         sys.exit(1)
 
-    # if hasattr(args, 'func') == False:
-    #     parser.print_help()
-    #     sys.exit(1)
+    # create job manager
+    jobmgr = JobManager(sdl_params['clocks'], options, sim_control_params, job_sequencer_params)
 
-    # # create job manager
-    # jobmgr = JobManager(args)
-
-    # # Invoke selection to set up jobs
+    # Invoke selection to set up jobs
     # args.func(jobmgr, args)
 
-    # # Launch from job manager
+    # Launch from job manager
     # jobmgr.launch()
