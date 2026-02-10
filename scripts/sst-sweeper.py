@@ -109,9 +109,9 @@ class JobEntry():
         self.setdeps = False
 
         self.sdl = g_sdl
-        self.sdlopts = ""
+        self.sdlopts = "--"
         for opt in sdl_params:
-            self.sdlopts += f"--{opt}={sdl_params[opt]} "
+            self.sdlopts += f" --{opt}={sdl_params[opt]}"
         
         # nodes and processes
         self.max_nodes = g_max_nodes     
@@ -295,7 +295,7 @@ class JobManager():
             "cwd": cwd } )
         self.sqldb.commit()
     def launch(self):
-        print(f"{g_pfx} starting {len(self.joblist)} jobs in {self.rundir}")
+        print(f"\n{g_pfx} starting {len(self.joblist)} jobs in {self.rundir}")
         if self.noprompt == False:
             print("continue?")
             resp = input("[Yn]")
@@ -624,5 +624,6 @@ if __name__ == '__main__':
                 threads=t,
                 sdl_params=sdl_params
             ))
+    
     # Launch from job manager
-    # jobmgr.launch()
+    jobmgr.launch()

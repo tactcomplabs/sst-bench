@@ -2,7 +2,7 @@
     "job_sequencer" :
     {
         "seq"       : ["BASE",   "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
-        "simperiod" : ["100000", "checkpoint sim period in ns"]
+        "simperiod" : ["10000",  "checkpoint sim period in ns"]
     },
     "sim_controls"  :
     {
@@ -13,14 +13,14 @@
     },
     "sdl_params"    :
     {
-        "x"         : ["1000",      "number of horizonal components"],
+        "x"         : ["10",        "number of horizonal components"],
         "y"         : ["1",         "number of vertical components"],
-        "numBytes"  : ["16384",     "Internal state size in 4B increments"],
+        "numBytes"  : ["512",       "Internal state size in 4B increments"],
         "minData"   : ["10",        "minimum number of dwords transmitted per link"],
         "maxData"   : ["256",       "maximum number of dwords transmitted per link"],
-        "clocks"    : ["1000000",   "[REQUIRED] number of clocks to run sim"],
-        "minDelay"  : ["50",        "min number of clocks between transmissions"],
-        "maxDelay"  : ["100",       "max number of clocks between transmissions"],
+        "clocks"    : ["100000",    "[REQUIRED] number of clocks to run sim"],
+        "minDelay"  : ["500",       "min number of clocks between transmissions"],
+        "maxDelay"  : ["1000",      "max number of clocks between transmissions"],
         "rngSeed"   : ["1223",      "seed for random number generator"],
         "verbose"   : ["0",         "verbosity level"]
     },
@@ -49,20 +49,20 @@
         },
         { "name"     : "size_rank_perm",
           "desc"     : "Permute comp size and ranks for a fixed number of components",
-          "ranks"    : "1,8,1",
+          "ranks"    : "1,9,1",
           "threadsPerRank" : "1",
           "sdl"      : 
           { 
-            "x"  : "16,16400,1024"
+            "x"  : "1024,10240, 1024"
           }
         },
         { "name"     : "delay_rank_perm",
           "desc"     : "Permute comp link delay and ranks for a fixed number of components",
-          "ranks"    : "1,8,1",
+          "ranks"    : "1,9,1",
           "threadsPerRank" : "1",
           "sdl" : 
           {
-            "minDelay" : "50,10000,100"
+            "minDelay" : "100,1000,100"
           }
         }
     ]
