@@ -62,10 +62,20 @@ if not os.path.isdir(g_tmpdir):
     else:
         g_tmpdir = "."
 
-def range_arg(v):
-    # command line range argument type
+def is_integer(s: str): 
     try:
-        values=[int(i) for i in v.split(',')]
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+def range_from_str(s: str) -> range:
+    # command line range argument type
+    if is_integer(s):
+        v = int(s)
+        return range(v, v+1, 1)
+    try:
+        values=[int(i) for i in s.split(',')]
         assert(len(values)==2 or len(values)==3)
     except (ValueError, AssertionError):
         raise argparse.ArgumentTypeError(
@@ -75,7 +85,8 @@ def range_arg(v):
     return range(*values)
 
 class JobEntry():
-    def __init__(self, *, slurm:bool, ranks:int, threads:int, x:int, y:int, clocks:int, numBytes: int, minDelay: int, maxDelay: int, predecessors:list = []):
+    def __init__(self, *, options:list, sim_controls:list, ranks:int, threads:int, sdl_params:list, predecessors:list = []):
+        
         self.jtype = JobType.BASE
         self.predecessors = predecessors
         self.ranks = ranks
@@ -83,8 +94,13 @@ class JobEntry():
         self.procs = ranks * threads
         self.sstopts = f"--num-threads={self.threads} --output-json=config.json"
         self.sstopts += f" --print-timing-info --timing-info-json=timing.json"
-        self.sdl = g_sdl
-        self.sdlopts = f"-- --x={x} --y={y} --clocks={clocks} --numBytes={numBytes} --minDelay={minDelay} --maxDelay={maxDelay}"
+
+        self.slurm = options['slurm']
+
+        self.db = sim_controls['db']
+        self.jobname = sim_controls['jobname']
+        self.nodeclamp = int(sim_controls['nodeclamp'])
+
         self.cptid = 0
         self.cptfile = ""
         self.friend = 0
@@ -92,25 +108,30 @@ class JobEntry():
         self.cpt_timestamp = 0
         self.setdeps = False
 
+        self.sdl = g_sdl
+        self.sdlopts = ""
+        for opt in sdl_params:
+            self.sdlopts += f"--{opt}={sdl_params[opt]} "
+        
         # nodes and processes
         self.max_nodes = g_max_nodes     
         self.max_processes = self.max_nodes * g_proc_per_node   
         if self.procs > self.max_processes:
             print(f"{self.procs} processes exceed limit of {self.max_processes}")
             sys.exit(1)
-        if args.nodeclamp == 0:
+        if self.nodeclamp == 0:
             # minimize nodes
             self.nodes = 1 + int( (self.procs - 1 ) / g_proc_per_node)
             if self.nodes > self.max_nodes:
                 print(f"{g_pfx} Exceeded max nodes ({self.max_nodes}) attempting {self.ranks} ranks and {self.threads} threads limiting to {g_proc_per_node} processes per node. Max processes { self.max_processes }")
                 sys.exit(1)
-        elif args.nodeclamp > self.max_nodes:
-            print(f"{g_pfx} nodeclamp of {args.nodeclamp} exceeds max allowable nodes {self.max_nodes}")
+        elif self.nodeclamp > self.max_nodes:
+            print(f"{g_pfx} nodeclamp of {self.nodeclamp} exceeds max allowable nodes {self.max_nodes}")
             sys.exit(1)
         else:
             # distribute across constant node count
-            self.nodes = args.nodeclamp
-            print(f"{args.nodeclamp} {self.nodes} {self.procs}")
+            self.nodes = self.nodeclamp
+            print(f"{self.nodeclamp} {self.nodes} {self.procs}")
             procsPerNode = self.procs / self.nodes
             if  procsPerNode > g_proc_per_node:
                 print(f"{g_pfx} {self.procs} across {self.nodes} nodes requires {procsPerNode} per node exceeding limit of {g_proc_per_node}")
@@ -142,13 +163,13 @@ class JobEntry():
     def getJobString(self, norun = False):
         # only called when submitting runs to ensure previous slurm ids are available
         if self.jtype == JobType.COMPLETION:
-            jobstring = f"{g_sbatch} --parsable --wait --dependency=singleton --job-name={args.jobname} {g_slurm_completion} -r {g_scripts} -R {g_tmpdir} -d {args.db}"
+            jobstring = f"{g_sbatch} --parsable --wait --dependency=singleton --job-name={self.jobname} {g_slurm_completion} -r {g_scripts} -R {g_tmpdir} -d {self.db}"
             return jobstring
         if self.jtype == JobType.RST:
-            sid = self.getsid(args.slurm, self.cptid, norun)
+            sid = self.getsid(self.slurm, self.cptid, norun)
             self.sstopts += f" --load-checkpoint ../{sid}/{self.cptfile}"
         sst_cmd = f"sst {self.sdl} {self.sstopts} {self.sdlopts}"
-        if args.slurm == False:
+        if self.slurm == False:
             # local jobs will not be run in parallel so dependencies do not matter
             jobstring = f"mpirun -np {self.ranks} {sst_cmd}"
         else:
@@ -158,7 +179,7 @@ class JobEntry():
                 for lid in self.predecessors:
                     deps += f":{self.getsid(True, lid, norun)}"
             wait = "--wait"  # TODO this should be optional
-            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.procs} -J {args.jobname} {g_slurm_script} -r {g_scripts} -d {args.db} -R {g_tmpdir} {sst_cmd}"
+            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.procs} -J {self.jobname} {g_slurm_script} -r {g_scripts} -d {self.db} -R {g_tmpdir} {sst_cmd}"
         return jobstring
 
 class JobManager():
@@ -206,11 +227,11 @@ class JobManager():
         return id
     def add_job_sequence(self, baseEntry:JobEntry):
         # base sim
-        id_base = self.jobmgr.add_job(baseEntry)
+        id_base = jobmgr.add_job(baseEntry)
         if self.do_checkpoint:
             cptEntry=copy(baseEntry)
             cptEntry.cpt(self.simperiod, id_base)
-            id_cpt = self.jobmgr.add_job(cptEntry)
+            id_cpt = jobmgr.add_job(cptEntry)
             # predict checkpoint file names for restart
             numCpts = int(clocks / self.simperiod)
             period = int(self.simperiod * 1000) # ns to ps
@@ -222,12 +243,12 @@ class JobManager():
                     cpt = f"{g_cptpfx}/{n}_{timestamp}/grid.sstcpt"
                     rstEntry = copy(baseEntry)
                     rstEntry.rst(id_cpt, cpt, n, timestamp)
-                    self.jobmgr.add_job(rstEntry)
+                    jobmgr.add_job(rstEntry)
         # slurm completion creates barrier and can perform post-processing
         if self.slurm:
             compEntry=copy(baseEntry)
             compEntry.completion()
-            self.jobmgr.add_job(compEntry)
+            jobmgr.add_job(compEntry)
     def run(self, *, id:int, entry:JobEntry):
         jobstr = entry.getJobString(self.norun)
         print(f"{g_pfx} job {id} {jobstr}")
@@ -301,37 +322,6 @@ class JobManager():
                     self.sqldb.slurm_info(jobid=id, jobpath=rundir)
             self.sqldb.commit()
         self.wipList = []
-def linear_scaling(jobmgr, args):
-    # submit jobs where number of x components is proportional to the rank
-    rrange = args.rrange
-    ratio = args.ratio
-    for r in rrange:
-        X = r * ratio
-        jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=args.numBytes, minDelay=args.minDelay, maxDelay=args.maxDelay))
-def comp_size(jobmgr, args):
-    # submit jobs where number of components is constant and we permute the data size and ranks
-    rrange = args.rrange
-    srange = args.srange
-    X = args.comps
-    for s in srange:
-        for r in rrange:
-            if X >= r:
-                jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=s, minDelay=args.minDelay, maxDelay=args.maxDelay))
-            else:
-                print(f"warning: components({X}) is less then ranks({r} ... skipped)")
-def link_delay(jobmgr, args):
-    # submit jobs where number of components and data size are constant. Permute link transmission delay and ranks
-    # maxDelay is fixed to delay + 50
-    rrange = args.rrange
-    drange = args.drange
-    X = args.comps
-    for d in drange:
-        for r in rrange:
-            dmax = d + abs(drange.step)
-            if X >= r:
-                jobmgr.add_job_sequence(JobEntry(slurm=args.slurm, ranks=r, threads=1, x=X, y=1, clocks=args.clocks, numBytes=args.numBytes, minDelay=d, maxDelay=dmax))
-            else:
-                print(f"warning: components({X}) is less then ranks({r} ... skipped)")
 
 # The json parameter settings
 class JsonParams():
@@ -517,8 +507,8 @@ if __name__ == '__main__':
         print(f"Invalid json file: {args.jsonFile}")
         print(parser.usage)
         sys.exit(1)
-    sweep = jsonParams.get_sweep(args.sweep)
-    if sweep == None:
+    sweep_params = jsonParams.get_sweep(args.sweep)
+    if sweep_params == None:
         print(f"error: sweep '{args.sweep}' not defined\nPlease select sweep from: {jsonParams.sweep_short_help()}\n")
         print(parser.usage)
         sys.exit(1)
@@ -617,8 +607,22 @@ if __name__ == '__main__':
     # create job manager
     jobmgr = JobManager(sdl_params['clocks'], options, sim_control_params, job_sequencer_params)
 
-    # Invoke selection to set up jobs
-    # args.func(jobmgr, args)
+    # Generate job descriptions and add to job manager
 
+    # Identify sweep ranges
+    rankRange=range_from_str(sweep_params['ranks'])
+    threadRange=range_from_str(sweep_params['threadsPerRank'])
+    # TODO SDL variable range
+    # TODO SDL dependent variable * (ranks + threads)
+
+    for r in rankRange:
+        for t in threadRange:
+            jobmgr.add_job_sequence(JobEntry(
+                options=options,
+                sim_controls=sim_control_params,
+                ranks=r,
+                threads=t,
+                sdl_params=sdl_params
+            ))
     # Launch from job manager
     # jobmgr.launch()

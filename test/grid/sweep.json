@@ -13,7 +13,7 @@
     },
     "sdl_params"    :
     {
-        "x"         : ["2",         "number of horizonal components"],
+        "x"         : ["1000",      "number of horizonal components"],
         "y"         : ["1",         "number of vertical components"],
         "numBytes"  : ["16384",     "Internal state size in 4B increments"],
         "minData"   : ["10",        "minimum number of dwords transmitted per link"],
@@ -31,9 +31,19 @@
           "ranks"    : "1",
           "threadsPerRank" : "1"
         },
+        { "name"     : "thread-sanity",
+          "desc"     : "Basic check of a short simulation sequence",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,9,2"
+        },
+        { "name"     : "rank-sanity",
+          "desc"     : "Basic check of a short simulation sequence",
+          "ranks"    : "1,9,2",
+          "threadsPerRank" : "1"
+        },
         { "name"     : "weak_scaling",
           "desc"     : "Maintain the number of components proportional to the number of ranks plus threads",
-          "ranks"    : "1,8,1",
+          "ranks"    : "1,9,1",
           "threadsPerRank" : "1",
           "depvar"   : "x"
         },
