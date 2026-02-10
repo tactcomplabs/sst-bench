@@ -209,7 +209,7 @@ class JobManager():
         seq = job_sequencer_params['seq']
         self.do_restart = seq=='BASE_CPT_RST'
         self.do_checkpoint = seq=='BASE_CPT' or self.do_restart
-        self.simperiod = job_sequencer_params['simperiod']
+        self.simperiod = int(job_sequencer_params['simperiod'])
 
         self.next_id = g_id_base
         self.joblist = OrderedDict()
@@ -669,7 +669,7 @@ if __name__ == '__main__':
     print(f"rank sweep range:\t{rank_sweep_range}")
     print(f"thread sweep range:\t{thread_sweep_range}")
     if sdl_sweep_var != None:
-        print(f"sdl var {sdl_sweep_var} sweep range:\t{sdl_sweep_range}")
+        print(f"sdl {sdl_sweep_var} sweep range:\t{sdl_sweep_range}")
     else:
         sdl_sweep_range = range(1,2,1)  # placeholder for inner loop
 
