@@ -62,13 +62,22 @@ if not os.path.isdir(g_tmpdir):
     else:
         g_tmpdir = "."
 
-def is_integer(s: str): 
+def is_integer(s: str) -> bool:
     try:
         int(s)
         return True
     except ValueError:
         return False
 
+def is_strict_range(s: str) -> bool:
+    if is_integer(s):
+        return False
+    try:
+        range_from_str(s)
+        return True
+    except (ValueError, argparse.ArgumentTypeError):
+        return False
+    
 def range_from_str(s: str) -> range:
     # command line range argument type
     if is_integer(s):
@@ -442,7 +451,7 @@ if __name__ == '__main__':
     # main parser
     parser = argparse.ArgumentParser(
         description='SST Simulation parameter sweeps with performance database generation',
-        usage='sst=sweeper.py jsonFile sdlFile sweep [options] [overrides]\n       sst=sweeper.py --help <path-to-jsonFile>',
+        usage='sst-sweeper.py jsonFile sdlFile sweep [options] [overrides]\n       sst-sweeper.py --help <path-to-jsonFile>',
         formatter_class=argparse.RawTextHelpFormatter)
     
     # positional arguments
@@ -549,32 +558,32 @@ if __name__ == '__main__':
     print("\n[resolved job_sequencer parameters]")
     job_sequencer_params = {}
     for key in jsonParams.job_sequencer_params:
-        v = jsonParams.job_sequencer_params[key][0]
+        val = jsonParams.job_sequencer_params[key][0]
         if key in args_dict and args_dict[key] != None:
-            v = args_dict[key]
-        job_sequencer_params[key] = v
-        print(f"  {key:<10} {v}")
+            val = args_dict[key]
+        job_sequencer_params[key] = val
+        print(f"  {key:<10} {val}")
 
     print("\n[resolved sim_controls parameters]")
     sim_control_params = {}
     for key in jsonParams.sim_control_params:
-        v = jsonParams.sim_control_params[key][0]
+        val = jsonParams.sim_control_params[key][0]
         if key in args_dict and args_dict[key] != None:
-            v = args_dict[key]
+            val = args_dict[key]
         # resolve file paths
         if key=="db" or key=="tmpdir":
-            v = os.path.abspath(v)
-        sim_control_params[key] = v
-        print(f"  {key:<10} {v}")
+            val = os.path.abspath(val)
+        sim_control_params[key] = val
+        print(f"  {key:<10} {val}")
 
     print("\n[resolved SDL parameters]")
     sdl_params = {}
     for key in jsonParams.sdl_params:
-        v = jsonParams.sdl_params[key][0]
+        val = jsonParams.sdl_params[key][0]
         if key in args_dict and args_dict[key] != None:
-            v = args_dict[key]
-        sdl_params[key] = v
-        print(f"  {key:<10} {v}")
+            val = args_dict[key]
+        sdl_params[key] = val
+        print(f"  {key:<10} {val}")
 
     #
     # Resolved parameter validation
@@ -614,6 +623,34 @@ if __name__ == '__main__':
             depvar_base_value = int(sdl_params[depvar])
             print(f"\nFound SDL dependent variable, '{depvar}', with base value={depvar_base_value}")
             print(f"{depvar} will be resolved as {depvar_base_value} * (ranks + threads)")
+    # SDL sweep variable check
+    sdl_sweep_params = None
+    sdl_sweep_var = None
+    sdl_sweep_range = None
+    
+    if 'sdl' in sweep_params:
+        sdl_sweep_params = sweep_params['sdl']
+        errors = 0
+        for key in sdl_sweep_params:
+            if key not in sdl_params:
+                print(f"sdl sweep param '{key} not found in sweep sdl parameters")
+                errors += 1
+                continue
+            val = sdl_sweep_params[key]
+            if not is_strict_range(val):
+                print(f"sdl key in sweep section specify a range: '{key}:{val}' is not a range")
+                errors += 1
+                continue
+            if sdl_sweep_var==None:
+                sdl_sweep_var = key
+                sdl_sweep_range = range_from_str(val)
+            else:
+                print(f"Currently cannot have two SDL ranges: Detected ranges on '{sdl_sweep_var}' and '{key}'")
+                errors += 1
+                continue
+        if errors > 0:
+            print(f"Please fix errors in sweep sdl parameters")
+            sys.exit(1)
 
     #
     # Job Section
@@ -624,22 +661,33 @@ if __name__ == '__main__':
 
     # Generate job descriptions and add to job manager
 
-    # Identify sweep ranges
-    rankRange=range_from_str(sweep_params['ranks'])
-    threadRange=range_from_str(sweep_params['threadsPerRank'])
-    # TODO SDL variable range
+    # Identify rank and thread sweep ranges
+    rank_sweep_range=range_from_str(sweep_params['ranks'])
+    thread_sweep_range=range_from_str(sweep_params['threadsPerRank'])
+
+    # confirm ranges
+    print(f"rank sweep range:\t{rank_sweep_range}")
+    print(f"thread sweep range:\t{thread_sweep_range}")
+    if sdl_sweep_var != None:
+        print(f"sdl var {sdl_sweep_var} sweep range:\t{sdl_sweep_range}")
+    else:
+        sdl_sweep_range = range(1,2,1)  # placeholder for inner loop
+
     local_sdl_params = sdl_params
-    for r in rankRange:
-        for t in threadRange:
-            if depvar:
-                local_sdl_params[depvar] = depvar_base_value * ( r + t )
-            jobmgr.add_job_sequence(JobEntry(
-                options=options,
-                sim_controls=sim_control_params,
-                ranks=r,
-                threads=t,
-                sdl_params=local_sdl_params
-            ))
+    for r in rank_sweep_range:
+        for t in thread_sweep_range:
+            for s in sdl_sweep_range:
+                if sdl_sweep_var:
+                    local_sdl_params[sdl_sweep_var] = s
+                if depvar:
+                    local_sdl_params[depvar] = depvar_base_value * ( r + t )
+                jobmgr.add_job_sequence(JobEntry(
+                    options=options,
+                    sim_controls=sim_control_params,
+                    ranks=r,
+                    threads=t,
+                    sdl_params=local_sdl_params
+                ))
     
     # Launch from job manager
     jobmgr.launch()

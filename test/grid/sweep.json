@@ -49,20 +49,20 @@
         },
         { "name"     : "size_rank_perm",
           "desc"     : "Permute comp size and ranks for a fixed number of components",
-          "ranks"    : "1,9,1",
+          "ranks"    : "2,9,2",
           "threadsPerRank" : "1",
           "sdl"      : 
           { 
-            "x"  : "1024,10240,1024"
+            "x"  : "100,1100,100"
           }
         },
         { "name"     : "delay_rank_perm",
           "desc"     : "Permute comp link delay and ranks for a fixed number of components",
-          "ranks"    : "1,9,1",
+          "ranks"    : "2,9,2",
           "threadsPerRank" : "1",
-          "sdl" : 
+          "sdl" :
           {
-            "minDelay" : "100,1000,100"
+            "minDelay" : "100,1100,100"
           }
         }
     ]
