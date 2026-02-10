@@ -44,6 +44,8 @@ endif()
 if(${SST_MAJOR_VERSION} GREATER_EQUAL 15)
   message(STATUS "[SST-BENCH] Enabling NOODLE testing")
   add_subdirectory(noodle)
+  message(STATUS "[SST-BENCH] Enabling PARSER-BENCH testing")
+  add_subdirectory(parser-bench)
 endif()
 
 if(${ENABLE_SSTDBG})
