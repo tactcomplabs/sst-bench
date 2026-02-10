@@ -603,6 +603,21 @@ if __name__ == '__main__':
     if not os.path.isdir(dirname):
         print(f"error: could not locate database (db) directory: {dirname}")
         sys.exit(1)
+    # sweep dependent variable check
+    depvar = None
+    if 'depvar' in sweep_params:
+        depvar = sweep_params['depvar']
+        if depvar not in sdl_params:
+            print(f"error: sweep dependent variable {depvar} not found in sdl_params")
+            sys.exit(1)
+        else:
+            depvar_base_value = int(sdl_params[depvar])
+            print(f"\nFound SDL dependent variable, '{depvar}', with base value={depvar_base_value}")
+            print(f"{depvar} will be resolved as {depvar_base_value} * (ranks + threads)")
+
+    #
+    # Job Section
+    #
 
     # create job manager
     jobmgr = JobManager(sdl_params['clocks'], options, sim_control_params, job_sequencer_params)
@@ -613,16 +628,17 @@ if __name__ == '__main__':
     rankRange=range_from_str(sweep_params['ranks'])
     threadRange=range_from_str(sweep_params['threadsPerRank'])
     # TODO SDL variable range
-    # TODO SDL dependent variable * (ranks + threads)
-
+    local_sdl_params = sdl_params
     for r in rankRange:
         for t in threadRange:
+            if depvar:
+                local_sdl_params[depvar] = depvar_base_value * ( r + t )
             jobmgr.add_job_sequence(JobEntry(
                 options=options,
                 sim_controls=sim_control_params,
                 ranks=r,
                 threads=t,
-                sdl_params=sdl_params
+                sdl_params=local_sdl_params
             ))
     
     # Launch from job manager
