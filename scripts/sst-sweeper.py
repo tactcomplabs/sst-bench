@@ -30,7 +30,6 @@ g_debug = False
 g_version = 0.0
 g_pfx = "[sst-sweeper.py]"
 g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
-g_sdl = os.path.abspath(f"{g_scripts}/../test/grid/2d.py")
 g_slurm_script = os.path.abspath(f"{g_scripts}/perf.slurm")
 g_slurm_completion = os.path.abspath(f"{g_scripts}/completion.slurm")
 g_scratchdir = os.path.abspath(".")
@@ -94,7 +93,7 @@ def range_from_str(s: str) -> range:
     return range(*values)
 
 class JobEntry():
-    def __init__(self, *, options:list, sim_controls:list, ranks:int, threads:int, sdl_params:list, predecessors:list = []):
+    def __init__(self, *, sdl:str, options:list, sim_controls:list, ranks:int, threads:int, sdl_params:list, predecessors:list = []):
         
         self.jtype = JobType.BASE
         self.predecessors = predecessors
@@ -117,7 +116,7 @@ class JobEntry():
         self.cpt_timestamp = 0
         self.setdeps = False
 
-        self.sdl = g_sdl
+        self.sdl = sdl
         self.sdlopts = "--"
         for opt in sdl_params:
             self.sdlopts += f" --{opt}={sdl_params[opt]}"
@@ -192,7 +191,7 @@ class JobEntry():
         return jobstring
 
 class JobManager():
-    def __init__(self, clocks, options, sim_control_params, job_sequencer_params ):
+    def __init__(self, sdl, clocks, options, sim_control_params, job_sequencer_params ):
         print("\nCreating Job Manager")
         self.clocks = clocks
 
@@ -512,6 +511,7 @@ if __name__ == '__main__':
         print(f"Could not find sdl file {args.sdlFile}")
         print(parser.usage)
         sys.exit(1)
+    sdlFile = os.path.abspath(args.sdlFile)
     if jsonParams.json == None:
         print(f"Invalid json file: {args.jsonFile}")
         print(parser.usage)
@@ -547,7 +547,7 @@ if __name__ == '__main__':
     print(f"{os.path.abspath(sys.argv[0])}\nVersion {g_version}")
     print("\n[positional]")
     print(f"  {'jsonFile':<10} {os.path.abspath(args.jsonFile)}")
-    print(f"  {'sdlFile':<10} {os.path.abspath(args.sdlFile)}")
+    print(f"  {'sdlFile':<10} {sdlFile}")
     print(f"  {'sweep':<10} {args.sweep}")
     print(jsonParams.sweep_params_str(13, args.sweep))
 
@@ -657,7 +657,7 @@ if __name__ == '__main__':
     #
 
     # create job manager
-    jobmgr = JobManager(sdl_params['clocks'], options, sim_control_params, job_sequencer_params)
+    jobmgr = JobManager(sdlFile, sdl_params['clocks'], options, sim_control_params, job_sequencer_params)
 
     # Generate job descriptions and add to job manager
 
@@ -673,7 +673,7 @@ if __name__ == '__main__':
     else:
         sdl_sweep_range = range(1,2,1)  # placeholder for inner loop
 
-    local_sdl_params = sdl_params
+    local_sdl_params = copy(sdl_params)
     for r in rank_sweep_range:
         for t in thread_sweep_range:
             for s in sdl_sweep_range:
@@ -682,6 +682,7 @@ if __name__ == '__main__':
                 if depvar:
                     local_sdl_params[depvar] = depvar_base_value * ( r + t )
                 jobmgr.add_job_sequence(JobEntry(
+                    sdl=sdlFile,
                     options=options,
                     sim_controls=sim_control_params,
                     ranks=r,

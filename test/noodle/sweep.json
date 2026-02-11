@@ -1,8 +1,8 @@
 {
     "job_sequencer" :
     {
-        "seq"       : ["BASE_CPT_RST",   "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
-        "simperiod" : ["100000",  "checkpoint sim period in ns"]
+        "seq"       : ["BASE_CPT_RST", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
+        "simperiod" : ["10000",        "checkpoint sim period in ns"]
     },
     "sim_controls"  :
     {
@@ -16,7 +16,7 @@
         "x"             : ["10",        "Number of horizonal components"],
         "y"             : ["1",         "Number of vertical components"],
         "rngSeed"       : ["0",         "Random number generator seed"],
-        "clocks"        : ["1000000",   "[REQUIRED] Number of clocks to run sim"],
+        "clocks"        : ["100000",    "[REQUIRED] Number of clocks to run sim"],
         "clockFreq"     : ["1",         "Clock Frequency in GHz"],
         "msgPerClock"   : ["3",         "Messages per clock"],
         "bytesPerClock" : ["4",         "Bytes per clock"],
