@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2017-2025 Tactical Computing Laboratories, LLC
+# Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved
 # contact@tactcomplabs.com
 #
@@ -110,19 +110,19 @@ keyDict = {
         "timeVortex",             # "sst.timevortex.priority_queue"
         "checkpoint-sim-period",  # "2000ns"
         "checkpoint-wall-period", # "0"
-        #TODO what about other command line options like checkpoint-prefix missing from config.json
+        #Component details are too specific
         # "components" : {...}
-        "comp-name",       # "cp_0_0"
-        "comp-type",       # "grid.GridNode"
-        "numBytes",   # rest under "params" : {...} specific to 2d.py
-        "numPorts",
-        "minData",
-        "maxData",
-        "minDelay",
-        "maxDelay",
-        "clocks",
-        "rngSeed",
-        "clockFreq",  # "1GHz"
+        # "comp-name",       # "cp_0_0"
+        # "comp-type",       # "grid.GridNode"
+        # "numBytes",   # rest under "params" : {...} specific to 2d.py
+        # "numPorts",
+        # "minData",
+        # "maxData",
+        # "minDelay",
+        # "maxDelay",
+        # "clocks",
+        # "rngSeed",
+        # "clockFreq",  # "1GHz"
     ],
 }
 
@@ -224,8 +224,6 @@ class sqldb():
         self.insertRecord(jobid, slurmObj.dbDict, slurmInfoTable)
 
     # conf-info subcommand for comp_info table
-    # Some of this could be made generic but 
-    # currently based on using 2d.py as the SDL
     def conf_info(self, *, jsonFile:str=None, jobpath:str, jobid:int):
         jsonFile=jsonFile
         if jsonFile == None:
@@ -252,19 +250,21 @@ class sqldb():
         confinfo["timeVortex"] = program_options["timeVortex"]
         confinfo["checkpoint-sim-period"] = program_options["checkpoint-sim-period"]
         confinfo["checkpoint-wall-period"] = program_options["checkpoint-wall-period"]
-        # Flattened component0 (grid.GridNode)
-        confinfo["comp-name"] = components[0]["name"]
-        confinfo["comp-type"] = components[0]["type"]
-        params = components[0]["params"]
-        confinfo["numBytes"]  = params["numBytes"]
-        confinfo["numPorts"]  = params["numPorts"]
-        confinfo["minData"]   = params["minData"]
-        confinfo["maxData"]   = params["maxData"]
-        confinfo["minDelay"]  = params["minDelay"]
-        confinfo["maxDelay"]  = params["maxDelay"]
-        confinfo["clocks"]    = params["clocks"]
-        confinfo["rngSeed"]   = params["rngSeed"]
-        confinfo["clockFreq"] = params["clockFreq"]
+        # component info is too specific. We are saving the command line information
+        # so customization for reports is possible through that route.
+        # # Flattened component0 (grid.GridNode)
+        # confinfo["comp-name"] = components[0]["name"]
+        # confinfo["comp-type"] = components[0]["type"]
+        # params = components[0]["params"]
+        # confinfo["numBytes"]  = params["numBytes"]
+        # confinfo["numPorts"]  = params["numPorts"]
+        # confinfo["minData"]   = params["minData"]
+        # confinfo["maxData"]   = params["maxData"]
+        # confinfo["minDelay"]  = params["minDelay"]
+        # confinfo["maxDelay"]  = params["maxDelay"]
+        # confinfo["clocks"]    = params["clocks"]
+        # confinfo["rngSeed"]   = params["rngSeed"]
+        # confinfo["clockFreq"] = params["clockFreq"]
         data = ( jobid, )
         for k in sortedKeyDict[confInfoTable]:
             data += ( confinfo[k], )

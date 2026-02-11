@@ -2,7 +2,7 @@
     "job_sequencer" :
     {
         "seq"       : ["BASE_CPT_RST", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
-        "simperiod" : ["10000",        "checkpoint sim period in ns"]
+        "simperiod" : ["1000",        "checkpoint sim period in ns"]
     },
     "sim_controls"  :
     {
@@ -16,7 +16,7 @@
         "x"             : ["10",        "Number of horizonal components"],
         "y"             : ["1",         "Number of vertical components"],
         "rngSeed"       : ["0",         "Random number generator seed"],
-        "clocks"        : ["100000",    "[REQUIRED] Number of clocks to run sim"],
+        "clocks"        : ["10000",    "[REQUIRED] Number of clocks to run sim"],
         "clockFreq"     : ["1",         "Clock Frequency in GHz"],
         "msgPerClock"   : ["3",         "Messages per clock"],
         "bytesPerClock" : ["4",         "Bytes per clock"],
@@ -29,6 +29,16 @@
           "desc"     : "Basic check of a short simulation sequence",
           "ranks"    : "1",
           "threadsPerRank" : "1"
+        },
+        { "name"     : "sweep-sanity",
+          "desc"     : "2-3 threads, dependent bytesPerClock, 10-15 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "2,4,1",
+          "depvar"   : "bytesPerClock",
+          "sdl"      :
+          {
+            "x" : "10,20,5"
+          }
         },
         { "name"     : "thread-sanity",
           "desc"     : "Basic check of a short simulation sequence",
