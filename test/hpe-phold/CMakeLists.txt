@@ -9,7 +9,7 @@
 
 file(GLOB PHOLD_TEST_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} phold_dist.py)
 
-set(SST_OPTS --print-timing-info=3 --parallel-load=SINGLE)
+set(SST_OPTS --parallel-load=SINGLE)
 set(SDL_OPTS --height 100 --width 100 --eventDensity 2.0 --timeToRun 100ns --numRings 2 --smallPayload 8 --largePayload 1024 --largeEventFraction 0.0 --imbalance-factor 0.0 --componentSize 0)
 
 if(SSTBENCH_ENABLE_TESTING)
