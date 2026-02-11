@@ -55,31 +55,31 @@
             "x"  : "100,1100,100"
           }
         },
-        { "name"     : "delay_rank_perm",
-          "desc"     : "Permute comp link delay and ranks for a fixed number of components",
+        { "name"     : "messages_rank_perm",
+          "desc"     : "Permute msgPerClock and ranks for a fixed number of components",
           "ranks"    : "2,9,2",
           "threadsPerRank" : "1",
           "sdl" :
           {
-            "minDelay" : "100,1100,100"
+            "msgPerClock" : "10,110,10"
           }
         },
-        { "name"     : "weak_scaling_1to8ranks_1kbto64kb",
-          "desc"     : "Maintain component count proportional to number of ranks. Vary numBytes from 1Kb to 64kb",
+        { "name"     : "weak_scaling_1to8ranks_100bto1kb",
+          "desc"     : "Maintain component count proportional to number of ranks. Vary bytesPerClock from 100 to 1000 bytes",
           "ranks"    : "1,9,1",
           "threadsPerRank" : "1",
           "depvar"   : "x",
           "sdl" : {
-            "numBytes" : "1000,66000,5000"
+            "bytesPerClock" : "100,1100,100"
           }
         },
-        { "name"     : "weak_scaling_1to8threads_1kbto64kb",
-          "desc"     : "Maintain component count proportional to number of ranks. Vary numBytes from 1Kb to 64kb",
+        { "name"     : "weak_scaling_1to8threads_100bto1kb",
+          "desc"     : "Maintain component count proportional to number of ranks. Vary bytesPerClock from 100 to 1000 bytes",
           "ranks"    : "1",
           "threadsPerRank" : "1,9,1",
           "depvar"   : "x",
           "sdl" : {
-            "numBytes" : "1000,66000,5000"
+            "bytesPerClock" : "100,1100,100"
           }
         }
     ]
