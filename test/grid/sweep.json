@@ -31,6 +31,16 @@
           "ranks"    : "1",
           "threadsPerRank" : "1"
         },
+        { "name"     : "sweep-sanity",
+          "desc"     : "2-3 threads, dependent numBytes, 10-15 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "2,4,1",
+          "depvar"   : "numBytes",
+          "sdl"      :
+          {
+            "x" : "10,20,5"
+          }
+        },
         { "name"     : "thread-sanity",
           "desc"     : "Basic check of a short simulation sequence",
           "ranks"    : "1",
