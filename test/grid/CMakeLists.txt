@@ -48,6 +48,8 @@ if(SSTBENCH_ENABLE_TESTING)
             sweep-sanity 
             --tmpdir ${CMAKE_CURRENT_SOURCE_DIR}/run
             --jobname=grid_sweep_check
+	    --clocks=10000
+	    --simperiod=2000
             --noprompt)
   set_tests_properties(grid_sweep_check PROPERTIES
     LABELS "perf"
