@@ -1,8 +1,8 @@
 {
     "job_sequencer" :
     {
-        "seq"       : ["BASE_CPT_RST",   "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
-        "simperiod" : ["100000",  "checkpoint sim period in ns"]
+        "seq"       : ["BASE_CPT_RST", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
+        "simperiod" : ["1000",        "checkpoint sim period in ns"]
     },
     "sim_controls"  :
     {
@@ -13,16 +13,15 @@
     },
     "sdl_params"    :
     {
-        "x"         : ["10",        "number of horizonal components"],
-        "y"         : ["1",         "number of vertical components"],
-        "numBytes"  : ["512",       "Internal state size in 4B increments"],
-        "minData"   : ["10",        "minimum number of dwords transmitted per link"],
-        "maxData"   : ["256",      "maximum number of dwords transmitted per link"],
-        "clocks"    : ["1000000",   "[REQUIRED] number of clocks to run sim"],
-        "minDelay"  : ["500",       "min number of clocks between transmissions"],
-        "maxDelay"  : ["1000",      "max number of clocks between transmissions"],
-        "rngSeed"   : ["0",         "seed for random number generator"],
-        "verbose"   : ["0",         "verbosity level"]
+        "x"             : ["10",        "Number of horizonal components"],
+        "y"             : ["1",         "Number of vertical components"],
+        "rngSeed"       : ["0",         "Random number generator seed"],
+        "clocks"        : ["10000",    "[REQUIRED] Number of clocks to run sim"],
+        "clockFreq"     : ["1",         "Clock Frequency in GHz"],
+        "msgPerClock"   : ["3",         "Messages per clock"],
+        "bytesPerClock" : ["4",         "Bytes per clock"],
+        "portsPerClock" : ["4",         "Ports per clock"],
+        "verbose"       : ["0",         "verbosity level"]
     },
     "sweeps" :
     [
@@ -32,10 +31,10 @@
           "threadsPerRank" : "1"
         },
         { "name"     : "sweep-sanity",
-          "desc"     : "2-3 threads, dependent numBytes, 10-15 components",
+          "desc"     : "2-3 threads, dependent bytesPerClock, 10-15 components",
           "ranks"    : "1",
           "threadsPerRank" : "2,4,1",
-          "depvar"   : "numBytes",
+          "depvar"   : "bytesPerClock",
           "sdl"      :
           {
             "x" : "10,20,5"
@@ -66,31 +65,31 @@
             "x"  : "100,1100,100"
           }
         },
-        { "name"     : "delay_rank_perm",
-          "desc"     : "Permute comp link delay and ranks for a fixed number of components",
+        { "name"     : "messages_rank_perm",
+          "desc"     : "Permute msgPerClock and ranks for a fixed number of components",
           "ranks"    : "2,9,2",
           "threadsPerRank" : "1",
           "sdl" :
           {
-            "minDelay" : "100,1100,100"
+            "msgPerClock" : "10,110,10"
           }
         },
-        { "name"     : "weak_scaling_1to8ranks_1kbto64kb",
-          "desc"     : "Maintain component count proportional to number of ranks. Vary numBytes from 1Kb to 64kb",
+        { "name"     : "weak_scaling_1to8ranks_100bto1kb",
+          "desc"     : "Maintain component count proportional to number of ranks. Vary bytesPerClock from 100 to 1000 bytes",
           "ranks"    : "1,9,1",
           "threadsPerRank" : "1",
           "depvar"   : "x",
           "sdl" : {
-            "numBytes" : "1000,66000,5000"
+            "bytesPerClock" : "100,1100,100"
           }
         },
-        { "name"     : "weak_scaling_1to8threads_1kbto64kb",
-          "desc"     : "Maintain component count proportional to number of ranks. Vary numBytes from 1Kb to 64kb",
+        { "name"     : "weak_scaling_1to8threads_100bto1kb",
+          "desc"     : "Maintain component count proportional to number of ranks. Vary bytesPerClock from 100 to 1000 bytes",
           "ranks"    : "1",
           "threadsPerRank" : "1,9,1",
           "depvar"   : "x",
           "sdl" : {
-            "numBytes" : "1000,66000,5000"
+            "bytesPerClock" : "100,1100,100"
           }
         }
     ]
