@@ -24,28 +24,30 @@ if(SSTBENCH_ENABLE_TESTING)
       PASS_REGULAR_EXPRESSION "${passRegex}")
   endforeach(testSrc)
 
+  # TODO qualify with version and mpi availability
+  # Also make sure ./run is clean
   # sanity check short parameter sweeps with checkpoint/restart
-  add_test(NAME noodle_sweep_check
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${CMAKE_SOURCE_DIR}/scripts/sst-sweeper.py 
-            ${CMAKE_CURRENT_SOURCE_DIR}/sweep.json
-            ${CMAKE_CURRENT_SOURCE_DIR}/noodle-2d.py
-            sweep-sanity 
-            --tmpdir ${CMAKE_CURRENT_SOURCE_DIR}/run
-            --jobname=noodle_sweep_check
-	    --clocks=10000
-	    --simperiod=2000
-            --noprompt)
-  set_tests_properties(noodle_sweep_check PROPERTIES
-    LABELS "perf"
-    TIMEOUT 120)
-  add_test(NAME noodle-sweep-check-clean
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/run/noodle_sweep_check)
-  set_tests_properties(noodle-sweep-check-clean PROPERTIES
-    DEPENDS noodle_sweep_check
-    LABELS "perf;clean"
-    TIMEOUT 10)
+  # add_test(NAME noodle_sweep_check
+  #   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  #   COMMAND ${CMAKE_SOURCE_DIR}/scripts/sst-sweeper.py 
+  #           ${CMAKE_CURRENT_SOURCE_DIR}/sweep.json
+  #           ${CMAKE_CURRENT_SOURCE_DIR}/noodle-2d.py
+  #           sweep-sanity 
+  #           --tmpdir ${CMAKE_CURRENT_SOURCE_DIR}/run
+  #           --jobname=noodle_sweep_check
+	#     --clocks=10000
+	#     --simperiod=2000
+  #           --noprompt)
+  # set_tests_properties(noodle_sweep_check PROPERTIES
+  #   LABELS "perf"
+  #   TIMEOUT 120)
+  # add_test(NAME noodle-sweep-check-clean
+  #   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  #   COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/run/noodle_sweep_check)
+  # set_tests_properties(noodle-sweep-check-clean PROPERTIES
+  #   DEPENDS noodle_sweep_check
+  #   LABELS "perf;clean"
+  #   TIMEOUT 10)
 
 endif()
 
