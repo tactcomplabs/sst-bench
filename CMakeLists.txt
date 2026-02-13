@@ -146,13 +146,15 @@ if (SST_ASAN)
   set (SANITIZE_FLAG "-fsanitize=address -fno-omit-frame-pointer")
 endif()
 
+#set(SST_SUGGEST_FINAL -Wsuggest-final-methods -Wsuggest-final-types")
+
 # Compiler Options
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   set(FP_MODE_FLAG "-ffp-model=strict -frounding-math -ftrapping-math")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-command-line-argument")
 else()
   set(FP_MODE_FLAG "-frounding-math -ftrapping-math")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-format-attribute -Wvolatile -Wsuggest-final-methods -Wsuggest-final-types")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-format-attribute -Wvolatile ${SST_SUGGEST_FINAL}")
 endif()
 
 set(CMAKE_CXX_FLAGS "-std=c++17 ${FP_MODE_FLAG} -O2 -Wall -Wextra -Wsuggest-override -Wmissing-noreturn -Wvla -Wuninitialized -Wfloat-conversion -Wdouble-promotion -Wno-unused-parameter -Wno-deprecated-declarations -Wsign-conversion -Wconversion -Wno-unused-parameter -Wno-deprecated-declarations -Wno-macro-redefined ${WERROR_FLAG} ${SANITIZE_FLAG} ${CMAKE_CXX_FLAGS} -I./ ${LDFLAGS}")

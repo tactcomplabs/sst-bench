@@ -104,7 +104,7 @@ public:
 // -------------------------------------------------------
 // MicroCompLinkNIC
 // -------------------------------------------------------
-class MicroCompLinkNIC : public MicroCompLinkAPI {
+class MicroCompLinkNIC final: public MicroCompLinkAPI {
 public:
   // register with the SST Core
   SST_ELI_REGISTER_SUBCOMPONENT( MicroCompLinkNIC,

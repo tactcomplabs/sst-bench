@@ -105,7 +105,7 @@ public:
 // -------------------------------------------------------
 // MsgPerfNIC
 // -------------------------------------------------------
-class MsgPerfNIC : public MsgPerfAPI {
+class MsgPerfNIC final: public MsgPerfAPI {
 public:
   // register with the SST Core
   SST_ELI_REGISTER_SUBCOMPONENT( MsgPerfNIC,
