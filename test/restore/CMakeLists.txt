@@ -10,7 +10,7 @@
 file(GLOB RESTORE_TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.py)
 
 # Checkpoint numbering version dependent
-if(${SST_MAJOR_VERSION} GREATER 14)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
   set(CPT_N 1)
 else()
   set(CPT_N 0)
