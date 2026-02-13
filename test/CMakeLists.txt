@@ -1,7 +1,7 @@
 #
 # sst-bench/test CMake
 #
-# Copyright (C) 2017-2025 Tactical Computing Laboratories, LLC
+# Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved
 # contact@tactcomplabs.com
 # See LICENSE in the top level directory for licensing details
@@ -50,9 +50,10 @@ if(${SST_MAJOR_VERSION} GREATER_EQUAL 15)
   add_subdirectory(hpe-phold)
 endif()
 
-if(${ENABLE_SSTDBG})
-  message(STATUS "[SST-BENCH] Enabling TCL-DBG testing")
-  add_subdirectory(tcl-dbg)
-endif()
+# TODO replace with interactive console micro-benchmarks
+# if(${ENABLE_SSTDBG})
+#   message(STATUS "[SST-BENCH] Enabling TCL-DBG testing")
+#   add_subdirectory(tcl-dbg)
+# endif()
 
 # EOF

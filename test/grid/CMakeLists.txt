@@ -39,30 +39,33 @@ if(SSTBENCH_ENABLE_TESTING)
       PASS_REGULAR_EXPRESSION "${passRegex}")
   endforeach(testSrc)
 
-  # TODO qualify with version and mpi availability
-  # Also make sure ./run is clean
-  # sanity check short parameter sweeps with checkpoint/restart
-  # add_test(NAME grid_sweep_check
-  #   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  #   COMMAND ${CMAKE_SOURCE_DIR}/scripts/sst-sweeper.py 
-  #           ${CMAKE_CURRENT_SOURCE_DIR}/sweep.json
-  #           ${CMAKE_CURRENT_SOURCE_DIR}/2d.py
-  #           sweep-sanity 
-  #           --tmpdir ${CMAKE_CURRENT_SOURCE_DIR}/run
-  #           --jobname=grid_sweep_check
-	#     --clocks=10000
-	#     --simperiod=2000
-  #           --noprompt)
-  # set_tests_properties(grid_sweep_check PROPERTIES
-  #   LABELS "perf"
-  #   TIMEOUT 120)
-  # add_test(NAME grid-sweep-check-clean
-  #   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  #   COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/run/grid_sweep_check)
-  # set_tests_properties(grid-sweep-check-clean PROPERTIES
-  #   DEPENDS grid_sweep_check
-  #   LABELS "perf;clean"
-  #   TIMEOUT 10)
+  # if (MPIEXEC_EXECUTABLE)
+  #   # TODO qualify with version
+  #   # Also make sure ./run is clean
+  #   # Need to be able to pass sst options: --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/grid
+  #   # sanity check short parameter sweeps with checkpoint/restart
+  #   add_test(NAME grid_sweep_check
+  #     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  #     COMMAND ${CMAKE_SOURCE_DIR}/scripts/sst-sweeper.py 
+  #             ${CMAKE_CURRENT_SOURCE_DIR}/sweep.json
+  #             ${CMAKE_CURRENT_SOURCE_DIR}/2d.py
+  #             sweep-sanity 
+  #             --tmpdir ${CMAKE_CURRENT_SOURCE_DIR}/run
+  #             --jobname=grid_sweep_check
+  #       --clocks=10000
+  #       --simperiod=2000
+  #             --noprompt)
+  #   set_tests_properties(grid_sweep_check PROPERTIES
+  #     LABELS "perf"
+  #     TIMEOUT 120)
+  #   add_test(NAME grid-sweep-check-clean
+  #     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  #     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/run/grid_sweep_check)
+  #   set_tests_properties(grid-sweep-check-clean PROPERTIES
+  #     DEPENDS grid_sweep_check
+  #     LABELS "perf;clean"
+  #     TIMEOUT 10)
+  # endif()
 
 endif()
 
