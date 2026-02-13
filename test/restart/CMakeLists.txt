@@ -1,7 +1,7 @@
 #
 # sst-bench/test/restart CMake
 #
-# Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
+# Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved
 # contact@tactcomplabs.com
 # See LICENSE in the top level directory for licensing details
@@ -10,7 +10,7 @@
 file(GLOB RESTART_TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.py)
 
 # Checkpoint numbering version dependent
-if(${SST_MAJOR_VERSION} GREATER 14)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
   set(CPT_N 1)
 else()
   set(CPT_N 0)
