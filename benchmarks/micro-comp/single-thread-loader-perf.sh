@@ -3,7 +3,7 @@
 COMPS=1000
 ENDCOMPS=1000000000
 INTERVAL=1000
-MC_LIB_PATH="../../build/sst-bench/micro-comp"
+MC_LIB_PATH="../../build/components/micro-comp"
 TEST="../../test/micro-comp/micro-comp-test2.py"
 
 echo "START TEST: $COMPS to $ENDCOMPS with interval=$INTERVAL"

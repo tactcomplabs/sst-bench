@@ -24,14 +24,14 @@ if(SSTBENCH_ENABLE_TESTING)
     set(CHKPT_PFX ${testName}_SAVE_)
     add_test(NAME ${testName}_SAVE
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND ${SCRIPTS}/sst-chkpt.sh ${CHKPT_PFX} --checkpoint-period=10ns --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/grid ${testSrc})
+      COMMAND ${SCRIPTS}/sst-chkpt.sh ${CHKPT_PFX} --checkpoint-period=10ns --add-lib-path=${CMAKE_BINARY_DIR}/components/grid ${testSrc})
     set_tests_properties(${testName}_SAVE PROPERTIES
       TIMEOUT 120
       LABELS "all"
       PASS_REGULAR_EXPRESSION "${passRegex}")
     add_test(NAME ${testName}_RESTORE
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND sst --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/grid --load-checkpoint ${CHKPT_PFX}/${CHKPT_PFX}_${CPT_N}_1010000/${CHKPT_PFX}_${CPT_N}_1010000.sstcpt)
+      COMMAND sst --add-lib-path=${CMAKE_BINARY_DIR}/components/grid --load-checkpoint ${CHKPT_PFX}/${CHKPT_PFX}_${CPT_N}_1010000/${CHKPT_PFX}_${CPT_N}_1010000.sstcpt)
     set_tests_properties(${testName}_RESTORE PROPERTIES
       TIMEOUT 120
       LABELS "all"
@@ -42,7 +42,7 @@ if(SSTBENCH_ENABLE_TESTING)
   # if (MPIEXEC_EXECUTABLE)
   #   # TODO qualify with version
   #   # Also make sure ./run is clean
-  #   # Need to be able to pass sst options: --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/grid
+  #   # Need to be able to pass sst options: --add-lib-path=${CMAKE_BINARY_DIR}/components/grid
   #   # sanity check short parameter sweeps with checkpoint/restart
   #   add_test(NAME grid_sweep_check
   #     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

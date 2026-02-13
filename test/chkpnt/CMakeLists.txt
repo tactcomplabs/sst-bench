@@ -17,7 +17,7 @@ if(SSTBENCH_ENABLE_TESTING)
     if(NOT ${testName} MATCHES "checkpoint_dump")
       add_test(NAME ${testName}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND ${SCRIPTS}/sst-chkpt.sh ${testName}_SAVE_ --checkpoint-period=100ns --add-lib-path=${CMAKE_BINARY_DIR}/sst-bench/chkpnt ${testSrc})
+        COMMAND ${SCRIPTS}/sst-chkpt.sh ${testName}_SAVE_ --checkpoint-period=100ns --add-lib-path=${CMAKE_BINARY_DIR}/components/chkpnt ${testSrc})
       set_tests_properties(${testName}
         PROPERTIES
         TIMEOUT 60

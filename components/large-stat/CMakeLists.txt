@@ -1,5 +1,5 @@
 #
-# sst-bench/sst-bench/large-stat CMake
+# sst-bench/components/large-stat CMake
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved

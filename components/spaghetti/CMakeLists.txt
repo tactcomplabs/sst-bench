@@ -1,5 +1,5 @@
 #
-# sst-bench/sst-bench/spaghetti CMake
+# sst-bench/components/spaghetti CMake
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved

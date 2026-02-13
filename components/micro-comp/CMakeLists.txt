@@ -1,5 +1,5 @@
 #
-# sst-bench/sst-bench/micro-comp CMake
+# sst-bench/components/micro-comp CMake
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved

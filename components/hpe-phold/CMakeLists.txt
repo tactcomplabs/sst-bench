@@ -1,5 +1,5 @@
 #
-# sst-bench/sst-bench/hpe-phold CMake
+# sst-bench/components/hpe-phold CMake
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved

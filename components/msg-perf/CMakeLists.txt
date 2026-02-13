@@ -1,5 +1,5 @@
 #
-# sst-bench/sst-bench/msg-perf CMake
+# sst-bench/components/msg-perf CMake
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved

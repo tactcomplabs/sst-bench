@@ -5,7 +5,7 @@ ENDCOMPS=1000
 INTERVAL=10
 STATS=10
 ENDSTATS=1000
-MC_LIB_PATH="../../build/sst-bench/large-stat"
+MC_LIB_PATH="../../build/components/large-stat"
 TEST1="./large-stat-bench1.py"
 TEST2="./large-stat-bench2.py"
 

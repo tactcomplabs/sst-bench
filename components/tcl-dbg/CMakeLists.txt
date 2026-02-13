@@ -1,5 +1,5 @@
 #
-# sst-bench/sst-bench/tcl-dbg CMake
+# sst-bench/components/tcl-dbg CMake
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved

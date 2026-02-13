@@ -1,5 +1,5 @@
 #
-# sst-bench/sst-bench/restore CMake
+# sst-bench/components/restore CMake
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved
