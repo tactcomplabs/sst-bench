@@ -54,18 +54,23 @@ def main():
         args.config
     ]
 
+    # Capture stdout so we can parse timing info from it, then pass it through.
+    # SST writes both "Simulation is complete" and the timing tree to stdout.
     result = subprocess.run(cmd, capture_output=True, text=True)
 
-    # Pass through all SST output so CTest sees "Simulation is complete"
+    # Pass through ALL output immediately so CTest sees "Simulation is complete"
     if result.stdout:
-        print(result.stdout, end='')
+        print(result.stdout, end='', flush=True)
     if result.stderr:
-        print(result.stderr, end='', file=sys.stderr)
+        print(result.stderr, end='', file=sys.stderr, flush=True)
 
-    # Parse timing and emit NDJSON
-    timing_output = result.stderr + result.stdout
-    tree = parse_timing_output(timing_output)
-    metrics = extract_key_metrics(tree)
+    # Parse timing from combined output and emit NDJSON
+    try:
+        combined = (result.stdout or '') + (result.stderr or '')
+        tree = parse_timing_output(combined)
+        metrics = extract_key_metrics(tree)
+    except Exception:
+        metrics = {}
 
     record = {
         "@timestamp": datetime.now(timezone.utc).isoformat(),
@@ -89,7 +94,7 @@ def main():
     }
 
     # Emit NDJSON line — this appears in Jenkins console and flows to Logstash
-    print(f"PARSER_BENCH_RESULT:{json.dumps(record)}")
+    print(f"PARSER_BENCH_RESULT:{json.dumps(record)}", flush=True)
 
     sys.exit(result.returncode)
 
