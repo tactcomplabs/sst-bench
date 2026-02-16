@@ -10,7 +10,7 @@
 # sst-bench-runner.py
 #
 # Wrapper around sst that captures timing info and emits NDJSON.
-# Designed for CTest integration: passes through SST output so
+# Designed for CTest integration: streams SST output in real-time so
 # "Simulation is complete" is visible for PASS_REGULAR_EXPRESSION,
 # and emits a single NDJSON line with timing metrics for Logstash.
 #
@@ -54,19 +54,24 @@ def main():
         args.config
     ]
 
-    # Capture stdout so we can parse timing info from it, then pass it through.
-    # SST writes both "Simulation is complete" and the timing tree to stdout.
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    # Stream SST output line-by-line so CTest sees it in real-time.
+    # Merge stderr into stdout so we get everything in one stream.
+    proc = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        text=True, bufsize=1
+    )
 
-    # Pass through ALL output immediately so CTest sees "Simulation is complete"
-    if result.stdout:
-        print(result.stdout, end='', flush=True)
-    if result.stderr:
-        print(result.stderr, end='', file=sys.stderr, flush=True)
+    output_lines = []
+    for line in proc.stdout:
+        sys.stdout.write(line)
+        sys.stdout.flush()
+        output_lines.append(line)
 
-    # Parse timing from combined output and emit NDJSON
+    returncode = proc.wait()
+
+    # Parse timing from collected output
+    combined = ''.join(output_lines)
     try:
-        combined = (result.stdout or '') + (result.stderr or '')
         tree = parse_timing_output(combined)
         metrics = extract_key_metrics(tree)
     except Exception:
@@ -81,7 +86,7 @@ def main():
         "config_type": args.config_type,
         "topology": args.topology,
         "num_components": args.num_comps,
-        "exit_code": result.returncode,
+        "exit_code": returncode,
         "total_duration_sec": metrics.get('total_duration_sec', 0.0),
         "total_memory_gb": metrics.get('total_memory_gb', 0.0),
         "build_duration_sec": metrics.get('build_duration_sec', 0.0),
@@ -94,9 +99,10 @@ def main():
     }
 
     # Emit NDJSON line — this appears in Jenkins console and flows to Logstash
-    print(f"PARSER_BENCH_RESULT:{json.dumps(record)}", flush=True)
+    sys.stdout.write(f"PARSER_BENCH_RESULT:{json.dumps(record)}\n")
+    sys.stdout.flush()
 
-    sys.exit(result.returncode)
+    sys.exit(returncode)
 
 
 if __name__ == '__main__':
