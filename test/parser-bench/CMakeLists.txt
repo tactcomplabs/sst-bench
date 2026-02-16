@@ -55,7 +55,7 @@ function(add_parser_bench_test topology size fmt ports timeout labels)
 
   add_test(NAME ${test_name}
     WORKING_DIRECTORY ${GEN_DIR}
-    COMMAND ${Python3_EXECUTABLE} ${RUNNER}
+    COMMAND ${Python3_EXECUTABLE} -u ${RUNNER}
       --add-lib-path=${NOODLE_LIB_PATH}
       --topology ${topology}
       --num-comps ${size}
@@ -66,6 +66,7 @@ function(add_parser_bench_test topology size fmt ports timeout labels)
     PROPERTIES
     TIMEOUT ${timeout}
     LABELS "${labels}"
+    ENVIRONMENT "PYTHONUNBUFFERED=1"
     PASS_REGULAR_EXPRESSION "${passRegex}")
 endfunction()
 
@@ -135,7 +136,7 @@ foreach(test_num 1 2 3)
 
   add_test(NAME ${test_name}
     WORKING_DIRECTORY ${GEN_DIR}
-    COMMAND ${Python3_EXECUTABLE} ${RUNNER}
+    COMMAND ${Python3_EXECUTABLE} -u ${RUNNER}
       --add-lib-path=${NOODLE_LIB_PATH}
       --topology parity
       --num-comps 2
@@ -146,6 +147,7 @@ foreach(test_num 1 2 3)
     PROPERTIES
     TIMEOUT 30
     LABELS "all;parser-bench"
+    ENVIRONMENT "PYTHONUNBUFFERED=1"
     PASS_REGULAR_EXPRESSION "${passRegex}")
 endforeach()
 

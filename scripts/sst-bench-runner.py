@@ -14,6 +14,9 @@
 # "Simulation is complete" is visible for PASS_REGULAR_EXPRESSION,
 # and emits a single NDJSON line with timing metrics for Logstash.
 #
+# IMPORTANT: This script must be invoked with "python3 -u" (unbuffered)
+# or PYTHONUNBUFFERED=1 so that CTest can see SST output in real-time.
+#
 
 import argparse
 import json
@@ -23,6 +26,7 @@ import re
 import socket
 import subprocess
 import sys
+import traceback
 from datetime import datetime, timezone
 
 # Add scripts directory to path for timing_tree_parser
@@ -56,13 +60,16 @@ def main():
 
     # Stream SST output line-by-line so CTest sees it in real-time.
     # Merge stderr into stdout so we get everything in one stream.
+    # Use iter(readline, '') instead of iterating the file object
+    # directly, because the file iterator uses an 8KB internal read
+    # buffer that can delay output visibility to CTest.
     proc = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         text=True, bufsize=1
     )
 
     output_lines = []
-    for line in proc.stdout:
+    for line in iter(proc.stdout.readline, ''):
         sys.stdout.write(line)
         sys.stdout.flush()
         output_lines.append(line)
@@ -106,4 +113,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception:
+        traceback.print_exc()
+        sys.exit(1)
