@@ -105,6 +105,7 @@ endif()
 option(SSTBENCH_ENABLE_TESTING "Enable Testing" OFF)
 if(SSTBENCH_ENABLE_TESTING)
   enable_testing()
+  list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
   add_subdirectory(test)
 endif()
 
