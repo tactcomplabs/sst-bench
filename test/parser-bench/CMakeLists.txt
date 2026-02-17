@@ -171,16 +171,12 @@ foreach(test_num 1 2 3)
 endforeach()
 
 # ---------------------------------------------------------------------------
-# NDJSON emitter — runs after all parser-bench tests complete
+# NDJSON emitter — print results to console after the test suite
 # ---------------------------------------------------------------------------
-add_test(NAME parser-bench-emit-ndjson
-  WORKING_DIRECTORY ${GEN_DIR}
-  COMMAND ${Python3_EXECUTABLE} -u ${NDJSON_EMITTER} --timing-dir ${GEN_DIR})
-
-set_tests_properties(parser-bench-emit-ndjson
-  PROPERTIES
-  FIXTURES_CLEANUP parser_bench_results
-  LABELS "parser-bench"
-  TIMEOUT 30)
+# CTest's --output-on-failure hides stdout from passing tests, so we use
+# CTEST_CUSTOM_POST_TEST to run the emitter *after* the test suite.  Its
+# output goes directly to the console (visible in Jenkins for Logstash).
+file(WRITE "${CMAKE_BINARY_DIR}/CTestCustom.cmake"
+  "set(CTEST_CUSTOM_POST_TEST \"${Python3_EXECUTABLE} -u ${NDJSON_EMITTER} --timing-dir ${GEN_DIR}\")\n")
 
 # EOF
