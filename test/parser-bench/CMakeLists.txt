@@ -22,6 +22,15 @@ set(NOODLE_LIB_PATH "${CMAKE_BINARY_DIR}/sst-bench/noodle")
 
 file(MAKE_DIRECTORY ${GEN_DIR})
 
+# --timing-info-json was added in SST 15.1; omit it for older versions
+if(SST_MAJOR_VERSION GREATER_EQUAL 15 AND SST_MINOR_VERSION GREATER_EQUAL 1)
+  set(HAVE_TIMING_JSON TRUE)
+  message(STATUS "[PARSER-BENCH] SST ${SST_MAJOR_VERSION}.${SST_MINOR_VERSION} supports --timing-info-json")
+else()
+  set(HAVE_TIMING_JSON FALSE)
+  message(STATUS "[PARSER-BENCH] SST ${SST_MAJOR_VERSION}.${SST_MINOR_VERSION} lacks --timing-info-json, skipping timing output")
+endif()
+
 # ---------------------------------------------------------------------------
 # Helper: generate a config and register a test
 # ---------------------------------------------------------------------------
@@ -54,11 +63,18 @@ function(add_parser_bench_test topology size fmt ports timeout labels)
     return()
   endif()
 
-  add_test(NAME ${test_name}
-    WORKING_DIRECTORY ${GEN_DIR}
-    COMMAND sst --add-lib-path=${NOODLE_LIB_PATH}
-      --timing-info-json=${timing_file}
-      ${config_file})
+  if(HAVE_TIMING_JSON)
+    add_test(NAME ${test_name}
+      WORKING_DIRECTORY ${GEN_DIR}
+      COMMAND sst --add-lib-path=${NOODLE_LIB_PATH}
+        --timing-info-json=${timing_file}
+        ${config_file})
+  else()
+    add_test(NAME ${test_name}
+      WORKING_DIRECTORY ${GEN_DIR}
+      COMMAND sst --add-lib-path=${NOODLE_LIB_PATH}
+        ${config_file})
+  endif()
 
   set_tests_properties(${test_name}
     PROPERTIES
@@ -133,11 +149,18 @@ foreach(test_num 1 2 3)
   set(config_file "${GEN_DIR}/noodle-test${test_num}.json")
   set(timing_file "${GEN_DIR}/${test_name}.timing.json")
 
-  add_test(NAME ${test_name}
-    WORKING_DIRECTORY ${GEN_DIR}
-    COMMAND sst --add-lib-path=${NOODLE_LIB_PATH}
-      --timing-info-json=${timing_file}
-      ${config_file})
+  if(HAVE_TIMING_JSON)
+    add_test(NAME ${test_name}
+      WORKING_DIRECTORY ${GEN_DIR}
+      COMMAND sst --add-lib-path=${NOODLE_LIB_PATH}
+        --timing-info-json=${timing_file}
+        ${config_file})
+  else()
+    add_test(NAME ${test_name}
+      WORKING_DIRECTORY ${GEN_DIR}
+      COMMAND sst --add-lib-path=${NOODLE_LIB_PATH}
+        ${config_file})
+  endif()
 
   set_tests_properties(${test_name}
     PROPERTIES
