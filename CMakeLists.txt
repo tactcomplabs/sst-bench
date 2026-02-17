@@ -37,15 +37,6 @@ set(SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 
 # SST Configuration Sanity Check
 find_program(SST sst)
-
-find_program(SST_CONFIG sst-config)
-if(NOT SST OR NOT SST_CONFIG)
-  message(FATAL_ERROR "No SST binary or sst-config binary found in path")
-endif()
-
-# SST Configuration Sanity Check
-find_program(SST sst)
-
 find_program(SST_CONFIG sst-config)
 if(NOT SST OR NOT SST_CONFIG)
   message(FATAL_ERROR "No SST binary or sst-config binary found in path")
@@ -60,7 +51,7 @@ set(SST_INCLUDE_DIR "${SST_INSTALL_DIR}/include")
 if(NOT (EXISTS "${SST_INSTALL_DIR}"))
   message(FATAL_ERROR " SST_INSTALL_DIR (${SST_INSTALL_DIR}) is invalid.")
 endif()
-include_directories(SST_SRC ${SST_INSTALL_DIR})
+include_directories(${SST_INSTALL_DIR})
 
 # SST Version found in path
 execute_process(COMMAND sst --version
@@ -160,7 +151,7 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-format-attribute -Wvolatile ${SST_SUGGEST_FINAL}")
 endif()
 
-set(CMAKE_CXX_FLAGS "-std=c++17 ${FP_MODE_FLAG} -O2 -Wall -Wextra -Wsuggest-override -Wmissing-noreturn -Wvla -Wuninitialized -Wfloat-conversion -Wdouble-promotion -Wno-unused-parameter -Wno-deprecated-declarations -Wsign-conversion -Wconversion -Wno-unused-parameter -Wno-deprecated-declarations -Wno-macro-redefined ${WERROR_FLAG} ${SANITIZE_FLAG} ${CMAKE_CXX_FLAGS} -I./ ${LDFLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++17 ${FP_MODE_FLAG} -O2 -Wall -Wextra -Wsuggest-override -Wmissing-noreturn -Wvla -Wuninitialized -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wconversion -Wno-unused-parameter -Wno-deprecated-declarations -Wno-macro-redefined ${WERROR_FLAG} ${SANITIZE_FLAG} ${CMAKE_CXX_FLAGS} -I./ ${LDFLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
 

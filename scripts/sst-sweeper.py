@@ -93,13 +93,14 @@ def range_from_str(s: str) -> range:
     return range(*values)
 
 class JobEntry():
-    def __init__(self, *, sdl:str, options:list, sim_controls:list, ranks:int, threads:int, sdl_params:list, predecessors:list = []):
+    def __init__(self, *, sdlFile:str, options:list, sim_controls:list, ranks:int, threads:int, sdl_params:list, predecessors:list = []):
         
         self.jtype = JobType.BASE
         self.predecessors = predecessors
         self.ranks = ranks
         self.threads = threads
         self.procs = ranks * threads
+        self.sdl_params = copy(sdl_params)
         self.sstopts = f"--num-threads={self.threads} --output-json=config.json"
         self.sstopts += f" --print-timing-info --timing-info-json=timing.json"
 
@@ -116,7 +117,7 @@ class JobEntry():
         self.cpt_timestamp = 0
         self.setdeps = False
 
-        self.sdl = sdl
+        self.sdlFile = sdlFile
         self.sdlopts = "--"
         for opt in sdl_params:
             self.sdlopts += f" --{opt}={sdl_params[opt]}"
@@ -152,7 +153,7 @@ class JobEntry():
         self.jtype = JobType.RST
         self.cptid = cptid
         self.cptfile = cptfile
-        self.sdl = ""
+        self.sdlFile = ""
         self.sdlopts = ""
         self.predecessors = [ cptid ]
         self.friend = cptid
@@ -176,7 +177,7 @@ class JobEntry():
         if self.jtype == JobType.RST:
             sid = self.getsid(self.slurm, self.cptid, norun)
             self.sstopts += f" --load-checkpoint ../{sid}/{self.cptfile}"
-        sst_cmd = f"sst {self.sdl} {self.sstopts} {self.sdlopts}"
+        sst_cmd = f"sst {self.sdlFile} {self.sstopts} {self.sdlopts}"
         if self.slurm == False:
             # local jobs will not be run in parallel so dependencies do not matter
             jobstring = f"mpirun -np {self.ranks} {sst_cmd}"
@@ -191,7 +192,7 @@ class JobEntry():
         return jobstring
 
 class JobManager():
-    def __init__(self, sdl, clocks, options, sim_control_params, job_sequencer_params ):
+    def __init__(self, sdl, clocks, options, sim_control_params, job_sequencer_params, sdl_params ):
         print("\nCreating Job Manager")
         self.clocks = clocks
 
@@ -210,6 +211,8 @@ class JobManager():
         self.do_checkpoint = seq=='BASE_CPT' or self.do_restart
         self.simperiod = int(job_sequencer_params['simperiod'])
 
+        self.sdl_params = copy(sdl_params)
+
         self.next_id = g_id_base
         self.joblist = OrderedDict()
         self.wipList = []
@@ -227,7 +230,7 @@ class JobManager():
         os.makedirs(self.rundir)
         # print(f"{g_pfx} Jobs will run in: {self.rundir}")
         # database
-        self.sqldb = sqlutils.sqldb(self.db, self.logging)
+        self.sqldb = sqlutils.sqldb(self.db, self.sdl_params, self.logging)
     def add_job(self, entry:JobEntry):
         id = self.next_id
         self.joblist[id] = entry
@@ -286,6 +289,8 @@ class JobManager():
 
         # keep track of jobs up to completion job then run post-processing
         self.wipList.append(jobid)
+        # Capture set up parameters here
+        self.sqldb.sdl_info(jobid=id, sdl_params=entry.sdl_params)
         if self.slurm == False:
             self.pp_local(id=jobid, cwd=cwd)
         elif entry.jtype==JobType.COMPLETION:
@@ -657,7 +662,7 @@ if __name__ == '__main__':
     #
 
     # create job manager
-    jobmgr = JobManager(sdlFile, sdl_params['clocks'], options, sim_control_params, job_sequencer_params)
+    jobmgr = JobManager(sdlFile, sdl_params['clocks'], options, sim_control_params, job_sequencer_params, sdl_params)
 
     # Generate job descriptions and add to job manager
 
@@ -682,7 +687,7 @@ if __name__ == '__main__':
                 if depvar:
                     local_sdl_params[depvar] = depvar_base_value * ( r + t )
                 jobmgr.add_job_sequence(JobEntry(
-                    sdl=sdlFile,
+                    sdlFile=sdlFile,
                     options=options,
                     sim_controls=sim_control_params,
                     ranks=r,
