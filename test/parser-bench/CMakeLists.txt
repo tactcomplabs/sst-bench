@@ -15,7 +15,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 set(passRegex "Simulation is complete")
 set(CONFIG_GEN "${CMAKE_SOURCE_DIR}/scripts/config_generator.py")
-set(RUNNER "${CMAKE_SOURCE_DIR}/scripts/sst-bench-runner.py")
+set(NDJSON_EMITTER "${CMAKE_SOURCE_DIR}/scripts/emit_ndjson.py")
 set(PARITY_GEN "${CMAKE_CURRENT_SOURCE_DIR}/generate_parity_configs.py")
 set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/configs")
 set(NOODLE_LIB_PATH "${CMAKE_BINARY_DIR}/sst-bench/noodle")
@@ -35,6 +35,7 @@ function(add_parser_bench_test topology size fmt ports timeout labels)
   endif()
 
   set(config_file "${GEN_DIR}/${test_name}${ext}")
+  set(timing_file "${GEN_DIR}/${test_name}.timing.json")
 
   # Generate config at configure time
   execute_process(
@@ -55,18 +56,15 @@ function(add_parser_bench_test topology size fmt ports timeout labels)
 
   add_test(NAME ${test_name}
     WORKING_DIRECTORY ${GEN_DIR}
-    COMMAND ${Python3_EXECUTABLE} -u ${RUNNER}
-      --add-lib-path=${NOODLE_LIB_PATH}
-      --topology ${topology}
-      --num-comps ${size}
-      --config-type ${fmt}
+    COMMAND sst --add-lib-path=${NOODLE_LIB_PATH}
+      --timing-info-json=${timing_file}
       ${config_file})
 
   set_tests_properties(${test_name}
     PROPERTIES
     TIMEOUT ${timeout}
     LABELS "${labels}"
-    ENVIRONMENT "PYTHONUNBUFFERED=1"
+    FIXTURES_SETUP parser_bench_results
     PASS_REGULAR_EXPRESSION "${passRegex}")
 endfunction()
 
@@ -133,22 +131,33 @@ endif()
 foreach(test_num 1 2 3)
   set(test_name "parser-bench-noodle-test${test_num}-json")
   set(config_file "${GEN_DIR}/noodle-test${test_num}.json")
+  set(timing_file "${GEN_DIR}/${test_name}.timing.json")
 
   add_test(NAME ${test_name}
     WORKING_DIRECTORY ${GEN_DIR}
-    COMMAND ${Python3_EXECUTABLE} -u ${RUNNER}
-      --add-lib-path=${NOODLE_LIB_PATH}
-      --topology parity
-      --num-comps 2
-      --config-type json
+    COMMAND sst --add-lib-path=${NOODLE_LIB_PATH}
+      --timing-info-json=${timing_file}
       ${config_file})
 
   set_tests_properties(${test_name}
     PROPERTIES
     TIMEOUT 30
     LABELS "all;parser-bench"
-    ENVIRONMENT "PYTHONUNBUFFERED=1"
+    FIXTURES_SETUP parser_bench_results
     PASS_REGULAR_EXPRESSION "${passRegex}")
 endforeach()
+
+# ---------------------------------------------------------------------------
+# NDJSON emitter — runs after all parser-bench tests complete
+# ---------------------------------------------------------------------------
+add_test(NAME parser-bench-emit-ndjson
+  WORKING_DIRECTORY ${GEN_DIR}
+  COMMAND ${Python3_EXECUTABLE} -u ${NDJSON_EMITTER} --timing-dir ${GEN_DIR})
+
+set_tests_properties(parser-bench-emit-ndjson
+  PROPERTIES
+  FIXTURES_CLEANUP parser_bench_results
+  LABELS "parser-bench"
+  TIMEOUT 30)
 
 # EOF
