@@ -217,7 +217,7 @@ class sqldb():
     def slurm_info(self, *, jsonFile:str=None, jobpath:str, jobid:int):
         if jsonFile == None:
             jsonFile=f"{jobpath}/slurm.json"
-        slurmObj = SlurmObj(jsonFile)
+        slurmObj = SlurmObj(jsonFile, slurmInfoTable)
         self.insertRecord(jobid, slurmObj.dbDict, slurmInfoTable)
 
     # conf-info subcommand for comp_info table
@@ -253,11 +253,12 @@ class sqldb():
         self.cur.execute(f"INSERT INTO {confInfoTable} VALUES( {self.sqlQStrings[confInfoTable]})", data)
 
     # custom table
-    def sdl_info(self, *, sdl_params: dict, jobid: int):
-        self.insertRecord(jobid, sdl_params, sdlInfoTable)
+    def sdl_info(self, *, sdl_params: dict, id: int):
+        self.insertRecord(id, sdl_params, sdlInfoTable)
+
 class SlurmObj():
         
-    def __init__(self, filename):
+    def __init__(self, filename, slurmInfoTable):
         self.filename = filename
         with open(filename) as f:
             self.jdict = json.load(f)
@@ -275,7 +276,7 @@ class SlurmObj():
             sys.exit(1)
         # flatten data and associate with informative keys
         jobDict = jobs[0]
-        self.dbDict = dict.fromkeys(self.sortedKeyDict[slurmInfoTable], 0)
+        self.dbDict = dict.fromkeys(slurmInfoTable, 0)
         self.dbDict = self.flattenData(jobDict)
 
     def flattenData(self, jDict):
