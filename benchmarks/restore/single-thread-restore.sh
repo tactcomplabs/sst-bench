@@ -7,7 +7,8 @@ BASE=64
 ORIGBASE=$BASE
 ENDSIZE=1000000
 SIZEINTERVAL=1024
-RESTORE_LIB_PATH="../../build/sst-bench/restore"
+MC_LIB_PATH="../../build/components/restore"
+RESTORE_LIB_PATH="../../build/components/restore"
 TEST="single-thread-restore.py"
 FILE="test.$COMPS.$ENDCOMPS.$INTERVAL.out"
 

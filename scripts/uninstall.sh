@@ -12,6 +12,7 @@ sst-register -u largestat
 sst-register -u largestatchkpnt
 sst-register -u microcomplink
 sst-register -u noodle
+sst-register -u phold
 sst-register -u restart
 sst-register -u restore
 sst-register -u tcldbg
@@ -28,6 +29,7 @@ if test -f "$CONFIG"; then
   sed -i.bak '/largestatchkpnt/d' $CONFIG
   sed -i.bak '/microcomplink/d' $CONFIG
   sed -i.bak '/noodle/d' $CONFIG
+  sed -i.bak '/phold/d' $CONFIG
   sed -i.bak '/restart/d' $CONFIG
   sed -i.bak '/restore/d' $CONFIG
   sed -i.bak '/tcldbg/d' $CONFIG

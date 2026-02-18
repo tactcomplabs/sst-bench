@@ -1,0 +1,97 @@
+{
+    "job_sequencer" :
+    {
+        "seq"       : ["BASE_CPT_RST", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
+        "simperiod" : ["1000",        "checkpoint sim period in ns"]
+    },
+    "sim_controls"  :
+    {
+        "db"        : ["timing.db", "sqlite database file to be created or updated"],
+        "jobname"   : ["sst-perf",  "name associated with all jobs"],
+        "nodeclamp" : ["0",         "distribute threads evenly across nodes"],
+        "tmpdir"    : [".",         "temporary area for running jobs"]
+    },
+    "sdl_params"    :
+    {
+        "x"             : ["10",        "Number of horizonal components"],
+        "y"             : ["1",         "Number of vertical components"],
+        "rngSeed"       : ["0",         "Random number generator seed"],
+        "clocks"        : ["10000",    "[REQUIRED] Number of clocks to run sim"],
+        "clockFreq"     : ["1",         "Clock Frequency in GHz"],
+        "msgPerClock"   : ["3",         "Messages per clock"],
+        "bytesPerClock" : ["4",         "Bytes per clock"],
+        "portsPerClock" : ["4",         "Ports per clock"],
+        "verbose"       : ["0",         "verbosity level"]
+    },
+    "sweeps" :
+    [
+        { "name"     : "sanity",
+          "desc"     : "Basic check of a short simulation sequence",
+          "ranks"    : "1",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "sweep-sanity",
+          "desc"     : "2-3 threads, dependent bytesPerClock, 10-15 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "2,4,1",
+          "depvar"   : "bytesPerClock",
+          "sdl"      :
+          {
+            "x" : "10,20,5"
+          }
+        },
+        { "name"     : "thread-sanity",
+          "desc"     : "Basic check of a short simulation sequence",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,9,2"
+        },
+        { "name"     : "rank-sanity",
+          "desc"     : "Basic check of a short simulation sequence",
+          "ranks"    : "1,9,2",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "weak_scaling_short",
+          "desc"     : "Maintain the number of components proportional to the number of ranks plus threads",
+          "ranks"    : "1,9,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "x"
+        },
+        { "name"     : "size_rank_perm",
+          "desc"     : "Permute comp size and ranks for a fixed number of components",
+          "ranks"    : "2,9,2",
+          "threadsPerRank" : "1",
+          "sdl"      : 
+          { 
+            "x"  : "100,1100,100"
+          }
+        },
+        { "name"     : "messages_rank_perm",
+          "desc"     : "Permute msgPerClock and ranks for a fixed number of components",
+          "ranks"    : "2,9,2",
+          "threadsPerRank" : "1",
+          "sdl" :
+          {
+            "msgPerClock" : "10,110,10"
+          }
+        },
+        { "name"     : "weak_scaling_1to8ranks_100bto1kb",
+          "desc"     : "Maintain component count proportional to number of ranks. Vary bytesPerClock from 100 to 1000 bytes",
+          "ranks"    : "1,9,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "x",
+          "sdl" : {
+            "bytesPerClock" : "100,1100,100"
+          }
+        },
+        { "name"     : "weak_scaling_1to8threads_100bto1kb",
+          "desc"     : "Maintain component count proportional to number of ranks. Vary bytesPerClock from 100 to 1000 bytes",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,9,1",
+          "depvar"   : "x",
+          "sdl" : {
+            "bytesPerClock" : "100,1100,100"
+          }
+        }
+    ]
+ 
+}
