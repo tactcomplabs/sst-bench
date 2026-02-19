@@ -43,22 +43,3 @@ sqlite3 timing.db < query.sql
 
 # print a few lines
 head report.csv
-
-# Notes:
-#
-# The JSON definition for this sweep is
-# { "name"     : "weak_scaling_1to8threads_100bto1kb",
-#   "desc"     : "Maintain component count proportional to number of ranks. Vary bytesPerClock from 100 to 1000 bytes",
-#   "ranks"    : "1",
-#   "threadsPerRank" : "1,9,1",
-#   "depvar"   : "x",
-#   "sdl" : {
-#     "bytesPerClock" : "100,1100,100"
-#   }
-# }
-#
-# To view the generated tables use:
-# $sqlite3 timing.db
-# sqlite> .schema
-#
-#
