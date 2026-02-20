@@ -56,11 +56,18 @@
           "threadsPerRank" : "1",
           "depvar"   : "x"
         },
+        { "name"     : "weak_scaling_1node",
+          "desc"     : "Scale components/ranks on 1 node",
+          "ranks"    : "4,44,4",
+          "threadsPerRank" : "1",
+          "depvar"   : "x"
+        },
         { "name"     : "weak_scaling_4node",
-          "desc"     : "Scale components/ranks, 4 to 40 ranks",
-          "ranks"    : "4,40,1",
+          "desc"     : "Scale components/ranks evenly distributed on 4 nodes",
+          "ranks"    : "4,44,4",
           "threadsPerRank" : "1",
           "depvar"   : "x",
+	        "nodeclamp": "4"
         },
         { "name"     : "size_rank_perm",
           "desc"     : "Permute comp size and ranks for a fixed number of components",
