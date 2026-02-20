@@ -8,26 +8,27 @@
 
 # Using SLURM, run weak scaling test from 4 to 40 ranks on 1 node.
 # Then run with ranks evenly distributed on 4 nodes.
+# Enable checkpoint and restart simulations
 
-/bin/rm -rf NODES_* slurm.db slurm.csv slurm.sql
+/bin/rm -rf CPTRST_* cptrst.db cptrst.csv cptrst.sql
 
 SWEEPER=$(realpath ${SST_BENCH_HOME}/scripts/sst-sweeper.py) || exit 1
 JSONCFG=$(realpath ${SST_BENCH_HOME}/test/noodle/sweep.json) || exit 1
 SDL=$(realpath ${SST_BENCH_HOME}/test/noodle/noodle-2d.py) || exit 1
 
 # Do not run checkpoint and restart simulations
-SEQ="--seq=BASE"
+SEQ="--seq=BASE_CPT_RST"
 NOPROMPT="--noprompt"
 # TODO
 ADDLIBPATH="--add-lib-path ${SST_BENCH_HOME}/component/noodle"
-$SWEEPER ${JSONCFG} ${SDL} weak_scaling_4_40_ranks --slurm --nodeclamp=1 --jobname="NODES_1" --db="slurm.db" $SEQ $NOPROMPT || exit 2
-$SWEEPER ${JSONCFG} ${SDL} weak_scaling_4_40_ranks --slurm --nodeclamp=4 --jobname="NODES_4" --db="slurm.db" $SEQ $NOPROMPT || exit 2
+$SWEEPER ${JSONCFG} ${SDL} weak_scaling_4_40_ranks --slurm --nodeclamp=1 --jobname="CPTRST_1" --db="cptrst.db" $SEQ $NOPROMPT || exit 2
+$SWEEPER ${JSONCFG} ${SDL} weak_scaling_4_40_ranks --slurm --nodeclamp=4 --jobname="CPTRST_4" --db="cptrst.db" $SEQ $NOPROMPT || exit 2
 
 # simple sql script to extract some good info
-cat << EOF > slurm.sql
+cat << EOF > cptrst.sql
 .headers on
 .mode csv
-.output slurm.csv
+.output cptrst.csv
 
 SELECT
   J.jobid, J.jobtype, J.nodeclamp,
@@ -41,12 +42,12 @@ LEFT JOIN
   timing_info T ON T.jobid = J.jobid
 LEFT JOIN
   slurm_info  R ON  R.jobid = J.jobid
-WHERE J.jobtype = 'BASE';
+WHERE J.jobtype != 'COMPLETION';
 
 EOF
 
-# generate slurm.csv
-sqlite3 slurm.db < slurm.sql
+# generate cptrst.csv
+sqlite3 cptrst.db < cptrst.sql
 
 # print the data
-cat slurm.csv
+cat cptrst.csv
