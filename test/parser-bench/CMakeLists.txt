@@ -18,7 +18,7 @@ set(CONFIG_GEN "${CMAKE_SOURCE_DIR}/scripts/config_generator.py")
 set(NDJSON_EMITTER "${CMAKE_SOURCE_DIR}/scripts/emit_ndjson.py")
 set(PARITY_GEN "${CMAKE_CURRENT_SOURCE_DIR}/generate_parity_configs.py")
 set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/configs")
-set(NOODLE_LIB_PATH "${CMAKE_BINARY_DIR}/sst-bench/noodle")
+set(NOODLE_LIB_PATH "${CMAKE_BINARY_DIR}/components/noodle")
 
 file(MAKE_DIRECTORY ${GEN_DIR})
 
