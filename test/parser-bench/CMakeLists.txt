@@ -23,12 +23,12 @@ set(NOODLE_LIB_PATH "${CMAKE_BINARY_DIR}/components/noodle")
 file(MAKE_DIRECTORY ${GEN_DIR})
 
 # --timing-info-json was added in SST 15.1; omit it for older versions
-if(SST_MAJOR_VERSION GREATER_EQUAL 15 AND SST_MINOR_VERSION GREATER_EQUAL 1)
+if((${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.1"))
   set(HAVE_TIMING_JSON TRUE)
-  message(STATUS "[PARSER-BENCH] SST ${SST_MAJOR_VERSION}.${SST_MINOR_VERSION} supports --timing-info-json")
+  message(STATUS "[PARSER-BENCH] SST ${SST_VERSION} supports --timing-info-json")
 else()
   set(HAVE_TIMING_JSON FALSE)
-  message(STATUS "[PARSER-BENCH] SST ${SST_MAJOR_VERSION}.${SST_MINOR_VERSION} lacks --timing-info-json, skipping timing output")
+  message(STATUS "[PARSER-BENCH] SST ${SST_VERSION} lacks --timing-info-json, skipping timing output")
 endif()
 
 # ---------------------------------------------------------------------------
