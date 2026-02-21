@@ -41,9 +41,10 @@ g_id_base = (int(datetime.timestamp(datetime.now())*10) & 0xffffff) << 16
 g_sbatch="sbatch"
 g_lid2sid = {}   # map local id to slurm id
 
+# TODO move this to json config
 # be gentle on gizmo
 g_max_nodes = 4
-g_proc_per_node = 36
+g_proc_per_node = 40
 
 # not all slurm systems support sacct
 g_sacct = shutil.which('sacct')
@@ -140,10 +141,10 @@ class JobEntry():
         else:
             # distribute across constant node count
             self.nodes = self.nodeclamp
-            print(f"{self.nodeclamp} {self.nodes} {self.procs}")
+            # print(f"{self.nodeclamp} {self.nodes} {self.procs}")
             procsPerNode = self.procs / self.nodes
             if  procsPerNode > g_proc_per_node:
-                print(f"{g_pfx} {self.procs} across {self.nodes} nodes requires {procsPerNode} per node exceeding limit of {g_proc_per_node}")
+                print(f"{g_pfx} {self.procs} processes across {self.nodes} nodes requires {procsPerNode} per node exceeding limit of {g_proc_per_node}")
                 sys.exit(1)
     def cpt(self,simperiod, baseid):
         self.jtype = JobType.CPT
@@ -290,7 +291,7 @@ class JobManager():
         # keep track of jobs up to completion job then run post-processing
         self.wipList.append(jobid)
         # Capture set up parameters here
-        self.sqldb.sdl_info(jobid=id, sdl_params=entry.sdl_params)
+        self.sqldb.sdl_info(id=jobid, sdl_params=entry.sdl_params)
         if self.slurm == False:
             self.pp_local(id=jobid, cwd=cwd)
         elif entry.jtype==JobType.COMPLETION:

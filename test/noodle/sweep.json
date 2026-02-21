@@ -8,7 +8,7 @@
     {
         "db"        : ["timing.db", "sqlite database file to be created or updated"],
         "jobname"   : ["sst-perf",  "name associated with all jobs"],
-        "nodeclamp" : ["0",         "distribute threads evenly across nodes"],
+        "nodeclamp" : ["0",         "distribute threads evenly across specified number of nodes"],
         "tmpdir"    : [".",         "temporary area for running jobs"]
     },
     "sdl_params"    :
@@ -53,6 +53,12 @@
         { "name"     : "weak_scaling_short",
           "desc"     : "Maintain the number of components proportional to the number of ranks plus threads",
           "ranks"    : "1,9,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "x"
+        },
+        { "name"     : "weak_scaling_4_40_ranks",
+          "desc"     : "Scale components/rank, 4 to 40 ranks",
+          "ranks"    : "4,40,1",
           "threadsPerRank" : "1",
           "depvar"   : "x"
         },
