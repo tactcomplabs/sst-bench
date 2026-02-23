@@ -3,6 +3,9 @@
 # Unregisters sstbench libs from the SST infrastructure
 #
 
+#--remove files from cmake install manifest                                           
+xargs rm < install_manifest.txt
+
 #-- unregister the libs
 sst-register -u msgperf
 sst-register -u microcomp
@@ -15,6 +18,7 @@ sst-register -u noodle
 sst-register -u phold
 sst-register -u restart
 sst-register -u restore
+sst-register -u spaghetti
 sst-register -u tcldbg
 
 #-- forcible remove it from the local script
@@ -32,6 +36,7 @@ if test -f "$CONFIG"; then
   sed -i.bak '/phold/d' $CONFIG
   sed -i.bak '/restart/d' $CONFIG
   sed -i.bak '/restore/d' $CONFIG
+  sed -i.bak '/spaghetti/d' $CONFIG
   sed -i.bak '/tcldbg/d' $CONFIG
 fi
 
