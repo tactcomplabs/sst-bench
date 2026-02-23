@@ -57,7 +57,13 @@ def parse_filename(basename):
     return None, None, None
 
 
-def build_record(timing_file, hostname, plat, sst_version):
+def get_jenkins_metadata():
+    """Collect Jenkins environment variables when running in a Jenkins build."""
+    keys = ("BUILD_NUMBER", "BUILD_URL", "JOB_NAME", "BUILD_ID")
+    return {k.lower(): os.environ[k] for k in keys if k in os.environ}
+
+
+def build_record(timing_file, hostname, plat, sst_version, jenkins_meta):
     """Read a timing JSON file and build an NDJSON record."""
     basename = os.path.basename(timing_file)
     topology, num_components, config_type = parse_filename(basename)
@@ -72,7 +78,7 @@ def build_record(timing_file, hostname, plat, sst_version):
     max_rss_kb = info.get("global_max_rss", 0)
     total_memory_gb = max_rss_kb / 1048576.0
 
-    return {
+    record = {
         "@timestamp": datetime.now(timezone.utc).isoformat(),
         "benchmark": "parser-bench",
         "hostname": hostname,
@@ -92,6 +98,8 @@ def build_record(timing_file, hostname, plat, sst_version):
         "execute_duration_sec": 0.0,
         "run_duration_sec": info.get("max_run_time", 0.0),
     }
+    record.update(jenkins_meta)
+    return record
 
 
 def main():
@@ -116,9 +124,10 @@ def main():
     hostname = socket.gethostname()
     plat = f"{platform.system().lower()}-{platform.machine()}"
     sst_version = get_sst_version()
+    jenkins_meta = get_jenkins_metadata()
 
     for tf in timing_files:
-        record = build_record(tf, hostname, plat, sst_version)
+        record = build_record(tf, hostname, plat, sst_version, jenkins_meta)
         if record is None:
             continue
         sys.stdout.write(f"PARSER_BENCH_RESULT:{json.dumps(record)}\n")
