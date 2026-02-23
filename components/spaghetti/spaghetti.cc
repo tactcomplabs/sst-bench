@@ -47,6 +47,12 @@ Spaghetti::Spaghetti(SST::ComponentId_t id, const SST::Params& params ) :
   // setup the local rand number generator
   localRNG = new SST::RNG::MersenneRNG(uint32_t(id) + rngSeed);
 
+  // initialize the statistics
+  for( uint64_t i= 0; i<numPorts; i++ ){
+    std::string pName = std::to_string(i);
+    LStat.push_back(registerStatistic<uint64_t>("LATENCY_PORT_", pName));
+  }
+
   // constructor complete
   output.verbose( CALL_INFO, 5, 0, "Constructor complete\n" );
 }
@@ -110,6 +116,7 @@ void Spaghetti::sendData(){
       TimeConverter tc = getTimeConverter(std::to_string(freq) + "MHz");
       SimTime_t delay = (SimTime_t)(localRNG->generateNextUInt32() & 0b11111111);
       linkHandlers[i]->send(delay, tc, se);
+      LStat[i]->addData(delay);
 
       output.verbose(CALL_INFO, 5, 0,
                      "%s: injected %zu byte message into port = %s\n",

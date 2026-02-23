@@ -119,7 +119,9 @@ public:
   // -------------------------------------------------------
   // Spaghetti Component Statistics Data
   // -------------------------------------------------------
-  SST_ELI_DOCUMENT_STATISTICS()
+  SST_ELI_DOCUMENT_STATISTICS(
+    {"LATENCY_PORT_", "Histogram of latency values", "latency", 1},
+  )
 
   // -------------------------------------------------------
   // Spaghetti Component Checkpoint Methods
@@ -138,6 +140,7 @@ public:
     SST_SER(portname);
     SST_SER(linkHandlers);
     SST_SER(localRNG);
+    SST_SER(LStat);
   }
 
   /// Spaghetti: serialization implementations
@@ -159,6 +162,8 @@ private:
   std::vector<std::string> portname;              ///< port 0 to numPorts names
   std::vector<SST::Link *> linkHandlers;          ///< LinkHandler objects
   SST::RNG::Random* localRNG = 0;                 ///< component local random number generator
+
+  std::vector<Statistic<uint64_t>*> LStat;        ///< Statistics vector.  One entry per port.  Histogram of injection latencies
 
   // -- private methods
   /// Spaghetti: Message Event Handler
