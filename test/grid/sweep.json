@@ -11,6 +11,10 @@
         "nodeclamp" : ["0",         "distribute threads evenly across nodes"],
         "tmpdir"    : [".",         "temporary area for running jobs"]
     },
+    "sst_params"    :
+    {
+        "add-lib-path"  : "${SST_BENCH_HOME}/components/grid"
+    },
     "sdl_params"    :
     {
         "x"         : ["10",        "number of horizonal components"],

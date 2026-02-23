@@ -14,6 +14,7 @@ import argparse
 import jobutils
 import json
 import os
+import re
 import shutil
 import sqlutils
 import sys
@@ -26,7 +27,7 @@ from pprint import pprint
 # from time import sleep
 
 # global defaults
-g_debug = False
+g_debug = True
 g_version = 0.0
 g_pfx = "[sst-sweeper.py]"
 g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -94,19 +95,17 @@ def range_from_str(s: str) -> range:
     return range(*values)
 
 class JobEntry():
-    def __init__(self, *, sdlFile:str, options:list, sim_controls:list, ranks:int, threads:int, sdl_params:list, predecessors:list = []):
+    def __init__(self, *, sdlFile:str, options:list, sim_controls:list, ranks:int, threads:int, sst_params:list, sdl_params:list, predecessors:list = []):
         
         self.jtype = JobType.BASE
         self.predecessors = predecessors
         self.ranks = ranks
         self.threads = threads
         self.procs = ranks * threads
+        self.sst_params = copy(sst_params)
         self.sdl_params = copy(sdl_params)
-        self.sstopts = f"--num-threads={self.threads} --output-json=config.json"
-        self.sstopts += f" --print-timing-info --timing-info-json=timing.json"
 
         self.slurm = options['slurm']
-
         self.db = sim_controls['db']
         self.jobname = sim_controls['jobname']
         self.nodeclamp = int(sim_controls['nodeclamp'])
@@ -118,6 +117,11 @@ class JobEntry():
         self.cpt_timestamp = 0
         self.setdeps = False
 
+        self.sstopts = f"--num-threads={self.threads} --output-json=config.json"
+        self.sstopts += f" --print-timing-info --timing-info-json=timing.json"
+        for opt in sst_params:
+            self.sstopts += f" --{opt}={sst_params[opt]}"
+        
         self.sdlFile = sdlFile
         self.sdlopts = "--"
         for opt in sdl_params:
@@ -193,7 +197,7 @@ class JobEntry():
         return jobstring
 
 class JobManager():
-    def __init__(self, sdl, clocks, options, sim_control_params, job_sequencer_params, sdl_params ):
+    def __init__(self, sdl, clocks, options, sim_control_params, job_sequencer_params, sst_params: list, sdl_params: list ):
         print("\nCreating Job Manager")
         self.clocks = clocks
 
@@ -212,6 +216,7 @@ class JobManager():
         self.do_checkpoint = seq=='BASE_CPT' or self.do_restart
         self.simperiod = int(job_sequencer_params['simperiod'])
 
+        self.sst_params = copy(sst_params)
         self.sdl_params = copy(sdl_params)
 
         self.next_id = g_id_base
@@ -346,6 +351,8 @@ class JsonParams():
         self.sdl_required = ['clocks']
         self.sweep_required = ['name', 'desc', 'ranks', 'threadsPerRank']
         self.sweep_optional = ['depvar', 'sdl']
+        self.sst_reserved = ['num-threads', 'output-json', 'print-timing-info', 'timing-info-json']
+        self.re_env_var = r"\$\{.+?}"
         if jsonFile == None:
             return
         if not os.path.isfile(jsonFile):
@@ -354,25 +361,45 @@ class JsonParams():
         self.abspath = os.path.abspath(jsonFile)
         try:
             with open(self.abspath) as f:
-                self.json = json.load(f)
+                self.json_original = json.load(f)
         except Exception as e:
             print(f"{g_pfx} error: could not load {self.abspath}: [{e}]")
             return
-        if 'job_sequencer' in self.json:
-            self.job_sequencer_params = self.json['job_sequencer']
-        else:
+        
+        # Evaluate environment variables specified in JSON file
+        self.json = self.parse_env_vars(self.json_original)
+        # print(json.dumps(self.json, indent=2))
+
+        # Parse each section of json file
+        if 'job_sequencer' not in self.json:
             self.errors.append('error: json missing job_sequencer group')
-        if 'sim_controls' in self.json:
-            self.sim_control_params = self.json['sim_controls']
         else:
+            self.job_sequencer_params = self.json['job_sequencer']
+
+        if 'sim_controls' not in self.json:
             self.errors.append('error: json missing sim_controls group')
-        if 'sdl_params' in self.json:
+        else:
+            self.sim_control_params = self.json['sim_controls']
+
+        if 'sdl_params' not in self.json:
+            self.errors.append('error: json missing sdl_params group')
+        else:
             self.sdl_params = self.json['sdl_params']
             for r in self.sdl_required:
                 if r not in self.sdl_params:
                     self.errors.append(f"error: missing {r}' in sdl_params")
+        
+        if 'sst_params' not in self.json:
+            self.errors.append('error: json missing sst_params group')
         else:
-            self.errors.append('error: json missing sdl_params group')
+            self.sst_params = self.json['sst_params']
+            for p in self.sst_params:
+                if p in self.sst_reserved:
+                    self.errors.append(f"error: sst param '{p}' is reserved")
+                if "checkpoint" in p and "CPT" in self.job_sequencer_params["seq"]:
+                    self.errors.append(
+                        f"error: sst param '{p}' conflicts with job sequence '{self.job_sequencer_params["seq"]}'")
+
         if 'sweeps' not in self.json:
             self.errors.append('error: json missing sweeps group')
         else:
@@ -391,8 +418,9 @@ class JsonParams():
                 # check for unknown keys
                 for k in sweep:
                     if k not in self.sweep_required + self.sweep_optional:
-                        self.errors.append(f"error: unknown key '{k}' in sweep '{key}'")    
-                n += 1
+                        self.errors.append(f"error: unknown key '{k}' in sweep '{key}'")
+                    n += 1
+ 
     def sweep_short_help(self) -> str:
         if self.json == None:
             return ""
@@ -442,6 +470,29 @@ class JsonParams():
                     return f"[{self.json[group][key][0]}]" # default help value string
         self.errors.append(f"error: problem with json.{group}.{key}")
         return f"[???]"
+    def parse_env_vars(self, obj):
+        if isinstance(obj, dict):   
+            for k,v in obj.items():
+                if re.search(self.re_env_var, k):
+                    self.errors.append(f"error: key cannot contain an environment variable: '{k}'")
+                obj[k] = self.parse_env_vars(v)
+        elif isinstance(obj, list):
+            for index, value in enumerate(obj):
+                obj[index] = self.parse_env_vars(value)
+        elif isinstance(obj, str):
+            obj = self.evaluate_env_var(obj)
+        return obj
+    def evaluate_env_var(self, oldtxt: str):
+        newtxt=oldtxt
+        matches =  re.findall(self.re_env_var, oldtxt)
+        for env_var in matches:
+            var = env_var.replace("${","").replace("}","")
+            val = os.getenv(var)
+            if val == None:
+                self.errors.append("error: environment variable not set: {var}")
+                return oldtxt
+            newtxt = newtxt.replace(env_var,val)
+        return newtxt
 
 if __name__ == '__main__':
 
@@ -452,7 +503,7 @@ if __name__ == '__main__':
         jsonParams = JsonParams(sys.argv[2])
     elif len(sys.argv) > 2:
         jsonParams = JsonParams(sys.argv[1])
-        
+    
     # main parser
     parser = argparse.ArgumentParser(
         description='SST Simulation parameter sweeps with performance database generation',
@@ -503,6 +554,15 @@ if __name__ == '__main__':
                 sdl_params_group.add_argument(f"--{opt}", type=int, 
                                               help=f"{sdl_params[opt][1]} {jsonParams.defv_str('sdl_params', opt)}")
 
+    # "sst_params" overrides
+    if jsonParams.json != None and hasattr(jsonParams,'sst_params'):
+        sst_params_group = parser.add_argument_group(f"sst overrides")
+        sst_params = jsonParams.sst_params
+        if sst_params != None:
+            for opt in sst_params.keys():
+                # TODO currently only using this for --add-lib-path string
+                sst_params_group.add_argument(f"--{opt}", type=str, help=f"{[sst_params[opt]]}")
+
     # help text will notify user of any malformed json checking in argument parser creation
     if jsonParams.json == None:
         parser.epilog = 'Use "--help <path-to-jsonFile>" to include custom configuration command line details (e.g. ./sst-sweeper.py --help sweep.json)'
@@ -547,8 +607,10 @@ if __name__ == '__main__':
     if g_debug:
         print(f"# Command line args:")
         pprint(args_dict)
-        print(f"# JSON sdl_params")
+        pprint(f"# JSON sdl_params")
         pprint(jsonParams.sdl_params)
+        print(f"# JSON sst_params")
+        pprint(jsonParams.sst_params)
     
     print(f"{os.path.abspath(sys.argv[0])}\nVersion {g_version}")
     print("\n[positional]")
@@ -591,6 +653,17 @@ if __name__ == '__main__':
         sdl_params[key] = val
         print(f"  {key:<10} {val}")
 
+    print("\n[resolved SST parameters]")
+    sst_params = {}
+    for key in jsonParams.sst_params:
+        val = jsonParams.sst_params[key]
+        # SST uses dashes in command-line arguments. 
+        # The 'vars' function converts these to "_".
+        argkey = key.replace("-","_")
+        if argkey in args_dict and args_dict[argkey] != None:
+            val = args_dict[argkey]
+        sst_params[key] = val
+        print(f"  {key:<10} {val}")
     #
     # Resolved parameter validation
     #
@@ -661,9 +734,9 @@ if __name__ == '__main__':
     #
     # Job Section
     #
-
+    
     # create job manager
-    jobmgr = JobManager(sdlFile, sdl_params['clocks'], options, sim_control_params, job_sequencer_params, sdl_params)
+    jobmgr = JobManager(sdlFile, sdl_params['clocks'], options, sim_control_params, job_sequencer_params, sst_params, sdl_params)
 
     # Generate job descriptions and add to job manager
 
@@ -693,6 +766,7 @@ if __name__ == '__main__':
                     sim_controls=sim_control_params,
                     ranks=r,
                     threads=t,
+                    sst_params=sst_params,
                     sdl_params=local_sdl_params
                 ))
     
