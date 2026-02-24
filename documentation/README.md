@@ -34,7 +34,7 @@ export SST_BENCH_HOME=<path-to-sstbench>
 
 ## Running Simulations: General tips
 
-If you are running on a system using `slurm` job management you can still run MPI simulations interactively. Be sure to allocate the necessary compute resource using `salloc -N <nodes> -n <processors>`
+If you are running on a system using `slurm` job management you can still run MPI simulations interactively. Be sure to allocate the necessary compute resource using `salloc -N <nodes> -n <tasks>`
 
 Generally, the scripts should be run on a fast local disk rather than on NFS as disk latencies have a major impact on performance. This is especially true when running with checkpointing and restarting from checkpoints which have high disk usage.
 
@@ -294,7 +294,7 @@ Available sweeps [10]
 ## Command Line Examples
 
 These examples run a weak scaling test from 4 to 40 ranks. The first is run on 
-a single node. The second distributes the processes evenly across 4 nodes.
+a single node. The second distributes the tasks evenly across 4 nodes.
 
 ```
 $SST_BENCH_HOME/scripts/sst-sweeper.py
