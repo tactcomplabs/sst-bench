@@ -30,6 +30,14 @@ statistics values for simple components.
 ports per component and randomly sends a configurable number of message payloads per cycle.
 * *hpe-phold* : Port of PHOLD benchmark from https://github.com/hpc-ai-adv-dev/sst-benchmarks based on Fujimoto's 1990 paper [Performance of Time Warp Under Synthetic Workloads](https://gdo149.llnl.gov/attachments/20776356/24674621.pdf).
 
+## Parameter Sweep Automation
+
+A structured methodology to define, manage, and analyze parameter sweep simulations is provided along with sample scripts.
+These support running simulations locally on a development system or through the `slurm` batch management system. Example charts generated using this system are shown below. Refer to the [documentation](documentation/README.md) for more information.
+
+<img src="documentation/imgs/sweep-examples.png" alt="parameter sweep examples" width="300"/>
+
+
 ## Prerequisites
 
 Given that this is an SST external component, the primary prerequisite is a current installation of the SST Core. Some microbenchmarks use components from SST Elements so it is recommended to install that as well. These test case are labeled 'elements' so they can easily be excluded from testing.  The sst-bench building infrastructure assumes that the `sst-config` tool is installed and can be found in the current PATH environment.
@@ -89,6 +97,8 @@ git clean -f -d
 
 ### Benchmark Scale
 Be mindful of the simulation input size when scaling tests near the limits of physical memory or compute capacity.  Several benchmarks exhibit exponential memory growth.
+
+
 
 ## Contributing
 

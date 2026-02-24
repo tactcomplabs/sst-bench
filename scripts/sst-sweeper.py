@@ -27,7 +27,7 @@ from pprint import pprint
 # from time import sleep
 
 # global defaults
-g_debug = True
+g_debug = False
 g_version = 0.0
 g_pfx = "[sst-sweeper.py]"
 g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
