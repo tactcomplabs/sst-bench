@@ -1,0 +1,102 @@
+{
+    "job_sequencer" :
+    {
+        "seq"       : ["BASE_CPT_RST",   "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
+        "simperiod" : ["100000",  "checkpoint sim period in ns"]
+    },
+    "sim_controls"  :
+    {
+        "db"        : ["timing.db", "sqlite database file to be created or updated"],
+        "jobname"   : ["sst-perf",  "name associated with all jobs"],
+        "nodeclamp" : ["0",         "distribute threads evenly across nodes"],
+        "tmpdir"    : [".",         "temporary area for running jobs"]
+    },
+    "sst_params"    :
+    {
+        "add-lib-path"  : "${SST_BENCH_HOME}/components/grid"
+    },
+    "sdl_params"    :
+    {
+        "x"         : ["10",        "number of horizonal components"],
+        "y"         : ["1",         "number of vertical components"],
+        "numBytes"  : ["512",       "Internal state size in 4B increments"],
+        "minData"   : ["10",        "minimum number of dwords transmitted per link"],
+        "maxData"   : ["256",      "maximum number of dwords transmitted per link"],
+        "clocks"    : ["1000000",   "[REQUIRED] number of clocks to run sim"],
+        "minDelay"  : ["500",       "min number of clocks between transmissions"],
+        "maxDelay"  : ["1000",      "max number of clocks between transmissions"],
+        "rngSeed"   : ["0",         "seed for random number generator"],
+        "verbose"   : ["0",         "verbosity level"]
+    },
+    "sweeps" :
+    [
+        { "name"     : "sanity",
+          "desc"     : "Basic check of a short simulation sequence",
+          "ranks"    : "1",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "sweep-sanity",
+          "desc"     : "2-3 threads, dependent numBytes, 10-15 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "2,4,1",
+          "depvar"   : "numBytes",
+          "sdl"      :
+          {
+            "x" : "10,20,5"
+          }
+        },
+        { "name"     : "thread-sanity",
+          "desc"     : "Basic check of a short simulation sequence",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,9,2"
+        },
+        { "name"     : "rank-sanity",
+          "desc"     : "Basic check of a short simulation sequence",
+          "ranks"    : "1,9,2",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "weak_scaling_short",
+          "desc"     : "Maintain the number of components proportional to the number of ranks plus threads",
+          "ranks"    : "1,9,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "x"
+        },
+        { "name"     : "size_rank_perm",
+          "desc"     : "Permute comp size and ranks for a fixed number of components",
+          "ranks"    : "2,9,2",
+          "threadsPerRank" : "1",
+          "sdl"      : 
+          { 
+            "x"  : "100,1100,100"
+          }
+        },
+        { "name"     : "delay_rank_perm",
+          "desc"     : "Permute comp link delay and ranks for a fixed number of components",
+          "ranks"    : "2,9,2",
+          "threadsPerRank" : "1",
+          "sdl" :
+          {
+            "minDelay" : "100,1100,100"
+          }
+        },
+        { "name"     : "weak_scaling_1to8ranks_1kbto64kb",
+          "desc"     : "Maintain component count proportional to number of ranks. Vary numBytes from 1Kb to 64kb",
+          "ranks"    : "1,9,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "x",
+          "sdl" : {
+            "numBytes" : "1000,66000,5000"
+          }
+        },
+        { "name"     : "weak_scaling_1to8threads_1kbto64kb",
+          "desc"     : "Maintain component count proportional to number of ranks. Vary numBytes from 1Kb to 64kb",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,9,1",
+          "depvar"   : "x",
+          "sdl" : {
+            "numBytes" : "1000,66000,5000"
+          }
+        }
+    ]
+ 
+}

@@ -28,7 +28,15 @@ statistics values for simple components.
 * *grid* : Generates a configurable 2 dimensional grid network with configurable component and data transfer parameters. Compile options are provided for testing different container data types for evaluating checkpointing performance. 
 * *noodle* : Generates randomly connected components using a configurable number of 
 ports per component and randomly sends a configurable number of message payloads per cycle.
-* *sst-bench examples* : Example scripts for launching parameter sweep experiments under Slurm management or sst-bench provided job management for single MPI enabled systems. See [examples/README.md](examples/README.md) for more information.
+* *hpe-phold* : Port of PHOLD benchmark from https://github.com/hpc-ai-adv-dev/sst-benchmarks based on Fujimoto's 1990 paper [Performance of Time Warp Under Synthetic Workloads](https://gdo149.llnl.gov/attachments/20776356/24674621.pdf).
+
+## Parameter Sweep Automation
+
+A structured methodology to define, manage, and analyze parameter sweep simulations is provided along with sample scripts.
+These support running simulations locally on a development system or through the `slurm` batch management system. Example charts generated using this system are shown below. Refer to the [documentation](documentation/README.md) for more information.
+
+<img src="documentation/imgs/sweep-examples.png" alt="parameter sweep examples" width="300"/>
+
 
 ## Prerequisites
 
@@ -56,7 +64,6 @@ Additional build options include:
 from the current version of SST
 * `cmake -DSSTBENCH_ENABLE_TESTING=ON ../` : Enables included test harness: 
 run with `make test`
-* `cmake -DSSTBENCH_ENABLE_SSTDBG=ON ../` : Enables TCL SST-Dbg components
 
 ## Testing
 
@@ -91,22 +98,7 @@ git clean -f -d
 ### Benchmark Scale
 Be mindful of the simulation input size when scaling tests near the limits of physical memory or compute capacity.  Several benchmarks exhibit exponential memory growth.
 
-### TCL-DBG Benchmark
 
-The `tcl-dbg` micro benchmark is designed to test the report the cost of using 
-the TactCompLabs `sst-dbg` tool flow using a variety of data sizes.  The benchmark 
-randomly seeds a randomly sized `std::vector` container at a specified interval.  Users 
-can then utilize `sst-dbg` or the `sst-dbg-console` application to trigger debugging 
-outputs at a specified interval.  The timing reported is *only* the time required to output 
-the debug data to disk.  An example of executing this benchmark is as follows:
-
-```
-cd sst-bench/test/tcl-dbg
-sst-dbg -i 1 -- sst tcldbg-test1.py
-```
-
-The timing data and size of the vectors (in bytes) will be written to an SST Statistics 
-file (StatisticOutput.csv) using the histogram output format.
 
 ## Contributing
 

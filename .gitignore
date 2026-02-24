@@ -6,6 +6,5 @@
 .#*
 *~
 .gdb_history
-*.out
 build/*
 __pycache__/
