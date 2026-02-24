@@ -35,7 +35,8 @@ ports per component and randomly sends a configurable number of message payloads
 A structured methodology to define, manage, and analyze parameter sweep simulations is provided along with sample scripts.
 These support running simulations locally on a development system or through the `slurm` batch management system. Example charts generated using this system are shown below. Refer to the [documentation](documentation/README.md) for more information.
 
-<img src="documentation/imgs/sweep-examples.png" alt="parameter sweep examples" width="300"/>
+
+<img src="documentation/imgs/sweep-examples.png" alt="parameter sweep examples" width="600"/>
 
 
 ## Prerequisites
