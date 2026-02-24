@@ -11,6 +11,10 @@
         "nodeclamp" : ["0",         "distribute threads evenly across specified number of nodes"],
         "tmpdir"    : [".",         "temporary area for running jobs"]
     },
+    "sst_params"    :
+    {
+        "add-lib-path"  : "${SST_BENCH_HOME}/components/noodle"
+    },
     "sdl_params"    :
     {
         "x"             : ["10",        "Number of horizonal components"],
