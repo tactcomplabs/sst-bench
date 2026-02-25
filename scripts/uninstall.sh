@@ -20,6 +20,7 @@ sst-register -u restart
 sst-register -u restore
 sst-register -u spaghetti
 sst-register -u tcldbg
+sst-register -u flood
 
 #-- forcible remove it from the local script
 CONFIG=~/.sst/sstsimulator.conf
@@ -38,6 +39,7 @@ if test -f "$CONFIG"; then
   sed -i.bak '/restore/d' $CONFIG
   sed -i.bak '/spaghetti/d' $CONFIG
   sed -i.bak '/tcldbg/d' $CONFIG
+  sed -i.bak '/flood/d' $CONFIG
 fi
 
 # EOF

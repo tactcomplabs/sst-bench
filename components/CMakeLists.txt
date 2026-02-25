@@ -31,6 +31,8 @@ if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "14
   add_subdirectory(restart)
   message(STATUS "[SST-BENCH] Enabling GRID micro-benchmark")
   add_subdirectory(grid)
+  message(STATUS "[SST-BENCH] Enabling FLOOD micro-benchmark")
+  add_subdirectory(flood)
 endif()
 
 if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "14.1") )

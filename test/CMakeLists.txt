@@ -30,6 +30,8 @@ if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "14
   add_subdirectory(restart)
   message(STATUS "[SST-BENCH] Enabling GRID testing")
   add_subdirectory(grid)
+  message(STATUS "[SST-BENCH] Enabling FLOOD testing")
+  add_subdirectory(flood)
 endif()
 
 if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
