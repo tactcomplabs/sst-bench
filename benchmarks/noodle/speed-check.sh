@@ -23,8 +23,8 @@ echo "########"
 echo "sst -n 8"
 echo "########"
 
-rm -rf sst-n10; mkdir sst-n10 || exit 1
-( cd sst-n10 && sst ../noodle-bench.py --num-threads=10 --output-json=config.json --output-partition --print-timing-info -- --verbose=0 --numComps=100 --portsPerComp=100 --msgPerClock=8 --bytesPerClock=4 --clocks=${CLOCKS} --rngSeed=3131 | tee log )
+rm -rf sst-n8; mkdir sst-n8 || exit 1
+( cd sst-n8 && sst ../noodle-bench.py --num-threads=8 --output-json=config.json --output-partition --print-timing-info -- --verbose=0 --numComps=100 --portsPerComp=100 --msgPerClock=8 --bytesPerClock=4 --clocks=${CLOCKS} --rngSeed=3131 | tee log )
 
 doit () {
     NP=$1
