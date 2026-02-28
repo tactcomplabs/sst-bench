@@ -1,0 +1,52 @@
+{
+    "job_sequencer" :
+    {
+        "seq"       : ["BASE", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
+        "simperiod" : ["1000", "checkpoint sim period in ns used with BASE_CPT_* sequences"]
+    },
+    "sim_controls"  :
+    {
+        "db"        : ["noodle.db",    "sqlite database file to be created or updated"],
+        "jobname"   : ["noodle_perf",  "name associated with all jobs"],
+        "nodeclamp" : ["0",            "distribute threads evenly across specified nodes"],
+        "tmpdir"    : ["./jobs",        "temporary area for running jobs"]
+    },
+    "sst_params"    :
+    {
+        "add-lib-path"  : "${SST_BENCH_HOME}/components/noodle"
+    },
+    "sdl_params"    :
+    {
+        "verbose"       : ["0",       "verbosity level"],
+        "numComps"      : ["100",     "Number of Noodle components"],
+        "portsPerComp"  : ["100",     "Number of ports per component"],
+        "msgPerClock"   : ["8",       "Messages per clock cycle"],
+        "bytesPerClock" : ["4",       "Bytes per clock"],
+        "clocks"        : ["1000000", "[REQUIRED] Number of clocks to run sim"],
+        "rngSeed"       : ["3131",    "Random number generator seed"]
+    },
+    "sweeps" :
+    [
+        { "name"     : "strong_scaling_1to10_ranks",
+          "desc"     : "sweep 1 to 10 ranks for a fixed configuration",
+          "ranks"    : "1,11,1",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "strong_scaling_1to10_threads",
+          "desc"     : "sweep 1 to 10 threads for a fixed configuration",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,11,1"
+        },
+        { "name"     : "strong_scaling_11to50_ranks",
+          "desc"     : "sweep 11 to 50 ranks for a fixed configuration",
+          "ranks"    : "11,51,1",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "strong_scaling_11to50_threads",
+          "desc"     : "sweep 11 to 50 threads for a fixed configuration",
+          "ranks"    : "1",
+          "threadsPerRank" : "11,51,1"
+        }
+    ]
+ 
+}

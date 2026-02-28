@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -A tcl
@@ -20,6 +20,7 @@
 # /scratch/$USER is Infiniband
 
 export OMPI_MCA_orte_base_help_aggregate=0
+export OMPI_MCA_hwloc_base_binding_policy=socket
 
 #-- module load anything you need to here
 #module load openmpi4/4.1.4

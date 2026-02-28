@@ -14,6 +14,7 @@ import argparse
 import jobutils
 import json
 import os
+import platform
 import re
 import shutil
 import sqlutils
@@ -27,7 +28,7 @@ from pprint import pprint
 # from time import sleep
 
 # global defaults
-g_debug = False
+g_debug = True
 g_version = 0.0
 g_pfx = "[sst-sweeper.py]"
 g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -39,13 +40,19 @@ g_cptpfx = "_cpt"
 g_start_time = datetime.now()
 g_id_base = (int(datetime.timestamp(datetime.now())*10) & 0xffffff) << 16
 
+g_mpirun = "mpirun"
 g_sbatch="sbatch"
+
+g_os_type = platform.system()
+if "Linux" in g_os_type:
+    g_mpirun += " --bind-to socket"
+    
 g_lid2sid = {}   # map local id to slurm id
 
 # TODO move this to json config
 # be gentle on gizmo
 g_max_nodes = 4
-g_proc_per_node = 40
+g_proc_per_node = 50  # bumped up to see effect of CPU result limit on gizmo
 
 # not all slurm systems support sacct
 g_sacct = shutil.which('sacct')
@@ -185,7 +192,7 @@ class JobEntry():
         sst_cmd = f"sst {self.sdlFile} {self.sstopts} {self.sdlopts}"
         if self.slurm == False:
             # local jobs will not be run in parallel so dependencies do not matter
-            jobstring = f"mpirun -np {self.ranks} {sst_cmd}"
+            jobstring = f"{g_mpirun} -np {self.ranks} {sst_cmd}"
         else:
             deps = ""
             if self.setdeps and len(self.predecessors) > 0:
@@ -193,7 +200,7 @@ class JobEntry():
                 for lid in self.predecessors:
                     deps += f":{self.getsid(True, lid, norun)}"
             wait = "--wait"  # TODO this should be optional
-            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.procs} -J {self.jobname} {g_slurm_script} -r {g_scripts} -d {self.db} -R {g_tmpdir} {sst_cmd}"
+            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.ranks} -J {self.jobname} {g_slurm_script} -r {g_scripts} -d {self.db} -R {g_tmpdir} {sst_cmd}"
         return jobstring
 
 class JobManager():
@@ -398,7 +405,7 @@ class JsonParams():
                     self.errors.append(f"error: sst param '{p}' is reserved")
                 if "checkpoint" in p and "CPT" in self.job_sequencer_params["seq"]:
                     self.errors.append(
-                        f"error: sst param '{p}' conflicts with job sequence '{self.job_sequencer_params["seq"]}'")
+                        f"error: sst param '{p}' conflicts with job sequence '{self.job_sequencer_params['seq']}'")
 
         if 'sweeps' not in self.json:
             self.errors.append('error: json missing sweeps group')
@@ -424,7 +431,7 @@ class JsonParams():
     def sweep_short_help(self) -> str:
         if self.json == None:
             return ""
-        return f"\n{", ".join(self.sweeps.keys())}"
+        return f"\n{', '.join(self.sweeps.keys())}"
     def sweep_long_help(self) -> str:
         s = f"Available sweeps [{len(self.sweeps)}]\n"
         for sweep in self.sweeps:
@@ -668,7 +675,7 @@ if __name__ == '__main__':
     # Resolved parameter validation
     #
     if job_sequencer_params['seq'] not in ALLOWED_SEQ:
-        print(f"error: job_sequencer.seq must be in [{"|".join(ALLOWED_SEQ)}]")
+        print(f"error: job_sequencer.seq must be in [{'|'.join(ALLOWED_SEQ)}]")
     simperiod = int(job_sequencer_params['simperiod'])
     if simperiod <= 0:
         print("error: simperiod must be greater than 0")
@@ -679,7 +686,7 @@ if __name__ == '__main__':
         if clocks <= 0:
             print("error: clocks must be greater than 0")
             sys.exit(1)
-        if simperiod >= clocks:
+        if "CPT" in job_sequencer_params['seq'] and simperiod >= clocks:
             print("error: simperiod must be greater than clocks")
             sys.exit(1)
     # confirm temporary directory exists
@@ -717,7 +724,7 @@ if __name__ == '__main__':
                 continue
             val = sdl_sweep_params[key]
             if not is_strict_range(val):
-                print(f"sdl key in sweep section specify a range: '{key}:{val}' is not a range")
+                print(f"sdl key in sweep section must specify a range: '{key}:{val}' is not a range.")
                 errors += 1
                 continue
             if sdl_sweep_var==None:
