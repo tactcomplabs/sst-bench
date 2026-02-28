@@ -28,7 +28,7 @@ from pprint import pprint
 # from time import sleep
 
 # global defaults
-g_debug = True
+g_debug = False
 g_version = 0.0
 g_pfx = "[sst-sweeper.py]"
 g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -50,9 +50,8 @@ if "Linux" in g_os_type:
 g_lid2sid = {}   # map local id to slurm id
 
 # TODO move this to json config
-# be gentle on gizmo
 g_max_nodes = 4
-g_proc_per_node = 50  # bumped up to see effect of CPU result limit on gizmo
+g_proc_per_node = 40
 
 # not all slurm systems support sacct
 g_sacct = shutil.which('sacct')

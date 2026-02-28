@@ -6,16 +6,15 @@
 #
 # See LICENSE in the top level directory for licensing details
 
-# These simulations target a single node and can be launched by sbatch.
-# That is, these do not use the --slurm option of sst-sweeper.py and 
-# will directly invoke mpirun on the allocated node
+# This simulation use mpirun to launch simulations locally
 
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
 
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to10_threads --noprompt
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to10_ranks --noprompt
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_11to50_threads --noprompt
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_11to50_ranks --noprompt
+OPTS="--noprompt"
+${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads ${OPTS}
+${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks ${OPTS}
+${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads ${OPTS}
+${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks ${OPTS}
 
 # simple sql script to extract some good info
 cat << EOF > noodle.sql

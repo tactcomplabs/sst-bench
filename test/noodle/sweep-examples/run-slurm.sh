@@ -32,7 +32,7 @@ cat << EOF > slurm.sql
 SELECT
   J.jobid, J.jobtype, J.nodeclamp,
   S.x, S.bytesPerClock,
-  T.max_build_time, T.max_run_time, T.global_max_rss,
+  T.ranks, T.threads, T.max_build_time, T.max_run_time, T.global_max_rss,
   R.jobname, R.nodes
 FROM job_info J
 LEFT JOIN

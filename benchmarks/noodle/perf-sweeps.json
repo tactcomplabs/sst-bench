@@ -27,25 +27,25 @@
     },
     "sweeps" :
     [
-        { "name"     : "strong_scaling_1to10_ranks",
-          "desc"     : "sweep 1 to 10 ranks for a fixed configuration",
-          "ranks"    : "1,11,1",
+        { "name"     : "strong_scaling_1to12_ranks",
+          "desc"     : "sweep 1 to 12 ranks for a fixed configuration",
+          "ranks"    : "1,13,1",
           "threadsPerRank" : "1"
         },
-        { "name"     : "strong_scaling_1to10_threads",
-          "desc"     : "sweep 1 to 10 threads for a fixed configuration",
+        { "name"     : "strong_scaling_1to12_threads",
+          "desc"     : "sweep 1 to 12 threads for a fixed configuration",
           "ranks"    : "1",
-          "threadsPerRank" : "1,11,1"
+          "threadsPerRank" : "1,13,1"
         },
-        { "name"     : "strong_scaling_11to50_ranks",
-          "desc"     : "sweep 11 to 50 ranks for a fixed configuration",
-          "ranks"    : "11,51,1",
+        { "name"     : "strong_scaling_13to40_ranks",
+          "desc"     : "sweep 13 to 40 ranks for a fixed configuration",
+          "ranks"    : "13,41,1",
           "threadsPerRank" : "1"
         },
-        { "name"     : "strong_scaling_11to50_threads",
-          "desc"     : "sweep 11 to 50 threads for a fixed configuration",
+        { "name"     : "strong_scaling_13to40_threads",
+          "desc"     : "sweep 13 to 40 threads for a fixed configuration",
           "ranks"    : "1",
-          "threadsPerRank" : "11,51,1"
+          "threadsPerRank" : "13,41,1"
         }
     ]
  
