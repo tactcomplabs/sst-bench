@@ -8,9 +8,12 @@
 
 # These simulations utilize sbatch to launch simulations
 
+# usage:   ./run-sweeps-slurm.sh [sst-sweeper options]
+# example: ./run-sweeps-slurm.sh --norun
+
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
 
-OPTS="--noprompt --slurm"
+OPTS="--noprompt --slurm $1"
 ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  ${OPTS}
 ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    ${OPTS}
 ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads ${OPTS}
