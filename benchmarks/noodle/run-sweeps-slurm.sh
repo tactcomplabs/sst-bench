@@ -12,6 +12,7 @@
 # example: ./run-sweeps-slurm.sh --norun
 
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
+mkdir -p jobs || exit 1
 
 OPTS="--noprompt --slurm $1"
 ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  ${OPTS}
