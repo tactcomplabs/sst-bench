@@ -10,7 +10,7 @@
 
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
 
-OPTS="--noprompt --slurm --norun"
+OPTS="--noprompt --slurm"
 ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  ${OPTS}
 ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    ${OPTS}
 ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads ${OPTS}
