@@ -60,7 +60,8 @@ class JobType(Enum):
     BASE = 1
     CPT  = 2
     RST  = 3
-    COMPLETION = 4
+    PLOAD = 4
+    COMPLETION = 99
 
 # if scratch directory exists create a jobs directory
 if not os.path.isdir(g_tmpdir):
@@ -123,8 +124,10 @@ class JobEntry():
         self.cpt_timestamp = 0
         self.setdeps = False
 
-        self.sstopts = f"--num-threads={self.threads} --output-json=config.json"
-        self.sstopts += f" --print-timing-info --timing-info-json=timing.json"
+        self.sstopts = f"--num-threads={self.threads}"
+        self.sstopts += f" --print-timing-info=4 --timing-info-json=timing.json"
+        self.sstopts += " --output-config=config.py --parallel-output"
+        # --output-json=config.json" 
         for opt in sst_params:
             self.sstopts += f" --{opt}={sst_params[opt]}"
         
@@ -171,6 +174,11 @@ class JobEntry():
         self.cpt_num = cpt_num
         self.cpt_timestamp = cpt_timestamp
         self.setdeps = True
+    def pload(self, baseid):
+        self.jtype = JobType.PLOAD
+        self.sstopts += f" --parallel-load"
+        self.sdlFile = f"../{baseid}/config.py"
+        self.friend = baseid
     def completion(self):
         self.jtype = JobType.COMPLETION
     def getsid(self, slurm, lid, norun):
@@ -220,6 +228,7 @@ class JobManager():
         seq = job_sequencer_params['seq']
         self.do_restart = seq=='BASE_CPT_RST'
         self.do_checkpoint = seq=='BASE_CPT' or self.do_restart
+        self.do_parallel_load = seq=='BASE_PLOAD'
         self.simperiod = int(job_sequencer_params['simperiod'])
 
         self.sst_params = copy(sst_params)
@@ -251,6 +260,7 @@ class JobManager():
     def add_job_sequence(self, baseEntry:JobEntry):
         # base sim
         id_base = jobmgr.add_job(baseEntry)
+        # add checkpoint job
         if self.do_checkpoint:
             cptEntry=copy(baseEntry)
             cptEntry.cpt(self.simperiod, id_base)
@@ -259,6 +269,7 @@ class JobManager():
             numCpts = int(clocks / self.simperiod)
             period = int(self.simperiod * 1000) # ns to ps
             timestamp = (numCpts+1) * period
+            # add restart jobs
             if self.do_restart:
                 # schedule shortest restart runs first 
                 for n in range(numCpts, 0, -1):
@@ -267,6 +278,11 @@ class JobManager():
                     rstEntry = copy(baseEntry)
                     rstEntry.rst(id_cpt, cpt, n, timestamp)
                     jobmgr.add_job(rstEntry)
+        # add parallel load job
+        if self.do_parallel_load:
+            ploadEntry=copy(baseEntry)
+            ploadEntry.pload(id_base)
+            jobmgr.add_job(ploadEntry)
         # slurm completion creates barrier and can perform post-processing
         if self.slurm:
             compEntry=copy(baseEntry)
@@ -533,7 +549,7 @@ if __name__ == '__main__':
 
     # "job_sequencer" overrides
     job_seq_group = parser.add_argument_group('job sequencer overrides')
-    ALLOWED_SEQ = ['BASE', 'BASE_CPT', 'BASE_CPT_RST']
+    ALLOWED_SEQ = ['BASE', 'BASE_CPT', 'BASE_CPT_RST', 'BASE_PLOAD']
     job_seq_group.add_argument("--seq", type=str, choices=ALLOWED_SEQ,
                                help=f"Select simulation sequence {jsonParams.defv_str('job_sequencer', 'seq')}")
     job_seq_group.add_argument("--simperiod", type=int, 

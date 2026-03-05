@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved

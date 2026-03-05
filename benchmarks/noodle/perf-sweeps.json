@@ -46,6 +46,14 @@
           "desc"     : "sweep 13 to 40 threads for a fixed configuration",
           "ranks"    : "1",
           "threadsPerRank" : "13,41,1"
+        },
+        { "name"     : "parallel_load_2to12_ranks",
+          "desc"     : "sweep 2 to 12 ranks with parallel loading, 100 to 200 components",
+          "ranks"    : "2,13,1",
+          "threadsPerRank" : "1",
+	  "sdl" : {
+	      "numComps" : "100,210,10"
+	  }
         }
     ]
  
