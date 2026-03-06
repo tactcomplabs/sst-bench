@@ -1,0 +1,234 @@
++ sst --version
+SST-Core Version (-dev)
++ mpirun --version
+mpirun (Open MPI) 5.0.8
+
+Report bugs to https://www.open-mpi.org/community/help/
+
++ uname -v
+Darwin Kernel Version 25.3.0: Wed Jan 28 20:53:05 PST 2026; root:xnu-12377.81.4~5/RELEASE_ARM64_T6020
++ OPTS='--verbose=4 --print-timing-info=4 --parallel-output -- --numComps=100 --portsPerComp=100 --msgPerClock=8 --bytesPerClock=4 --clocks=1000 --rngSeed=3131'
++ echo '### 3 ranks'
+### 3 ranks
++ mpirun -np 3 sst ../noodle-bench.py --output-config=r3.py --parallel-output --verbose=4 --print-timing-info=4 --parallel-output -- --numComps=100 --portsPerComp=100 --msgPerClock=8 --bytesPerClock=4 --clocks=1000 --rngSeed=3131
+SSTPythonModel: SST loading a Python model from script: /Users/kgriesser/work/sst-bench/benchmarks/noodle/noodle-bench.py / [noodle-bench]
+SSTPythonModel: Creating config graph for SST using Python model...
+Noodle-Bench test SST Simulation Configuration:
+	 verbose  =  0
+	 numComps  =  100
+	 portsPerComp  =  100
+	 msgPerClock  =  8
+	 bytesPerClock  =  4
+	 clocks  =  1000
+	 rngSeed  =  3131
+SSTPythonModel: Creating component [n0] of type [noodle.Noodle]: id [0]
+SSTPythonModel: Creating component [n1] of type [noodle.Noodle]: id [1]
+SSTPythonModel: Creating component [n2] of type [noodle.Noodle]: id [2]
+SSTPythonModel: Creating component [n3] of type [noodle.Noodle]: id [3]
+SSTPythonModel: Creating component [n4] of type [noodle.Noodle]: id [4]
+SSTPythonModel: Creating component [n5] of type [noodle.Noodle]: id [5]
+SSTPythonModel: Creating component [n6] of type [noodle.Noodle]: id [6]
+SSTPythonModel: Creating component [n7] of type [noodle.Noodle]: id [7]
+SSTPythonModel: Creating component [n8] of type [noodle.Noodle]: id [8]
+SSTPythonModel: Creating component [n9] of type [noodle.Noodle]: id [9]
+SSTPythonModel: Creating component [n10] of type [noodle.Noodle]: id [10]
+SSTPythonModel: Creating component [n11] of type [noodle.Noodle]: id [11]
+SSTPythonModel: Creating component [n12] of type [noodle.Noodle]: id [12]
+SSTPythonModel: Creating component [n13] of type [noodle.Noodle]: id [13]
+SSTPythonModel: Creating component [n14] of type [noodle.Noodle]: id [14]
+SSTPythonModel: Creating component [n15] of type [noodle.Noodle]: id [15]
+SSTPythonModel: Creating component [n16] of type [noodle.Noodle]: id [16]
+SSTPythonModel: Creating component [n17] of type [noodle.Noodle]: id [17]
+SSTPythonModel: Creating component [n18] of type [noodle.Noodle]: id [18]
+SSTPythonModel: Creating component [n19] of type [noodle.Noodle]: id [19]
+SSTPythonModel: Creating component [n20] of type [noodle.Noodle]: id [20]
+SSTPythonModel: Creating component [n21] of type [noodle.Noodle]: id [21]
+SSTPythonModel: Creating component [n22] of type [noodle.Noodle]: id [22]
+SSTPythonModel: Creating component [n23] of type [noodle.Noodle]: id [23]
+SSTPythonModel: Creating component [n24] of type [noodle.Noodle]: id [24]
+SSTPythonModel: Creating component [n25] of type [noodle.Noodle]: id [25]
+SSTPythonModel: Creating component [n26] of type [noodle.Noodle]: id [26]
+SSTPythonModel: Creating component [n27] of type [noodle.Noodle]: id [27]
+SSTPythonModel: Creating component [n28] of type [noodle.Noodle]: id [28]
+SSTPythonModel: Creating component [n29] of type [noodle.Noodle]: id [29]
+SSTPythonModel: Creating component [n30] of type [noodle.Noodle]: id [30]
+SSTPythonModel: Creating component [n31] of type [noodle.Noodle]: id [31]
+SSTPythonModel: Creating component [n32] of type [noodle.Noodle]: id [32]
+SSTPythonModel: Creating component [n33] of type [noodle.Noodle]: id [33]
+SSTPythonModel: Creating component [n34] of type [noodle.Noodle]: id [34]
+SSTPythonModel: Creating component [n35] of type [noodle.Noodle]: id [35]
+SSTPythonModel: Creating component [n36] of type [noodle.Noodle]: id [36]
+SSTPythonModel: Creating component [n37] of type [noodle.Noodle]: id [37]
+SSTPythonModel: Creating component [n38] of type [noodle.Noodle]: id [38]
+SSTPythonModel: Creating component [n39] of type [noodle.Noodle]: id [39]
+SSTPythonModel: Creating component [n40] of type [noodle.Noodle]: id [40]
+SSTPythonModel: Creating component [n41] of type [noodle.Noodle]: id [41]
+SSTPythonModel: Creating component [n42] of type [noodle.Noodle]: id [42]
+SSTPythonModel: Creating component [n43] of type [noodle.Noodle]: id [43]
+SSTPythonModel: Creating component [n44] of type [noodle.Noodle]: id [44]
+SSTPythonModel: Creating component [n45] of type [noodle.Noodle]: id [45]
+SSTPythonModel: Creating component [n46] of type [noodle.Noodle]: id [46]
+SSTPythonModel: Creating component [n47] of type [noodle.Noodle]: id [47]
+SSTPythonModel: Creating component [n48] of type [noodle.Noodle]: id [48]
+SSTPythonModel: Creating component [n49] of type [noodle.Noodle]: id [49]
+SSTPythonModel: Creating component [n50] of type [noodle.Noodle]: id [50]
+SSTPythonModel: Creating component [n51] of type [noodle.Noodle]: id [51]
+SSTPythonModel: Creating component [n52] of type [noodle.Noodle]: id [52]
+SSTPythonModel: Creating component [n53] of type [noodle.Noodle]: id [53]
+SSTPythonModel: Creating component [n54] of type [noodle.Noodle]: id [54]
+SSTPythonModel: Creating component [n55] of type [noodle.Noodle]: id [55]
+SSTPythonModel: Creating component [n56] of type [noodle.Noodle]: id [56]
+SSTPythonModel: Creating component [n57] of type [noodle.Noodle]: id [57]
+SSTPythonModel: Creating component [n58] of type [noodle.Noodle]: id [58]
+SSTPythonModel: Creating component [n59] of type [noodle.Noodle]: id [59]
+SSTPythonModel: Creating component [n60] of type [noodle.Noodle]: id [60]
+SSTPythonModel: Creating component [n61] of type [noodle.Noodle]: id [61]
+SSTPythonModel: Creating component [n62] of type [noodle.Noodle]: id [62]
+SSTPythonModel: Creating component [n63] of type [noodle.Noodle]: id [63]
+SSTPythonModel: Creating component [n64] of type [noodle.Noodle]: id [64]
+SSTPythonModel: Creating component [n65] of type [noodle.Noodle]: id [65]
+SSTPythonModel: Creating component [n66] of type [noodle.Noodle]: id [66]
+SSTPythonModel: Creating component [n67] of type [noodle.Noodle]: id [67]
+SSTPythonModel: Creating component [n68] of type [noodle.Noodle]: id [68]
+SSTPythonModel: Creating component [n69] of type [noodle.Noodle]: id [69]
+SSTPythonModel: Creating component [n70] of type [noodle.Noodle]: id [70]
+SSTPythonModel: Creating component [n71] of type [noodle.Noodle]: id [71]
+SSTPythonModel: Creating component [n72] of type [noodle.Noodle]: id [72]
+SSTPythonModel: Creating component [n73] of type [noodle.Noodle]: id [73]
+SSTPythonModel: Creating component [n74] of type [noodle.Noodle]: id [74]
+SSTPythonModel: Creating component [n75] of type [noodle.Noodle]: id [75]
+SSTPythonModel: Creating component [n76] of type [noodle.Noodle]: id [76]
+SSTPythonModel: Creating component [n77] of type [noodle.Noodle]: id [77]
+SSTPythonModel: Creating component [n78] of type [noodle.Noodle]: id [78]
+SSTPythonModel: Creating component [n79] of type [noodle.Noodle]: id [79]
+SSTPythonModel: Creating component [n80] of type [noodle.Noodle]: id [80]
+SSTPythonModel: Creating component [n81] of type [noodle.Noodle]: id [81]
+SSTPythonModel: Creating component [n82] of type [noodle.Noodle]: id [82]
+SSTPythonModel: Creating component [n83] of type [noodle.Noodle]: id [83]
+SSTPythonModel: Creating component [n84] of type [noodle.Noodle]: id [84]
+SSTPythonModel: Creating component [n85] of type [noodle.Noodle]: id [85]
+SSTPythonModel: Creating component [n86] of type [noodle.Noodle]: id [86]
+SSTPythonModel: Creating component [n87] of type [noodle.Noodle]: id [87]
+SSTPythonModel: Creating component [n88] of type [noodle.Noodle]: id [88]
+SSTPythonModel: Creating component [n89] of type [noodle.Noodle]: id [89]
+SSTPythonModel: Creating component [n90] of type [noodle.Noodle]: id [90]
+SSTPythonModel: Creating component [n91] of type [noodle.Noodle]: id [91]
+SSTPythonModel: Creating component [n92] of type [noodle.Noodle]: id [92]
+SSTPythonModel: Creating component [n93] of type [noodle.Noodle]: id [93]
+SSTPythonModel: Creating component [n94] of type [noodle.Noodle]: id [94]
+SSTPythonModel: Creating component [n95] of type [noodle.Noodle]: id [95]
+SSTPythonModel: Creating component [n96] of type [noodle.Noodle]: id [96]
+SSTPythonModel: Creating component [n97] of type [noodle.Noodle]: id [97]
+SSTPythonModel: Creating component [n98] of type [noodle.Noodle]: id [98]
+SSTPythonModel: Creating component [n99] of type [noodle.Noodle]: id [99]
+SSTPythonModel: Construction of config graph with Python is complete.
+[0:0] SST Core: #main() My rank is (0.0), on 3/1 nodes/threads
+[2:0] SST Core: #main() My rank is (2.0), on 3/1 nodes/threads
+[1:0] SST Core: #main() My rank is (1.0), on 3/1 nodes/threads
+[0:0] SST Core: # ------------------------------------------------------------
+[0:0] SST Core: # Graph construction took 4.584945 seconds.
+[0:0] SST Core: # Global memory use is 66320kb (raised 13936kb)
+[0:0] SST Core: # Max memory use is 30672kb (rank 0)
+[0:0] SST Core: # Graph contains 100 components
+[0:0] SST Core: # ------------------------------------------------------------
+LinearPartition Performing a linear partition scheme for simulation model.
+LinearPartition Expected linear scheme:
+LinearPartition - Component Count:                         100
+LinearPartition - Approx. Components per Rank:              33
+LinearPartition - Remainder (non-balanced dist.):            1
+LinearPartition Linear partition scheme completed.
+[1:0] SST Core: Signal handlers will be registered for USR1, USR2, INT, ALRM, and TERM
+[0:0] SST Core: # ------------------------------------------------------------
+[0:0] SST Core: # Graph partitioning, output and distribution took 0.020566 seconds.
+[0:0] SST Core: # Global memory use is 71808kb (raised 5488kb)
+[0:0] SST Core: # Max memory use is 32528kb (rank 0)
+[0:0] SST Core: # ------------------------------------------------------------
+[0:0] SST Core: Signal handlers will be registered for USR1, USR2, INT, ALRM, and TERM
+[2:0] SST Core: Signal handlers will be registered for USR1, USR2, INT, ALRM, and TERM
+[0:0] SST Core:  : StatisticOutputConsole enabled...
+[1:0] SST Core:  : StatisticOutputConsole enabled...
+[2:0] SST Core:  : StatisticOutputConsole enabled...
+[1:0] SST Core: # Starting main event loop
+[2:0] SST Core: # Starting main event loop
+[0:0] SST Core: # Starting main event loop
+[0:0] SST Core: # Start time: 2026/03/06 at: 10:45:36
+[1:0] SST Core: # Start time: 2026/03/06 at: 10:45:36
+[2:0] SST Core: # Start time: 2026/03/06 at: 10:45:36
+
+
+------------------------------------------------------------
+Simulation Resource Utilization for Code Regions:
+■ total
+│ ├── Duration: 4.754 seconds
+│ └── Memory: Total - 282.5 MB, Max - 103.1 MB (rank 0)
+├ ■ build
+│ │ ├── Duration: 4.635 seconds
+│ │ └── Memory: Total - 95.81 MB, Max - 40.1 MB (rank 0)
+│ ├ ■ graph-processing
+│ │ │ ├── Duration: 4.614 seconds
+│ │ │ └── Memory: Total - 71.81 MB, Max - 32.53 MB (rank 0)
+│ │ ├ ■ model-generation
+│ │ │   ├── Duration: 4.585 seconds
+│ │ │   └── Memory: Total - 66.32 MB, Max - 30.67 MB (rank 0)
+│ │ ├ ■ graph-partitioning
+│ │ │   ├── Duration: 0.003 seconds
+│ │ │   └── Memory: Total - 66.78 MB, Max - 31.14 MB (rank 0)
+│ │ └ ■ graph-distribution
+│ │     ├── Duration: 0.021 seconds
+│ │     └── Memory: Total - 71.81 MB, Max - 32.53 MB (rank 0)
+│ └ ■ construct
+│     ├── Duration: 0.021 seconds
+│     └── Memory: Total - 95.79 MB, Max - 40.1 MB (rank 0)
+└ ■ execute
+  │ ├── Duration: 0.119 seconds
+  │ └── Memory: Total - 282.5 MB, Max - 103.1 MB (rank 0)
+  ├ ■ init
+  │   ├── Duration: 0.000 seconds
+  │   └── Memory: Total - 95.95 MB, Max - 40.14 MB (rank 0)
+  ├ ■ setup
+  │   ├── Duration: 0.000 seconds
+  │   └── Memory: Total - 102.9 MB, Max - 42.5 MB (rank 0)
+  ├ ■ run
+  │   ├── Duration: 0.117 seconds
+  │   └── Memory: Total - 282.5 MB, Max - 103.1 MB (rank 0)
+  ├ ■ complete
+  │   ├── Duration: 0.000 seconds
+  │   └── Memory: Total - 282.5 MB, Max - 103.1 MB (rank 0)
+  └ ■ finish
+      ├── Duration: 0.000 seconds
+      └── Memory: Total - 282.5 MB, Max - 103.1 MB (rank 0)
+
+Simulated time:                    1 us
+
+Simulation Resource Information:
+  Max Resident Set Size:           103.12 MB
+  Approx. Global Max RSS Size:     282.528 MB
+  Max Local Page Faults:           70 faults
+  Global Page Faults:              147 faults
+  Max Output Blocks:               0 blocks
+  Max Input Blocks:                0 blocks
+  Max mempool usage:               34.2098 MB
+  Global mempool usage:            102.629 MB
+  Global active activities:        3 activities
+  Current global TimeVortex depth: 6 entries
+  Max TimeVortex depth:            273067 entries
+  Max Sync data size:              21.0844 MB
+  Global Sync data size:           62.2529 MB
+------------------------------------------------------------
+
+
+Simulation is complete, simulated time: 1 us
++ wait
++ mpirun -np 3 sst r3.py --parallel-load
+[2:0] SST Core: #main() My rank is (2.0), on 3/1 nodes/threads
+[1:0] SST Core: #main() My rank is (1.0), on 3/1 nodes/threads
+[0:0] SST Core: #main() My rank is (0.0), on 3/1 nodes/threads
+[0:0] SST Core: # ------------------------------------------------------------
+[0:0] SST Core: # Graph construction took 0.055479 seconds.
+[0:0] SST Core: # Global memory use is 230336kb (raised 177872kb)
+[0:0] SST Core: # Max memory use is 76928kb (rank 0)
+[0:0] SST Core: # Graph contains 100 components
+[0:0] SST Core: # ------------------------------------------------------------
+Abort is in progress...hit ctrl-c again to forcibly terminate
+
++ wait
