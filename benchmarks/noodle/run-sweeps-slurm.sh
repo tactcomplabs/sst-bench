@@ -6,7 +6,7 @@
 #
 # See LICENSE in the top level directory for licensing details
 
-# These simulations utilize sbatch to launch simulations
+# These sweeps utilize sbatch to manage simulations using slurm
 
 # usage:   ./run-sweeps-slurm.sh [sst-sweeper options]
 # example: ./run-sweeps-slurm.sh --norun
@@ -15,10 +15,29 @@
 mkdir -p jobs || exit 1
 
 OPTS="--noprompt --slurm $1"
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  ${OPTS}
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    ${OPTS}
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads ${OPTS}
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks   ${OPTS}
+
+# uncomment desired sequence
+# OPTS+=" --seq=BASE"
+# OPTS+=" --seq=BASE_CPT"
+# OPTS+=" --seq=BASE_CPT_RST"
+OPTS+=" --seq=BASE_PLOAD"
+
+# edit these to select which groups to run
+do_strong_scaling=true
+do_parallel_loads=true
+
+if [[ $do_strong_scaling ]]; then
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks   ${OPTS}
+fi
+
+if [[ $do_parallel_loads ]]; then
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_ranks_100to200_components ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 13to40_ranks_100to200_components ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 4nodes_4to40_ranks_1kto10k_components ${OPTS}
+fi
 
 # simple sql script to extract some good info
 cat << EOF > noodle.sql
