@@ -18,8 +18,8 @@ OPTS="--noprompt $1"
 
 # uncomment desired sequence
 # OPTS+=" --seq=BASE"
-OPTS+=" --seq=BASE_CPT"
-# OPTS+=" --seq=BASE_CPT_RST"
+#OPTS+=" --seq=BASE_CPT"
+OPTS+=" --seq=BASE_CPT_RST"
 # OPTS+=" --seq=BASE_PLOAD"
 
 # edit these to select which groups to run
