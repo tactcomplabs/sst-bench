@@ -46,6 +46,30 @@
           "desc"     : "sweep 13 to 40 threads for a fixed configuration",
           "ranks"    : "1",
           "threadsPerRank" : "13,41,1"
+        },
+        { "name"     : "2to12_ranks_100to200_components",
+          "desc"     : "sweep 2 to 12 ranks, 100 to 200 components",
+          "ranks"    : "2,13,1",
+          "threadsPerRank" : "1",
+	  "sdl" : {
+	      "numComps" : "100,210,10"
+	  }
+        },
+        { "name"     : "13to40_ranks_100to200_components",
+          "desc"     : "sweep 13 to 40 ranks, 100 to 200 components",
+          "ranks"    : "13,41,1",
+          "threadsPerRank" : "1",
+	  "sdl" : {
+	      "numComps" : "100,210,10"
+	  }
+	},
+        { "name"     : "4nodes_4to40_ranks_1kto10k_components",
+          "desc"     : "sweep 4 to 40 ranks symmetrically across 4 nodes, 1000 to 10000 components",
+          "ranks"    : "4,44,4",
+          "threadsPerRank" : "1",
+	  "sdl" : {
+	      "numComps" : "1000,11000,1000"
+	  }
         }
     ]
  
