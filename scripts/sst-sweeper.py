@@ -177,8 +177,10 @@ class JobEntry():
     def pload(self, baseid):
         self.jtype = JobType.PLOAD
         self.sstopts += f" --parallel-load"
-        self.sdlFile = f"../{baseid}/config.py"
+        self.sdlFile = ""
         self.friend = baseid
+        self.predecessors = [ baseid ]
+        self.setdeps = True
     def completion(self):
         self.jtype = JobType.COMPLETION
     def getsid(self, slurm, lid, norun):
@@ -193,10 +195,16 @@ class JobEntry():
         if self.jtype == JobType.COMPLETION:
             jobstring = f"{g_sbatch} --parsable --wait --dependency=singleton --job-name={self.jobname} {g_slurm_completion} -r {g_scripts} -R {g_tmpdir} -d {self.db}"
             return jobstring
+        # Parallel load
+        if self.jtype == JobType.PLOAD:
+            sid = self.getsid(self.slurm, self.friend, norun)
+            self.sstopts += f" ../{sid}/config.py"
+        # Restart
         if self.jtype == JobType.RST:
             sid = self.getsid(self.slurm, self.cptid, norun)
             self.sstopts += f" --load-checkpoint ../{sid}/{self.cptfile}"
         sst_cmd = f"sst {self.sdlFile} {self.sstopts} {self.sdlopts}"
+        # Set dependencies
         if self.slurm == False:
             # local jobs will not be run in parallel so dependencies do not matter
             jobstring = f"{g_mpirun} -np {self.ranks} {sst_cmd}"
