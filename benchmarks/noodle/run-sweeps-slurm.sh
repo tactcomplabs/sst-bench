@@ -24,19 +24,22 @@ OPTS+=" --seq=BASE_PLOAD"
 
 # edit these to select which groups to run
 do_strong_scaling=true
-do_parallel_loads=true
+do_component_sweeps=true=true
 
 if [[ $do_strong_scaling ]]; then
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks   ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
 fi
 
-if [[ $do_parallel_loads ]]; then
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_ranks_100to200_components ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 13to40_ranks_100to200_components ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 4nodes_4to40_ranks_1kto10k_components ${OPTS}
+if [[ $do_component_sweeps ]]; then
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_ranks_100to200_components   --jobname="c100r2" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_threads_100to200_components --jobname="c100t2" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 13to40_ranks_100to200_components   --jobname="c100r13" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 13to40_threads_100to200_components --jobname="c100t13" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 4nodes_12to40_ranks_per_node_200to500_components   --jobname="n4c200r12" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 4nodes_12to40_threads_per_node_200to500_components --jobname="n4c200t12" ${OPTS}
 fi
 
 # simple sql script to extract some good info
@@ -54,7 +57,7 @@ LEFT JOIN
   sdl_info    S ON S.jobid = J.jobid
 LEFT JOIN
   timing_info T ON T.jobid = J.jobid
-WHERE J.jobtype == 'BASE'
+WHERE J.jobtype != 'COMPLETION'
 
 EOF
 
