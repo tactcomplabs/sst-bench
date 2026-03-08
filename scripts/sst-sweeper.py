@@ -325,6 +325,7 @@ class JobManager():
             self.pp_remote(comp_id=jobid)
 
         self.sqldb.job_info( jobid=jobid, dataDict={
+            "jobname": entry.jobname,
             "friend": friend,
             "jobtype": entry.jtype.name, 
             "jobstring": jobstr, 
