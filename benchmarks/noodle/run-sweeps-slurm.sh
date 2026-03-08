@@ -18,13 +18,13 @@ OPTS="--noprompt --slurm $1"
 
 # uncomment desired sequence
 # OPTS+=" --seq=BASE"
-# OPTS+=" --seq=BASE_CPT"
-# OPTS+=" --seq=BASE_CPT_RST"
-OPTS+=" --seq=BASE_PLOAD"
+#OPTS+=" --seq=BASE_CPT"
+OPTS+=" --seq=BASE_CPT_RST"
+# OPTS+=" --seq=BASE_PLOAD"
 
 # edit these to select which groups to run
 do_strong_scaling=true
-do_component_sweeps=true=true
+do_component_sweeps=true
 
 if [[ $do_strong_scaling ]]; then
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
