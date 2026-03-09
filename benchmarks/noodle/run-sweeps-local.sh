@@ -23,17 +23,26 @@ OPTS+=" --seq=BASE_CPT_RST"
 # OPTS+=" --seq=BASE_PLOAD"
 
 # edit these to select which groups to run
-do_strong_scaling=true
-do_component_sweeps=true
+do_strong_scaling=false
+do_weak_scaling=true
+do_component_sweeps=false
 
-if [[ $do_strong_scaling ]]; then
+if [[ $do_strong_scaling == true ]]; then
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
 fi
 
-if [[ $do_component_sweeps ]]; then
+if [[ $do_weak_scaling == true ]]; then
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_threads  --jobname="ws1t" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_ranks    --jobname="ws1r" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_threads --jobname="ws13t" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" ${OPTS}
+fi
+
+# These take a VERY long time
+if [[ $do_component_sweeps == true ]]; then
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_ranks_100to200_components   --jobname="c100r2" ${OPTS}
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_threads_100to200_components --jobname="c100t2" ${OPTS}
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 13to40_ranks_100to200_components   --jobname="c100r13" ${OPTS}

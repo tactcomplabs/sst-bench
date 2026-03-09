@@ -726,7 +726,7 @@ if __name__ == '__main__':
         else:
             depvar_base_value = int(sdl_params[depvar])
             print(f"\nFound SDL dependent variable, '{depvar}', with base value={depvar_base_value}")
-            print(f"{depvar} will be resolved as {depvar_base_value} * (ranks + threads)")
+            print(f"{depvar} will be resolved as {depvar_base_value} * (ranks * threads)")
     # SDL sweep variable check
     sdl_sweep_params = None
     sdl_sweep_var = None
@@ -784,7 +784,7 @@ if __name__ == '__main__':
                 if sdl_sweep_var:
                     local_sdl_params[sdl_sweep_var] = s
                 if depvar:
-                    local_sdl_params[depvar] = depvar_base_value * ( r + t )
+                    local_sdl_params[depvar] = depvar_base_value * ( r * t )
                 jobmgr.add_job_sequence(JobEntry(
                     sdlFile=sdlFile,
                     options=options,
