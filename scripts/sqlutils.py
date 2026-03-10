@@ -52,6 +52,7 @@ sdlInfoTable = "sdl_info"
 # all tables have implied 'jobid' as unique primary key
 keyDict = {
     jobInfoTable : [
+        "jobname",   # string used to identify job grouping
         "friend",    # related simulation ( e.g. base simulation id for checkpoint sim comparison)
         "jobtype",   # BASE, CPT, RST, COMPLETION
         "jobstring", # command line

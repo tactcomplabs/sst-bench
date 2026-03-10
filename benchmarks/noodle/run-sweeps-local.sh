@@ -6,7 +6,7 @@
 #
 # See LICENSE in the top level directory for licensing details
 
-# This simulation use mpirun to launch simulations locally
+# These sweeps use mpirun to manage simulations locally
 
 # usage:   ./run-sweeps-local.sh [sst-sweeper options]
 # example: ./run-sweeps-local.sh --norun
@@ -15,10 +15,40 @@
 mkdir -p jobs || exit 1
 
 OPTS="--noprompt $1"
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads ${OPTS}
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks ${OPTS}
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads ${OPTS}
-${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks ${OPTS}
+
+# uncomment desired sequence
+# OPTS+=" --seq=BASE"
+#OPTS+=" --seq=BASE_CPT"
+OPTS+=" --seq=BASE_CPT_RST"
+# OPTS+=" --seq=BASE_PLOAD"
+
+# edit these to select which groups to run
+do_strong_scaling=false
+do_weak_scaling=true
+do_component_sweeps=false
+
+if [[ $do_strong_scaling == true ]]; then
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
+fi
+
+# Beware: The build time grows expontially with numComps. These will instantiate numComps * ranks * threads
+if [[ $do_weak_scaling == true ]]; then
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --numComps=10 ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  --numComps=10 ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_threads --jobname="ws13t" --numComps=10 ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" --numComps=10 ${OPTS}
+fi
+
+# These take a VERY long time
+if [[ $do_component_sweeps == true ]]; then
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_ranks_100to200_components   --jobname="c100r2" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_threads_100to200_components --jobname="c100t2" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 13to40_ranks_100to200_components   --jobname="c100r13" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 13to40_threads_100to200_components --jobname="c100t13" ${OPTS}
+fi
 
 # simple sql script to extract some good info
 cat << EOF > noodle.sql

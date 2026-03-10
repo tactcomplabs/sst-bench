@@ -2,7 +2,7 @@
     "job_sequencer" :
     {
         "seq"       : ["BASE", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
-        "simperiod" : ["1000", "checkpoint sim period in ns used with BASE_CPT_* sequences"]
+        "simperiod" : ["20000","checkpoint sim period in ns used with BASE_CPT_* sequences"]
     },
     "sim_controls"  :
     {
@@ -22,7 +22,7 @@
         "portsPerComp"  : ["100",     "Number of ports per component"],
         "msgPerClock"   : ["8",       "Messages per clock cycle"],
         "bytesPerClock" : ["4",       "Bytes per clock"],
-        "clocks"        : ["1000000", "[REQUIRED] Number of clocks to run sim"],
+        "clocks"        : ["100000", "[REQUIRED] Number of clocks to run sim"],
         "rngSeed"       : ["3131",    "Random number generator seed"]
     },
     "sweeps" :
@@ -46,6 +46,100 @@
           "desc"     : "sweep 13 to 40 threads for a fixed configuration",
           "ranks"    : "1",
           "threadsPerRank" : "13,41,1"
+        },
+        { "name"     : "strong_scaling_4nodes_12to40_ranks_per_node",
+          "desc"     : "sweep 13 to 40 ranks per node for a fixed configuration",
+          "ranks"    : "12,164,4",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "strong_scaling_4_nodes_13to40_threads_per_node",
+          "desc"     : "sweep 12 to 40 threads per node for a fixed configuration",
+          "ranks"    : "1",
+          "threadsPerRank" : "12,164,4"
+        },
+        { "name"     : "weak_scaling_1to12_ranks",
+          "desc"     : "sweep 1 to 12 ranks for a fixed configuration, numComps tied to ranks/threads",
+          "ranks"    : "1,13,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "numComps"
+        },
+        { "name"     : "weak_scaling_1to12_threads",
+          "desc"     : "sweep 1 to 12 threads for a fixed configuration, numComps tied to ranks/threads",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,13,1",
+          "depvar"   : "numComps"
+        },
+        { "name"     : "weak_scaling_13to40_ranks",
+          "desc"     : "sweep 13 to 40 ranks for a fixed configuration, numComps tied to ranks/threads",
+          "ranks"    : "13,41,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "numComps"
+        },
+        { "name"     : "weak_scaling_13to40_threads",
+          "desc"     : "sweep 13 to 40 threads for a fixed configuration, numComps tied to ranks/threads",
+          "ranks"    : "1",
+          "threadsPerRank" : "13,41,1",
+          "depvar"   : "numComps"
+        },
+        { "name"     : "weak_scaling_4nodes_12to40_ranks_per_node",
+          "desc"     : "sweep 13 to 40 ranks for a fixed configuration, numComps tied to ranks/threads",
+          "ranks"    : "112,164,4",
+          "threadsPerRank" : "1",
+          "depvar"   : "numComps"
+        },
+        { "name"     : "weak_scaling_4nodes_12to40_threads_per_node",
+          "desc"     : "sweep 13 to 40 threads for a fixed configuration, numComps tied to ranks/threads",
+          "ranks"    : "1",
+          "threadsPerRank" : "12,164,4",
+          "depvar"   : "numComps"
+        },
+        { "name"     : "2to12_ranks_100to200_components",
+          "desc"     : "sweep 2 to 12 ranks, 100 to 200 components",
+          "ranks"    : "2,13,1",
+          "threadsPerRank" : "1",
+          "sdl" : {
+              "numComps" : "100,210,10"
+          }
+        },
+        { "name"     : "2to12_threads_100to200_components",
+          "desc"     : "sweep 2 to 12 threads, 100 to 200 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "2,13,1",
+          "sdl" : {
+              "numComps" : "100,210,10"
+          }
+        },
+        { "name"     : "13to40_ranks_100to200_components",
+          "desc"     : "sweep 13 to 40 ranks, 100 to 200 components",
+          "ranks"    : "13,41,1",
+          "threadsPerRank" : "1",
+          "sdl" : {
+              "numComps" : "100,210,10"
+          }
+        },
+        { "name"     : "13to40_threads_100to200_components",
+          "desc"     : "sweep 13 to 40 threads, 100 to 200 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "13,41,1",
+          "sdl" : {
+              "numComps" : "100,210,10"
+          }
+        },
+        { "name"     : "4nodes_12to40_ranks_per_node_100to200_components",
+          "desc"     : "sweep 12 to 40 ranks symmetrically across 4 nodes, 100 to 200 components",
+          "ranks"    : "12,164,4",
+          "threadsPerRank" : "1",
+          "sdl" : {
+              "numComps" : "100,210,10"
+          }
+        },
+        { "name"     : "4nodes_12to40_threads_per_node_100to200_components",
+          "desc"     : "sweep 12 to 40 threads symmetrically across 4 nodes, 100 to 200 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "12,164,4",
+          "sdl" : {
+              "numComps" : "100,210,10"
+          }
         }
     ]
  
