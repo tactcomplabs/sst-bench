@@ -52,7 +52,7 @@
           "ranks"    : "12,164,4",
           "threadsPerRank" : "1"
         },
-        { "name"     : "strong_scaling_4_nodes_13to40_threads_per_node",
+        { "name"     : "strong_scaling_4nodes_12to40_threads_per_node",
           "desc"     : "sweep 12 to 40 threads per node for a fixed configuration",
           "ranks"    : "1",
           "threadsPerRank" : "12,164,4"
