@@ -26,14 +26,14 @@ OPTS+=" --seq=BASE_CPT_RST"
 do_4node_sweeps=true
 do_1node_sweeps=false
 
-do_strong_scaling=true
+do_strong_scaling=false
 do_weak_scaling=true
 do_component_sweeps=true
 
-if [[ $do_strong_scaling ]]; then
+if [[ $do_strong_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_4nodes_12to40_threads_per_node --jobname="wsn4t12" --numComps=10 --nodeclamp=4 ${OPTS}
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=10 --nodeclamp=4 ${OPTS}
+    # ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_4nodes_12to40_threads_per_node --jobname="ssn4t12" --numComps=10 --nodeclamp=4 ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12" --numComps=10 --nodeclamp=4 ${OPTS}
   fi
   if [[ $do_1node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
@@ -46,8 +46,8 @@ fi
 # Beware: The build time grows expontially with numComps. These will instantiate numComps * ranks * threads
 if [[ $do_weak_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_threads_per_node --jobname="wsn4t12" --numComps=10 --nodeclamp=4 ${OPTS}
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=10 --nodeclamp=4 ${OPTS}
+    # ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_threads_per_node --jobname="wsn4t12" --numComps=10 --nodeclamp=4 --numComps=10 ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=10 --nodeclamp=4 --numComps=10 ${OPTS}
   fi
   if [[ $do_1node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --numComps=10 ${OPTS}
@@ -60,8 +60,8 @@ fi
 # These take a VERY long time
 if [[ $do_component_sweeps == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
+    # ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 4nodes_12to40_threads_per_node_100to200_components --jobname="n4c100t12" --nodeclamp=4 ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 4nodes_12to40_ranks_per_node_100to200_components   --jobname="n4c100r12" --nodeclamp=4 ${OPTS}
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 4nodes_12to40_threads_per_node_100to200_components --jobname="n4c100t12" --nodeclamp=4 ${OPTS}
   fi
   if [[ $do_1node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py 2to12_ranks_100to200_components   --jobname="c100r2" ${OPTS}
