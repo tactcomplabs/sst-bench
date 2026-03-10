@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved
@@ -57,8 +57,8 @@ cat << EOF > noodle.sql
 .output noodle.csv
 
 SELECT
-  J.jobid, J.jobtype,
-  S.numComps, S.portsPerComp, S.msgPerClock, S.bytesPerClock, S.clocks, S.rngSeed,
+  J.jobid, J.jobname, J.jobtype,
+  S.*,
   T.ranks, T.threads, T.max_build_time, T.max_run_time, T.global_max_rss
 FROM job_info J
 LEFT JOIN
