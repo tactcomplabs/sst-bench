@@ -18,17 +18,17 @@ OPTS="--noprompt --slurm $1"
 
 # uncomment desired sequence
 # OPTS+=" --seq=BASE"
-#OPTS+=" --seq=BASE_CPT"
-OPTS+=" --seq=BASE_CPT_RST"
+OPTS+=" --seq=BASE_CPT"
+#OPTS+=" --seq=BASE_CPT_RST"
 # OPTS+=" --seq=BASE_PLOAD"
 
 # edit these to select which groups to run
 do_4node_sweeps=true
 do_1node_sweeps=false
 
-do_strong_scaling=false
+do_strong_scaling=true
 do_weak_scaling=true
-do_component_sweeps=true
+do_component_sweeps=false
 
 if [[ $do_strong_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
@@ -75,7 +75,7 @@ cat << EOF > noodle.sql
 .output noodle.csv
 
 SELECT
-  J.jobid, , J.jobname, J.jobtype,
+  J.jobid, J.jobname, J.jobtype,
   S.*,
   T.ranks, T.threads, T.max_build_time, T.max_run_time, T.global_max_rss
 FROM job_info J
