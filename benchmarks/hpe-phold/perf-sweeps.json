@@ -31,6 +31,11 @@
     },
     "sweeps" :
     [
+        { "name"     : "slurm_sanity",
+          "desc"     : "sweep 4 to 5 ranks on 1 node for a fixed configuration",
+          "ranks"    : "4,6,1",
+          "threadsPerRank" : "1"
+        },
         { "name"     : "strong_scaling_1to12_ranks",
           "desc"     : "sweep 1 to 12 ranks for a fixed configuration",
           "ranks"    : "1,13,1",
