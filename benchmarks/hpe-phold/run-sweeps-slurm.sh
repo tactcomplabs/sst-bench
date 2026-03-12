@@ -27,12 +27,12 @@ do_4node_sweeps=true
 do_1node_sweeps=false
 
 do_strong_scaling=true
-do_weak_scaling=true
+do_weak_scaling=false
 do_component_sweeps=false
 
 if [[ $do_strong_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12" --height=10 --nodeclamp=4 ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12" --height=50000 --width=1000 --nodeclamp=4 ${OPTS}
   fi
   if [[ $do_1node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
@@ -45,7 +45,7 @@ fi
 # Beware: The build time grows expontially with height. These will instantiate height * ranks * threads
 if [[ $do_weak_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --height=10 --nodeclamp=4 --height=10 ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --height=500 --width=1000 --nodeclamp=4 ${OPTS}
   fi
   if [[ $do_1node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_1to12_threads  --jobname="ws1t"  --height=10 ${OPTS}
