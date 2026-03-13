@@ -14,7 +14,7 @@
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
 mkdir -p jobs || exit 1
 
-OPTS="--noprompt --slurm $1"
+OPTS="--noprompt --slurm $1 --add-lib-path=--add-lib-path=${SST_BENCH_HOME}/build/components/noodle"
 
 # uncomment desired sequence
 # OPTS+=" --seq=BASE"
@@ -32,7 +32,7 @@ do_component_sweeps=false
 
 if [[ $do_strong_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12" --numComps=10 --nodeclamp=4 ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12" --numComps=100 --nodeclamp=4 ${OPTS}
   fi
   if [[ $do_1node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
@@ -45,7 +45,7 @@ fi
 # Beware: The build time grows expontially with numComps. These will instantiate numComps * ranks * threads
 if [[ $do_weak_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=10 --nodeclamp=4 --numComps=10 ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --nodeclamp=4 --numComps=10 ${OPTS}
   fi
   if [[ $do_1node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --numComps=10 ${OPTS}
