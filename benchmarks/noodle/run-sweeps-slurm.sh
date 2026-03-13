@@ -24,7 +24,7 @@ OPTS+=" --seq=BASE_CPT"
 
 # edit these to select which groups to run
 do_4node_sweeps=true
-do_1node_sweeps=false
+do_1node_sweeps=true
 
 do_strong_scaling=true
 do_weak_scaling=true
