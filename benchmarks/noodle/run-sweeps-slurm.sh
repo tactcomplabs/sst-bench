@@ -14,7 +14,7 @@
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
 mkdir -p jobs || exit 1
 
-OPTS="--noprompt --slurm $1 --add-lib-path=--add-lib-path=${SST_BENCH_HOME}/build/components/noodle"
+OPTS="--noprompt --slurm $1 --add-lib-path=${SST_BENCH_HOME}/build/components/noodle"
 
 # uncomment desired sequence
 # OPTS+=" --seq=BASE"
