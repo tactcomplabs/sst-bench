@@ -9,7 +9,8 @@
 # These sweeps utilize sbatch to manage simulations using slurm
 
 # usage:   ./run-sweeps-slurm.sh [sst-sweeper options]
-# example: ./run-sweeps-slurm.sh --norun
+# examples: ./run-sweeps-slurm.sh --norun
+#           ./run-sweeps-slurm.sh --add-lib-path=${SST_BENCH_HOME}/build/components/noodle
 
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
 mkdir -p jobs || exit 1
@@ -24,7 +25,7 @@ OPTS+=" --seq=BASE_CPT"
 
 # edit these to select which groups to run
 do_4node_sweeps=true
-do_1node_sweeps=false
+do_1node_sweeps=true
 
 do_strong_scaling=true
 do_weak_scaling=true

@@ -32,14 +32,17 @@ g_debug = False
 g_version = 0.0
 g_pfx = "[sst-sweeper.py]"
 g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
-g_slurm_script = os.path.abspath(f"{g_scripts}/perf.slurm")
-g_slurm_completion = os.path.abspath(f"{g_scripts}/completion.slurm")
+g_slurm_home = os.getenv("SST_BENCH_SLURM_HOME")
+if g_slurm_home is None:
+    g_slurm_home=f"{g_scripts}/../jenkins/prun"
+g_slurm_script = os.path.abspath(f"{g_slurm_home}/perf.slurm")
+g_slurm_completion = os.path.abspath(f"{g_slurm_home}/completion.slurm")
 g_cptpfx = "_cpt"
 g_start_time = datetime.now()
 g_id_base = (int(datetime.timestamp(datetime.now())*10) & 0xffffff) << 16
 
 g_mpirun = "mpirun"
-g_sbatch="sbatch"
+g_sbatch="sbatch --export=ALL"
 
 g_os_type = platform.system()
 if "Linux" in g_os_type:
@@ -47,7 +50,7 @@ if "Linux" in g_os_type:
     
 g_lid2sid = {}   # map local id to slurm id
 
-# TODO move this to json config
+# TODO move this to json config or slurm home
 g_max_nodes = 4
 g_proc_per_node = 40
 
@@ -363,14 +366,20 @@ class JobManager():
         self.sqldb.conf_info(jobid=id, jobpath=cwd)
         self.sqldb.commit()
     def pp_remote(self, comp_id:int):
-        if g_sacct != None:
+        sacct_ok = g_sacct == None
+        if sacct_ok == True:
             for id in self.wipList:
                 if id != comp_id:
                     rundir=f"{self.tmpdir}/{self.jobname}/{id}"
                     cmd=f"sacct -l -j {id} --json"
-                    self.jutil.exec(cmd=cmd, cwd=rundir, log="slurm.json")
-                    self.sqldb.slurm_info(jobid=id, jobpath=rundir)
-            self.sqldb.commit()
+                    rc = self.jutil.exec(cmd=cmd, cwd=rundir, log="slurm.json")
+                    if rc == 0:
+                        self.sqldb.slurm_info(jobid=id, jobpath=rundir)
+                    else:
+                        sacct_ok = False
+                        break
+            if sacct_ok:
+                self.sqldb.commit()
         self.wipList = []
 
 # The json parameter settings

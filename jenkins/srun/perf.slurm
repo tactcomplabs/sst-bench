@@ -10,7 +10,6 @@
 #-- you can change `normal` to `largemem` if you want the 1TB memory nodes (but there are currently only three)
 #-- the `-J SST_JOB` will "name" the job.  That way you can see it running when you use the `squeue` command
 
-# gizmo
 #  72 nodes
 #  40 physical cores per nodes, 80 processes per node
 #  72x40 = 2880 Ranks ( or 5760 using 80 )
@@ -79,6 +78,9 @@ if [ ! -e "$SQLUTIL" ]; then
     usage
 fi
 
+# TODO pass in version
+module load sst/15.1.2
+
 # TODO use --tmpdir
 #-- cd to scratch run directory
 # RUNDIR=/scratch/${USER}/jobs/${SLURM_JOB_NAME}/${SLURM_JOB_ID}
@@ -92,9 +94,9 @@ fi
 
 cd ${RUNDIR} || exit 3
 
-# -- `prun` will execute MPI applications using the correct hosts
-echo "[perf.slurm] Launching prun $*"
-prun $* > log
+# -- `srun` will execute MPI applications using the correct hosts
+echo "[perf.slurm] Launching srun $*"
+srun $* > log
 
 if [ $? -ne 0 ]; then
     echo "[perf.slurm] FAILED"
