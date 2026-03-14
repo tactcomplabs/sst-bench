@@ -72,7 +72,7 @@ SELECT * FROM raw;
 
 CREATE TEMP TABLE short AS
 SELECT
-  jobname, jobid, jobtype, friend, ranks, threads, cpt_num, cpt_timestamp,
+  jobname, jobid, jobtype, friend, ranks, threads, cpt_num, cpt_timestamp, sst_version,
   disk_usage,
   global_active_activities, global_current_tv_depth, global_max_io_in, global_max_io_out,
   global_max_rss, global_max_sync_data_size, global_max_tv_depth, global_mempool_size,
@@ -143,3 +143,5 @@ EOF
 # generate csv files
 sqlite3 hpe-phold.db < hpe-phold.sql
 
+
+#EOF

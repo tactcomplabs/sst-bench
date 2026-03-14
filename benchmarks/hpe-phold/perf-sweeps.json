@@ -13,7 +13,7 @@
     },
     "sst_params"    :
     {
-        "add-lib-path"  : "${SST_BENCH_HOME}/components/hpe-phold"
+        "add-lib-path"  : "${SST_BENCH_HOME}/build/components/hpe-phold"
     },
     "sdl_params"   :
     {
@@ -31,6 +31,11 @@
     },
     "sweeps" :
     [
+        { "name"     : "sanity",
+          "desc"     : "run 4 and 8 threads for a fixed configuration",
+          "ranks"    : "1",
+          "threadsPerRank" : "4,9,4"
+        },
         { "name"     : "strong_scaling_1to12_ranks",
           "desc"     : "sweep 1 to 12 ranks for a fixed configuration",
           "ranks"    : "1,13,1",

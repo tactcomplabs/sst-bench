@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved
@@ -45,7 +45,7 @@ fi
 # Beware: The build time grows expontially with numComps. These will instantiate numComps * ranks * threads
 if [[ $do_weak_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
-    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=10 --nodeclamp=4 --numComps=10 ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=10 --nodeclamp=4 ${OPTS}
   fi
   if [[ $do_1node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --numComps=10 ${OPTS}
@@ -90,7 +90,7 @@ SELECT * FROM raw;
 
 CREATE TEMP TABLE short AS
 SELECT
-  jobname, jobid, jobtype, friend, ranks, threads, cpt_num, cpt_timestamp,
+  jobname, jobid, jobtype, friend, ranks, threads, cpt_num, cpt_timestamp, sst_version,
   disk_usage,
   global_active_activities, global_current_tv_depth, global_max_io_in, global_max_io_out,
   global_max_rss, global_max_sync_data_size, global_max_tv_depth, global_mempool_size,
@@ -180,3 +180,4 @@ EOF
 # generate csv files
 sqlite3 noodle.db < noodle.sql
 
+#EOF

@@ -324,6 +324,10 @@ class JobManager():
         elif entry.jtype==JobType.COMPLETION:
             self.pp_remote(comp_id=jobid)
 
+        # sst version
+        self.jutil.exec(cmd='sst --version')
+        sst_version = self.jutil.res1
+
         self.sqldb.job_info( jobid=jobid, dataDict={
             "jobname": entry.jobname,
             "friend": friend,
@@ -334,7 +338,11 @@ class JobManager():
             "cpt_timestamp": entry.cpt_timestamp,
             "nodeclamp" : self.nodeclamp,
             "jobnodes"  : entry.nodes,
-            "cwd": cwd } )
+            "cwd": cwd,
+            "sst_version": sst_version,
+            "os_type": g_os_type,
+            "date":  datetime.now().strftime("%Y.%m.%d %H:%M") 
+        } )
         self.sqldb.commit()
     def launch(self):
         print(f"\n{g_pfx} starting {len(self.joblist)} jobs in {self.rundir}")

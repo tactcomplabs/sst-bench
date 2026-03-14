@@ -62,6 +62,9 @@ keyDict = {
         "cpt_timestamp", # checkpoint timestamp if RST job type
         "nodeclamp",  # sets nodes constant if non-zero
         "jobnodes",   # nodes requests with job submission
+        "sst_version",
+        "os_type",
+        "date"
     ],
     timingInfoTable : [
         "local_max_rss",
@@ -100,6 +103,7 @@ keyDict = {
         "minmem", "minvmem", "minpages",
         "avgmem", "avgvmem", "avgpages"
     ],
+    # TODO this is only available when serial json configuration is available.
     # json keys have '-' which need to be converted to '_' for sqlite3
     confInfoTable: [
         # summary info
