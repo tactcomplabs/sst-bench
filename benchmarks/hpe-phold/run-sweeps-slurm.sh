@@ -42,7 +42,6 @@ if [[ $do_strong_scaling == true ]]; then
   fi
 fi
 
-# Beware: The build time grows expontially with height. These will instantiate height * ranks * threads
 if [[ $do_weak_scaling == true ]]; then
   if [[ $do_4node_sweeps == true ]]; then
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --height=500 --width=1000 --nodeclamp=4 ${OPTS}

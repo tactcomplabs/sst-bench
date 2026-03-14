@@ -34,7 +34,6 @@ if [[ $do_strong_scaling == true ]]; then
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
 fi
 
-# Beware: The build time grows expontially with height. These will instantiate height * ranks * threads
 if [[ $do_weak_scaling == true ]]; then
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_1to12_threads  --jobname="ws1t"  --height=10 ${OPTS}
   ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_1to12_ranks    --jobname="ws1r"  --height=10 ${OPTS}
