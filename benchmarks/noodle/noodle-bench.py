@@ -54,8 +54,9 @@ if len(endpoints) % 2 != 0:
 #print(endpoints)
 
 # randomly select two endpoints to connect
+random.seed(args.rngSeed)
+random.shuffle(endpoints)
 while len(endpoints) >= 2:
-    random.shuffle(endpoints)
     end1 = endpoints.pop()
     end2 = endpoints.pop()
 
