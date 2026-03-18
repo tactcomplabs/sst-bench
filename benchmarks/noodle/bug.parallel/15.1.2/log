@@ -1,0 +1,10 @@
+Noodle-Bench test SST Simulation Configuration:
+	 verbose  =  0
+	 numComps  =  1000
+	 portsPerComp  =  100
+	 msgPerClock  =  8
+	 bytesPerClock  =  4
+	 clocks  =  100
+	 rngSeed  =  3131
+Simulation is complete, simulated time: 100 ns
+Simulation is complete, simulated time: 100 ns
