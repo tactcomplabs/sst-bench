@@ -2,7 +2,7 @@
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -A tcl
-#SBATCH -J SSTBENCH_GRID_JOB
+#SBATCH -J SSTBENCH_SRUN
 #SBATCH --partition normal
 
 #-- To request 160 ranks use -N 4 -n 160 (override in sbatch command line)
@@ -10,7 +10,6 @@
 #-- you can change `normal` to `largemem` if you want the 1TB memory nodes (but there are currently only three)
 #-- the `-J SST_JOB` will "name" the job.  That way you can see it running when you use the `squeue` command
 
-# gizmo
 #  72 nodes
 #  40 physical cores per nodes, 80 processes per node
 #  72x40 = 2880 Ranks ( or 5760 using 80 )
@@ -69,19 +68,29 @@ if [ -z "${SCRIPTS}" ] || [ -z "${DB}" ] || [ $# -eq 0 ]; then
 fi
 
 if [ ! -d "$SCRIPTS" ]; then
-    echo "[perf.slurm] Could not locate scripts directory : ${SCRIPTS}"
+    echo "[perf.slurm] error: could not locate scripts directory : ${SCRIPTS}"
     usage
 fi
 
 SQLUTIL="$SCRIPTS/sqlutils.py"
 if [ ! -e "$SQLUTIL" ]; then
-    echo "[perf.slurm] Could not locate sql utility script : ${SQLUTIL}"
+    echo "[perf.slurm] error: could not locate sql utility script : ${SQLUTIL}"
     usage
 fi
 
+which sst
+if [ $? ne 0 ]; then
+    echo "[perf.slurm] error: could not locate sst"]
+    exit 1
+fi
+
+sst --version
+if [ $? ne 0 ]; then
+    echo "[perf.slurm] error: failed sst --version"]
+    exit 1
+fi
+
 # TODO use --tmpdir
-#-- cd to scratch run directory
-# RUNDIR=/scratch/${USER}/jobs/${SLURM_JOB_NAME}/${SLURM_JOB_ID}
 RUNDIR=${RUNDIR}/${SLURM_JOB_NAME}/${SLURM_JOB_ID}
 if [ -d "${RUNDIR}" ]; then
     echo "Warning: Found ${RUNDIR}. May have stale data"
