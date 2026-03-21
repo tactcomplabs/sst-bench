@@ -49,8 +49,11 @@ git checkout ${SST_BRANCH} || exit 1
 
 ./autogen.sh || exit 1
 ./configure --prefix=${INSTALL_PREFIX} || exit 1
+
+echo "Starting sst build at $(date)"
 make -j || exit 1
 make install || exit 1
+echo "Finished sst build at $(date)"
 
 export PATH=${INSTALL_PREFIX}/bin:${PATH}
 hash -r
@@ -62,7 +65,9 @@ sst --version
 mkdir build || exit 1
 pushd build
 cmake -DSSTBENCH_ENABLE_TESTING=ON ../ || exit 1
+echo "Starting sst-bench build at $(date)"
 make -j || exit 1
+echo "Finished sst-bench build at $(date)"
 
 # Test sst-bench
 ctest -LE elements || ctest --rerun-failed --output-on-failure --verbose || exit 1
