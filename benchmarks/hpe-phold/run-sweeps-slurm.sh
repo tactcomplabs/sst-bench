@@ -25,7 +25,7 @@ OPTS="--noprompt --slurm $1"
 # edit these to select which groups to run
 do_sanity_only=false
 do_4node_sweeps=true
-do_1node_sweeps=false
+do_1node_sweeps=true
 do_strong_scaling=true
 do_weak_scaling=true
 do_component_sweeps=false
@@ -40,9 +40,12 @@ else
 
   if [[ $do_strong_scaling == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12" --height=50000 --width=1000 --nodeclamp=4 ${OPTS}
+      # 4 node strong scaling
+      # 20x20 components -> 400 components, max 160 ranks  (100 components per node, 40 ranks per node)
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12" --height=20 --width=20 --nodeclamp=4 ${OPTS}
     fi
     if [[ $do_1node_sweeps == true ]]; then
+      # single node strong scaling: 10x10 components -> 100 components per node, max 40 ranks
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
@@ -52,13 +55,16 @@ else
 
   if [[ $do_weak_scaling == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --height=500 --width=1000 --nodeclamp=4 ${OPTS}
+      # 4 node weak scaling: 400 to 16000 components across 4 nodes (4 to 160 ranks, step 4)
+      # 10 * 10 * ranks
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_4nodes_12to40_ranks_per_node --jobname="wsn4r12" --height=2 --nodeclamp=4 ${OPTS}
     fi
     if [[ $do_1node_sweeps == true ]]; then
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --height=10 ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  --height=10 ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_13to40_threads --jobname="ws13t" --height=10 ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" --height=10 ${OPTS}
+      # single node weak scaling: 10 x (10*ranks) -> 100 to 4000 components per node
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_13to40_threads --jobname="ws13t" ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" ${OPTS}
     fi
   fi
 

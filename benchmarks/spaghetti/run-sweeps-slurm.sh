@@ -40,9 +40,11 @@ else
 
   if [[ $do_strong_scaling == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12"  --nodeclamp=4 ${OPTS}
+      # 4000 components -> 1000 per node
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_4nodes_12to40_ranks_per_node --numComps=4000 --jobname="ssn4r12"  --nodeclamp=4 ${OPTS}
     fi
     if [[ $do_1node_sweeps == true ]]; then
+      # 1000 components
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
@@ -52,9 +54,11 @@ else
 
   if [[ $do_weak_scaling == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=100 --nodeclamp=4 ${OPTS}
+      # numComps = 400 to 16000 (100 to 4000 per node)
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=400 --nodeclamp=4 ${OPTS}
     fi
     if [[ $do_1node_sweeps == true ]]; then
+      # numComps = 100 to 4000
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --numComps=100 ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  --numComps=100 ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_13to40_threads --jobname="ws13t" --numComps=100 ${OPTS}
