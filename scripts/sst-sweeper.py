@@ -338,7 +338,12 @@ class JobManager():
 
         # sst version
         self.jutil.exec(cmd='sst --version')
-        sst_version = self.jutil.res1
+        sst_version_string = self.jutil.res1
+        sst_version_match=re.search(r'SST-Core Version \((.+)[,\)]?.+$', sst_version_string)
+        if sst_version_match:
+            sst_version=sst_version_match.group(1).split(',')[0]
+        else:
+            sst_version="?"
 
         self.sqldb.job_info( jobid=jobid, dataDict={
             "jobname": entry.jobname,
