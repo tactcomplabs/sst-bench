@@ -37,8 +37,10 @@ if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15
   message(STATUS "[SST-BENCH] Enabling SPAGHETTI testing")
   add_subdirectory(noodle)
   add_subdirectory(spaghetti)
-  message(STATUS "[SST-BENCH] Enabling HPE-PHOLD testing")
-  add_subdirectory(hpe-phold)
+  if( ${SST_MPICC} MATCHES ".*mpi.*" )
+    message(STATUS "[SST-BENCH] Enabling HPE-PHOLD testing")
+    add_subdirectory(hpe-phold)
+  endif()
 endif()
 
 # TODO replace with interactive console micro-benchmarks

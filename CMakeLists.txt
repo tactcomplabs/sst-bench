@@ -47,6 +47,11 @@ execute_process(COMMAND sst-config --prefix
                 OUTPUT_VARIABLE SST_INSTALL_DIR
                 OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+execute_process(COMMAND sst-config --MPICC
+                OUTPUT_VARIABLE SST_MPICC
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 set(SST_INCLUDE_DIR "${SST_INSTALL_DIR}/include")
 if(NOT (EXISTS "${SST_INSTALL_DIR}"))
   message(FATAL_ERROR " SST_INSTALL_DIR (${SST_INSTALL_DIR}) is invalid.")
