@@ -54,9 +54,11 @@ else
 
   if [[ $do_weak_scaling == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
+      # numComps = 100 * ranks = 100 to 16000 (25 to 4000 per node)
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=100 --nodeclamp=4 ${OPTS}
     fi
     if [[ $do_1node_sweeps == true ]]; then
+      # numComps=100*ranks = 100 to 4000
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --numComps=100 ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  --numComps=100 ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_threads --jobname="ws13t" --numComps=100 ${OPTS}

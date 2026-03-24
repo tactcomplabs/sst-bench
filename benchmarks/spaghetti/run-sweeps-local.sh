@@ -37,6 +37,7 @@ if [[ $do_sanity_only == true ]]; then
 else
 
   if [[ $do_strong_scaling == true ]]; then
+    # 1000 components
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
@@ -44,6 +45,7 @@ else
   fi
 
   if [[ $do_weak_scaling == true ]]; then
+    # numComps = 100 to 4000
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --numComps=100 ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  --numComps=100 ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_13to40_threads --jobname="ws13t" --numComps=100 ${OPTS}
