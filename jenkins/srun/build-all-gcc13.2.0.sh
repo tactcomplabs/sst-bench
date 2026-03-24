@@ -26,7 +26,7 @@ export CC=gcc
 export CXX=g++
 
 # SST_SELECT provides <repo>/<branch> for sst-core
-if [[ -z "{SST_SELECT}" ]]; then
+if [[ -z "${SST_SELECT}" ]]; then
     echo "error: SST_SELECT is undefined" >&2
     exit 1
 fi

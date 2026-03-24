@@ -216,7 +216,8 @@ class JobEntry():
 class JobManager():
     def __init__(self, sdl, options, sim_control_params, job_sequencer_params, sst_params: list, sdl_params: list ):
         print("\nCreating Job Manager")
-        # TODO how to determine number of checkpoints for restart without clocks sdl param
+        # Ok to omit clocks which is used for calculating the number of checkpoints 
+        # when 'numcpt' is not set and checkpoint or restart is enabled
         if 'clocks' in sdl_params:
             self.clocks = clocks
         else:
