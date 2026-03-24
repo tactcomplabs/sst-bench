@@ -9,9 +9,9 @@
 # These sweeps utilize sbatch to manage simulations using slurm
 
 # usage:   ./run-sweeps-slurm.sh [sst-sweeper options]
-# example: ./run-sweeps-slurm.sh --norun
+# examples: ./run-sweeps-slurm.sh --norun
 
-/bin/rm -rf jobs/* hpe-phold.db hpe-phold.csv hpe-phold.sql
+/bin/rm -rf jobs/* spaghetti.db spaghetti.csv spaghetti.sql
 mkdir -p jobs || exit 1
 
 OPTS="--noprompt --slurm $1"
@@ -34,50 +34,48 @@ echo "STARTING SWEEPS AT: $(date +%y%m%d-%H:%M:%S)"
 
 if [[ $do_sanity_only == true ]]; then
 
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py sanity  --jobname="ss1t" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py sanity  --jobname="ss1t" ${OPTS}
 
 else
 
   if [[ $do_strong_scaling == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
-      # 4 node strong scaling
-      # 20x20 components -> 400 components, max 160 ranks  (100 components per node, 40 ranks per node)
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_4nodes_12to40_ranks_per_node   --jobname="ssn4r12" --height=20 --width=20 --nodeclamp=4 ${OPTS}
+      # 4000 components -> 1000 per node
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_4nodes_12to40_ranks_per_node --numComps=4000 --jobname="ssn4r12"  --nodeclamp=4 ${OPTS}
     fi
     if [[ $do_1node_sweeps == true ]]; then
-      # single node strong scaling: 10x10 components -> 100 components per node, max 40 ranks
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
+      # 1000 components
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
     fi
   fi
 
   if [[ $do_weak_scaling == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
-      # 4 node weak scaling: 400 to 16000 components across 4 nodes (4 to 160 ranks, step 4)
-      # 10 * 10 * ranks
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_4nodes_12to40_ranks_per_node --jobname="wsn4r12" --height=2 --nodeclamp=4 ${OPTS}
+      # numComps = 400 to 16000 (100 to 4000 per node)
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_4nodes_12to40_ranks_per_node   --jobname="wsn4r12" --numComps=400 --nodeclamp=4 ${OPTS}
     fi
     if [[ $do_1node_sweeps == true ]]; then
-      # single node weak scaling: 10 x (10*ranks) -> 100 to 4000 components per node
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_13to40_threads --jobname="ws13t" ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" ${OPTS}
+      # numComps = 100 to 4000
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  --numComps=100 ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  --numComps=100 ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_13to40_threads --jobname="ws13t" --numComps=100 ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" --numComps=100 ${OPTS}
     fi
   fi
 
   # These take a VERY long time
   if [[ $do_component_sweeps == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 4nodes_12to40_ranks_per_node_100to200_components   --jobname="n4c100r12" --nodeclamp=4 ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py 4nodes_12to40_ranks_per_node_100to200_components   --jobname="n4c100r12" --nodeclamp=4 ${OPTS}
     fi
     if [[ $do_1node_sweeps == true ]]; then
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 2to12_ranks_100to200_components   --jobname="c100r2" ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 2to12_threads_100to200_components --jobname="c100t2" ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 13to40_ranks_100to200_components   --jobname="c100r13" ${OPTS}
-      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 13to40_threads_100to200_components --jobname="c100t13" ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py 2to12_ranks_100to200_components   --jobname="c100r2" ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py 2to12_threads_100to200_components --jobname="c100t2" ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py 13to40_ranks_100to200_components   --jobname="c100r13" ${OPTS}
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./spaghetti-bench.py 13to40_threads_100to200_components --jobname="c100t13" ${OPTS}
     fi
   fi
 
@@ -86,7 +84,7 @@ fi
 echo "COMPLETED SWEEPS AT: $(date +%y%m%d-%H:%M:%S)"
 
 # simple sql script to extract some good info
-cat << EOF > hpe-phold.sql
+cat << EOF > spaghetti.sql
 .headers on
 .mode csv
 
@@ -114,8 +112,7 @@ SELECT
   global_max_rss, global_max_sync_data_size, global_max_tv_depth, global_mempool_size,
   global_pf, global_sync_data_size, local_max_pf, local_max_rss, max_build_time,
   max_mempool_size, max_run_time, max_total_time, ranks, simulated_time_ua,
-  clocks, componentSize, eventDensity, height, imbalance_factor, largeEventFraction,
-  largePayload, numRings, smallPayload, verbose, width  
+  numComps, portsPerComp, msgsPerPort, bytesPerMsg, rngSeed
 FROM
   raw;
 
@@ -198,6 +195,6 @@ WHERE
 EOF
 
 # generate csv files
-sqlite3 hpe-phold.db < hpe-phold.sql
+sqlite3 spaghetti.db < spaghetti.sql
 
 #EOF

@@ -2,7 +2,8 @@
     "job_sequencer" :
     {
         "seq"       : ["BASE", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST|BASE_PLOAD"],
-        "simperiod" : ["20000","checkpoint sim period in ns used with BASE_CPT_* sequences"]
+        "simperiod" : ["200",  "checkpoint sim period in ns used with BASE_CPT_* sequences"],
+        "numcpt"    : ["0", "Estimated number of checkpoints. When 0, count is calculated as sdl['clocks']/simperiod"]
     },
     "sim_controls"  :
     {
@@ -22,7 +23,7 @@
         "portsPerComp"  : ["100",     "Number of ports per component"],
         "msgPerClock"   : ["8",       "Messages per clock cycle"],
         "bytesPerClock" : ["4",       "Bytes per clock"],
-        "clocks"        : ["100000", "[REQUIRED] Number of clocks to run sim"],
+        "clocks"        : ["1000",    "[REQUIRED] Number of clocks to run sim"],
         "rngSeed"       : ["3131",    "Random number generator seed"]
     },
     "sweeps" :

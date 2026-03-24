@@ -16,38 +16,53 @@ mkdir -p jobs || exit 1
 
 OPTS="--noprompt $1"
 
-# uncomment desired sequence
+# uncomment desired sequence or use --seq=... at command line. Default is specified in perf-sweeps.json
 # OPTS+=" --seq=BASE"
-#OPTS+=" --seq=BASE_CPT"
-OPTS+=" --seq=BASE_CPT_RST"
+# OPTS+=" --seq=BASE_CPT"
+# OPTS+=" --seq=BASE_CPT_RST"
 # OPTS+=" --seq=BASE_PLOAD"
 
 # edit these to select which groups to run
+do_sanity_only=false
 do_strong_scaling=true
 do_weak_scaling=true
 do_component_sweeps=false
 
-if [[ $do_strong_scaling == true ]]; then
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
+echo "STARTING SWEEPS AT: $(date +%y%m%d-%H:%M:%S)"
+
+if [[ $do_sanity_only == true ]]; then
+
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py sanity  --jobname="ss1t" ${OPTS}
+
+else
+
+  if [[ $do_strong_scaling == true ]]; then
+    # single node strong scaling: 10x10 components -> 100 components per node, max 40 ranks
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
+  fi
+
+  if [[ $do_weak_scaling == true ]]; then
+    # single node weak scaling: 10 x (10*ranks) -> 100 to 4000 components per node
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_1to12_threads  --jobname="ws1t"  ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_13to40_threads --jobname="ws13t" ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" ${OPTS}
+  fi
+
+  # These take a VERY long time
+  if [[ $do_component_sweeps == true ]]; then
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 2to12_ranks_100to200_components   --jobname="c100r2" ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 2to12_threads_100to200_components --jobname="c100t2" ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 13to40_ranks_100to200_components   --jobname="c100r13" ${OPTS}
+    ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./hpe-phold-bench.py 13to40_threads_100to200_components --jobname="c100t13" ${OPTS}
+  fi
+
 fi
 
-if [[ $do_weak_scaling == true ]]; then
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_1to12_threads  --jobname="ws1t"  --height=10 ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_1to12_ranks    --jobname="ws1r"  --height=10 ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_13to40_threads --jobname="ws13t" --height=10 ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py weak_scaling_13to40_ranks   --jobname="ws13r" --height=10 ${OPTS}
-fi
-
-# These take a VERY long time
-if [[ $do_component_sweeps == true ]]; then
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py 2to12_ranks_100to200_components   --jobname="c100r2" ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py 2to12_threads_100to200_components --jobname="c100t2" ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py 13to40_ranks_100to200_components   --jobname="c100r13" ${OPTS}
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./phold_dist.py 13to40_threads_100to200_components --jobname="c100t13" ${OPTS}
-fi
+echo "COMPLETED SWEEPS AT: $(date +%y%m%d-%H:%M:%S)"
 
 # simple sql script to extract some good info
 cat << EOF > hpe-phold.sql
@@ -69,6 +84,7 @@ LEFT JOIN
 .output raw.csv
 SELECT * FROM raw;
 
+# The last line capture custome sdl parameters
 CREATE TEMP TABLE short AS
 SELECT
   jobname, jobid, jobtype, friend, ranks, threads, cpt_num, cpt_timestamp, sst_version,
@@ -82,58 +98,58 @@ SELECT
 FROM
   raw;
 
-# Combine base and checkpoint runs into single rows (currently skipping RST data)
+# Combine base and dependent runs (checkpoint or parallel load) into single rows
+# Currently skipping restart runs
 CREATE TEMP TABLE base AS SELECT * FROM short WHERE jobtype=='BASE';
-CREATE TEMP TABLE cpt  AS SELECT * FROM short WHERE jobtype=='CPT';
-CREATE TEMP TABLE base_cpt AS
+CREATE TEMP TABLE child  AS SELECT * FROM short WHERE jobtype=='CPT' OR jobtype=='PLOAD';
+CREATE TEMP TABLE dependent AS
 SELECT
   B.*, C.*
 FROM base as B
 LEFT JOIN
-  cpt C ON B.jobid==C.friend;
+  child C ON B.jobid==C.friend;
 
 # Now simply write out individual run data
-
 
 # strong_scaling_1to12_threads, strong_scaling_13to40_threads
 .output ss_t1to40.csv
 SELECT
-  * FROM base_cpt
+  * FROM dependent
 WHERE
   jobname=='ss1t' OR jobname=='ss13t';
 
-# strong_scaling_1to12_t_ranks, strong_scaling_13to40_ranks
+# strong_scaling_1to12_ranks, strong_scaling_13to40_ranks
 .output ss_r1to40.csv
 SELECT
-  * FROM base_cpt
+  * FROM dependent
 WHERE
   jobname=='ss1r' OR jobname=='ss13r';
 
 # weak_scaling_1to12_threads, weak_scaling_13to40_threads
 .output ws_t1to40.csv
 SELECT
-  * FROM base_cpt
+  * FROM dependent
 WHERE
   jobname=='ws1t' OR jobname=='ws13t';
 
 # weak_scaling_1to12_ranks, weak_scaling_13to40_ranks
 .output ws_r1to40.csv
 SELECT
-  * FROM base_cpt
+  * FROM dependent
 WHERE
   jobname=='ws1r' OR jobname=='ws13r';
 
 # 2to12_threads_100to200_components, 13to40_threads_100to200_components
 .output c100_t2to40.csv
 SELECT
-  * FROM base_cpt
+  * FROM dependent
 WHERE
   jobname=='c100t2' OR jobname=='c100t13';
 
 # 2to12_ranks_100to200_components, 13to40_ranks_100to200_components
 .output c100_r2to40.csv
 SELECT
-  * FROM base_cpt
+  * FROM dependent
 WHERE
   jobname=='c100r2' OR jobname=='c100r13';
 
@@ -141,6 +157,5 @@ EOF
 
 # generate csv files
 sqlite3 hpe-phold.db < hpe-phold.sql
-
 
 #EOF
