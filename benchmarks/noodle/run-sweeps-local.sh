@@ -24,8 +24,13 @@ OPTS="--noprompt $1"
 
 # edit these to select which groups to run
 do_sanity_only=false
-do_strong_scaling=true
-do_weak_scaling=true
+
+do_strong_scaling=false
+do_weak_scaling=false
+
+do_mixed_strong_scaling=true
+do_mixed_weak_scaling=true
+
 do_component_sweeps=false
 
 echo "STARTING SWEEPS AT: $(date +%y%m%d-%H:%M:%S)"
@@ -37,11 +42,18 @@ if [[ $do_sanity_only == true ]]; then
 else
 
   if [[ $do_strong_scaling == true ]]; then
-    # numComps=1000
+    # numComps=1000     
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_threads  --jobname="ss1t" ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_1to12_ranks    --jobname="ss1r" ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_threads --jobname="ss13t" ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
+  fi
+
+  if [[ $do_mixed_strong_scaling == true ]]; then
+    for c in strong_scaling_2to20r_2t strong_scaling_2to12r_3t strong_scaling_2to10r_4t strong_scaling_2to8r_5t strong_scaling_2to6r_6t strong_scaling_2to5r_7t strong_scaling_2to5r_8t strong_scaling_2to4r_9t strong_scaling_2to4r_10t strong_scaling_2to3r_11t strong_scaling_2to3r_12t strong_scaling_2to3r_13t
+    do
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py $c --jobname=$c ${OPTS}
+    done
   fi
 
   if [[ $do_weak_scaling == true ]]; then
@@ -49,6 +61,13 @@ else
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_1to12_ranks    --jobname="ws1r"  --numComps=100 ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_threads --jobname="ws13t" --numComps=100 ${OPTS}
     ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" --numComps=100 ${OPTS}
+  fi
+
+  if [[ $do_mixed_weak_scaling == true ]]; then
+    for c in weak_scaling_2to20r_2t weak_scaling_2to12r_3t weak_scaling_2to10r_4t weak_scaling_2to8r_5t weak_scaling_2to6r_6t weak_scaling_2to5r_7t weak_scaling_2to5r_8t weak_scaling_2to4r_9t weak_scaling_2to4r_10t weak_scaling_2to3r_11t weak_scaling_2to3r_12t weak_scaling_2to3r_13t
+    do
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py $c --jobname=$c ${OPTS}
+    done
   fi
 
   # These take a VERY long time
