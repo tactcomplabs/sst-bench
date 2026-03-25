@@ -25,7 +25,7 @@ OPTS="--noprompt --slurm $1"
 # edit these to select which groups to run
 do_sanity_only=false
 do_4node_sweeps=true
-do_1node_sweeps=true
+do_1node_sweeps=false
 do_strong_scaling=true
 do_weak_scaling=true
 do_component_sweeps=false
