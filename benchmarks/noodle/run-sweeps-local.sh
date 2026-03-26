@@ -98,6 +98,9 @@ LEFT JOIN
   timing_info T ON T.jobid = J.jobid
 LEFT JOIN
   file_info   F ON F.jobid = J.jobid;
+# create ranks_threads column
+ALTER TABLE raw ADD COLUMN ranks_threads VARCHAR;
+UPDATE raw SET ranks_threads = CONCAT_WS("_", ranks, threads);
 
 .output raw.csv
 SELECT * FROM raw;
@@ -105,13 +108,13 @@ SELECT * FROM raw;
 # The last line capture custome sdl parameters
 CREATE TEMP TABLE short AS
 SELECT
-  jobname, jobid, jobtype, friend, ranks, threads, cpt_num, cpt_timestamp, sst_version,
-  disk_usage,
+  jobname, jobid, jobtype, friend, ranks, threads, ranks_threads, 
+  cpt_num, cpt_timestamp, sst_version, disk_usage,
   global_active_activities, global_current_tv_depth, global_max_io_in, global_max_io_out,
   global_max_rss, global_max_sync_data_size, global_max_tv_depth, global_mempool_size,
   global_pf, global_sync_data_size, local_max_pf, local_max_rss, max_build_time,
   max_mempool_size, max_run_time, max_total_time, ranks, simulated_time_ua,
-  clocks, bytesPerClock, msgPerClock, numComps, portsPerComp, rngSeed 
+  clocks, bytesPerClock, msgPerClock, numComps, portsPerComp, rngSeed
 FROM
   raw;
 
@@ -169,6 +172,22 @@ SELECT
   * FROM dependent
 WHERE
   jobname=='c100r2' OR jobname=='c100r13';
+
+# strong scaling mixed ranks and threads
+.output ss_mixed.csv
+SELECT
+  * FROM dependent
+WHERE
+  jobname LIKE 'strong_scaling%'
+ORDER BY ranks ASC, threads ASC;
+
+# weak scaling mixed ranks and threads
+.output ws_mixed.csv
+SELECT
+  * FROM dependent
+WHERE
+  jobname LIKE 'weak_scaling%'
+ORDER BY ranks ASC, threads ASC;;
 
 EOF
 
