@@ -14,7 +14,8 @@
     },
     "sst_params"    :
     {
-        "add-lib-path"  : "${SST_BENCH_HOME}/build/components/spaghetti"
+        "add-lib-path"  : "${SST_BENCH_HOME}/build/components/spaghetti",
+	"interactive-start" : "100s"
     },
     "sdl_params"    :
     {
