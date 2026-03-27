@@ -50,8 +50,7 @@ else
   fi
 
   if [[ $do_mixed_strong_scaling == true ]]; then
-    # for c in strong_scaling_2to20r_2t strong_scaling_2to12r_3t strong_scaling_2to10r_4t strong_scaling_2to8r_5t strong_scaling_2to6r_6t strong_scaling_2to5r_7t strong_scaling_2to5r_8t strong_scaling_2to4r_9t strong_scaling_2to4r_10t strong_scaling_2to3r_11t strong_scaling_2to3r_12t strong_scaling_2to3r_13t
-    for c in strong_scaling_2to20r_2t
+    for c in strong_scaling_2to20r_2t strong_scaling_2to12r_3t strong_scaling_2to10r_4t strong_scaling_2to8r_5t strong_scaling_2to6r_6t strong_scaling_2to5r_7t strong_scaling_2to5r_8t strong_scaling_2to4r_9t strong_scaling_2to4r_10t strong_scaling_2to3r_11t strong_scaling_2to3r_12t strong_scaling_2to3r_13t
     do
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py $c --jobname=$c ${OPTS}
     done
@@ -65,8 +64,7 @@ else
   fi
 
   if [[ $do_mixed_weak_scaling == true ]]; then
-    #for c in weak_scaling_2to20r_2t weak_scaling_2to12r_3t weak_scaling_2to10r_4t weak_scaling_2to8r_5t weak_scaling_2to6r_6t weak_scaling_2to5r_7t weak_scaling_2to5r_8t weak_scaling_2to4r_9t weak_scaling_2to4r_10t weak_scaling_2to3r_11t weak_scaling_2to3r_12t weak_scaling_2to3r_13t
-    for c in weak_scaling_2to20r_2t
+    for c in weak_scaling_2to20r_2t weak_scaling_2to12r_3t weak_scaling_2to10r_4t weak_scaling_2to8r_5t weak_scaling_2to6r_6t weak_scaling_2to5r_7t weak_scaling_2to5r_8t weak_scaling_2to4r_9t weak_scaling_2to4r_10t weak_scaling_2to3r_11t weak_scaling_2to3r_12t weak_scaling_2to3r_13t
     do
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py $c --jobname=$c ${OPTS}
     done
