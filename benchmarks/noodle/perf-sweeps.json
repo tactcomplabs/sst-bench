@@ -127,7 +127,139 @@
           "sdl" : {
               "numComps" : "100,210,10"
           }
-        }
+        },
+        { "name"     : "strong_scaling_2to20r_2t",
+          "desc"     : "sweep 2 to 20 ranks with 2 threads per rank for a fixed configuration",
+          "ranks"    : "2,21,1",
+          "threadsPerRank" : "2"
+        },
+        { "name"     : "strong_scaling_2to12r_3t",
+          "desc"     : "sweep 2 to 12 ranks with 3 threads per rank for a fixed configuration",
+          "ranks"    : "2,13,1",
+          "threadsPerRank" : "3"
+        },
+        { "name"     : "strong_scaling_2to10r_4t",
+          "desc"     : "sweep 2 to 10 ranks with 4 threads per rank for a fixed configuration",
+          "ranks"    : "2,11,1",
+          "threadsPerRank" : "4"
+        },
+        { "name"     : "strong_scaling_2to8r_5t",
+          "desc"     : "sweep 2 to 8 ranks with 5 threads per rank for a fixed configuration",
+          "ranks"    : "2,9,1",
+          "threadsPerRank" : "5"
+        },
+        { "name"     : "strong_scaling_2to6r_6t",
+          "desc"     : "sweep 2 to 6 ranks with 6 threads per rank for a fixed configuration",
+          "ranks"    : "2,7,1",
+          "threadsPerRank" : "6"
+        },
+        { "name"     : "strong_scaling_2to5r_7t",
+          "desc"     : "sweep 2 to 5 ranks with 7 threads per rank for a fixed configuration",
+          "ranks"    : "2,6,1",
+          "threadsPerRank" : "7"
+      },
+      { "name"     : "strong_scaling_2to5r_8t",
+        "desc"     : "sweep 2 to 5 ranks with 8 threads per rank for a fixed configuration",
+        "ranks"    : "2,6,1",
+        "threadsPerRank" : "8"
+      },
+      { "name"     : "strong_scaling_2to4r_9t",
+        "desc"     : "sweep 2 to 4 ranks with 9 threads per rank for a fixed configuration",
+        "ranks"    : "2,5,1",
+        "threadsPerRank" : "9"
+      },
+      { "name"     : "strong_scaling_2to4r_10t",
+        "desc"     : "sweep 2 to 4 ranks with 10 threads per rank for a fixed configuration",
+        "ranks"    : "2,5,1",
+        "threadsPerRank" : "10"
+      },
+      { "name"     : "strong_scaling_2to3r_11t",
+        "desc"     : "sweep 2 to 3 ranks with 11 threads per rank for a fixed configuration",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "11"
+      },
+      { "name"     : "strong_scaling_2to3r_12t",
+        "desc"     : "sweep 2 to 3 ranks with 12 threads per rank for a fixed configuration",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "12"
+      },
+      { "name"     : "strong_scaling_2to3r_13t",
+        "desc"     : "sweep 2 to 3 ranks with 13 threads per rank for a fixed configuration",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "13"
+      },
+      { "name"     : "weak_scaling_2to20r_2t",
+        "desc"     : "sweep 2 to 20 ranks with 2 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,21,1",
+        "threadsPerRank" : "2",
+        "depvar"   : "numComps"	  
+      },
+      { "name"     : "weak_scaling_2to12r_3t",
+        "desc"     : "sweep 2 to 12 ranks with 3 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,13,1",
+        "threadsPerRank" : "3",
+        "depvar"   : "numComps"	  
+      },
+      { "name"     : "weak_scaling_2to10r_4t",
+        "desc"     : "sweep 2 to 10 ranks with 4 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,11,1",
+        "threadsPerRank" : "4",
+        "depvar"   : "numComps"	  
+      },
+      { "name"     : "weak_scaling_2to8r_5t",
+        "desc"     : "sweep 2 to 8 ranks with 5 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,9,1",
+        "threadsPerRank" : "5",
+        "depvar"   : "numComps"	  
+      },
+      { "name"     : "weak_scaling_2to6r_6t",
+        "desc"     : "sweep 2 to 6 ranks with 6 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,7,1",
+        "threadsPerRank" : "6",
+        "depvar"   : "numComps"	  
+      },
+      { "name"     : "weak_scaling_2to5r_7t",
+        "desc"     : "sweep 2 to 5 ranks with 7 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,6,1",
+        "threadsPerRank" : "7",
+        "depvar"   : "numComps"	  
+      },
+      { "name"     : "weak_scaling_2to5r_8t",
+        "desc"     : "sweep 2 to 5 ranks with 8 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,6,1",
+        "threadsPerRank" : "8",
+        "depvar"   : "numComps"	
+      },
+      { "name"     : "weak_scaling_2to4r_9t",
+        "desc"     : "sweep 2 to 4 ranks with 9 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,5,1",
+        "threadsPerRank" : "9",
+        "depvar"   : "numComps"		
+      },
+      { "name"     : "weak_scaling_2to4r_10t",
+        "desc"     : "sweep 2 to 4 ranks with 10 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,5,1",
+        "threadsPerRank" : "10",
+        "depvar"   : "numComps"		
+      },
+      { "name"     : "weak_scaling_2to3r_11t",
+        "desc"     : "sweep 2 to 3 ranks with 11 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "11",
+        "depvar"   : "numComps"	
+      },
+      { "name"     : "weak_scaling_2to3r_12t",
+        "desc"     : "sweep 2 to 3 ranks with 12 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "12",
+        "depvar"   : "numComps"	
+      },
+      { "name"     : "weak_scaling_2to3r_13t",
+        "desc"     : "sweep 2 to 3 ranks with 13 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "13",
+        "depvar"   : "numComps"	
+      }
     ]
  
 }
