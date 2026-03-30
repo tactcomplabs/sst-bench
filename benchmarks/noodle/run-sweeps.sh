@@ -6,36 +6,68 @@
 #
 # See LICENSE in the top level directory for licensing details
 
-# These sweeps utilize sbatch to manage simulations using slurm
+# usage:   ./run-sweeps.sh [--slurm] --seq=[BASE|BASE_CPT|BASE_CPT_RST|BASE_PLOAD] [sst-sweeper options]
 
-# usage:   ./run-sweeps-slurm.sh [sst-sweeper options]
-# examples: ./run-sweeps-slurm.sh --norun
+# environment variable controls (set enable feature, unset to disable)
+# SWEEP_STRONG
+# SWEEP_WEAK
+# SWEEP_MIXED_STRONG
+# SWEEP_MIXED_WEAK
+# SWEEP_1NODE
+# SWEEP_4NODE
+# example: ./run-sweeps.sh --norun --slurm --seq=BASE_PLOAD
 
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
 mkdir -p jobs || exit 1
 
-OPTS="--noprompt --slurm $1"
+OPTS="--noprompt $1"
 
-# uncomment desired sequence or use --seq=... at command line. Default is specified in perf-sweeps.json
-# OPTS+=" --seq=BASE"
-# OPTS+=" --seq=BASE_CPT"
-# OPTS+=" --seq=BASE_CPT_RST"
-# OPTS+=" --seq=BASE_PLOAD"
+# default
+do_sanity_only=true
 
-# edit these to select which groups to run
-do_sanity_only=false
-do_4node_sweeps=true
-do_1node_sweeps=true
-do_strong_scaling=true
-do_weak_scaling=true
+# simulation settings
+do_strong_scaling=false
+do_weak_scaling=false
+do_mixed_strong_scaling=false
+do_mixed_weak_scaling=false
+do_1node_sweeps=false
+do_4node_sweeps=false
 do_component_sweeps=false
+
+if [[ ! -z $SWEEP_STRONG ]]; then
+  do_sanity_only=false
+  do_strong_scaling=true
+  echo "STRONG SCALING ENABLED"
+fi
+if [[ ! -z $SWEEP_WEAK ]]; then
+  do_sanity_only=false
+  do_weak_scaling=true
+  echo "WEAK SCALING ENABLED"
+fi
+if [[ ! -z $SWEEP_MIXED_STRONG ]]; then
+  do_sanity_only=false
+  do_mixed_strong_scaling=true
+  echo "MIXED STRONG SCALING ENABLED"
+fi
+if [[ ! -z $SWEEP_MIXED_WEAK ]]; then
+  do_sanity_only=false
+  do_mixed_weak_scaling=true
+  echo "MIXED WEAK SCALING ENABLED"
+fi
+# run 1 or 4 node sims, not both. Only set if another sweep selected
+if [[ $do_sanity_only == false ]]; then
+if [[ ! -z $SWEEP_4NODE ]]; then
+  do_4node_sweeps=true
+  echo "4 NODE SWEEPS ENABLED"
+else
+  do_1node_sweeps=true
+  fi
+fi
 
 echo "STARTING SWEEPS AT: $(date +%y%m%d-%H:%M:%S)"
 
 if [[ $do_sanity_only == true ]]; then
-
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py sanity  --jobname="ss1t" ${OPTS}
-
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py sanity  --jobname="sanity" ${OPTS}
 else
 
   if [[ $do_strong_scaling == true ]]; then
@@ -51,6 +83,15 @@ else
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py strong_scaling_13to40_ranks   --jobname="ss13r" ${OPTS}
     fi
   fi
+  if [[ $do_mixed_strong_scaling == true ]]; then
+    # All
+    # for c in strong_scaling_2to20r_2t strong_scaling_2to12r_3t strong_scaling_2to10r_4t strong_scaling_2to8r_5t strong_scaling_2to6r_6t strong_scaling_2to5r_7t strong_scaling_2to5r_8t strong_scaling_2to4r_9t strong_scaling_2to4r_10t strong_scaling_2to3r_11t strong_scaling_2to3r_12t strong_scaling_2to3r_13t
+    # Even threads only
+    for c in strong_scaling_2to20r_2t strong_scaling_2to10r_4t strong_scaling_2to6r_6t strong_scaling_2to5r_8t strong_scaling_2to4r_10t
+    do
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py $c --jobname=$c ${OPTS}
+    done
+  fi
 
   if [[ $do_weak_scaling == true ]]; then
     if [[ $do_4node_sweeps == true ]]; then
@@ -64,6 +105,15 @@ else
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_threads --jobname="ws13t" --numComps=100 ${OPTS}
       ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py weak_scaling_13to40_ranks   --jobname="ws13r" --numComps=100 ${OPTS}
     fi
+  fi
+  if [[ $do_mixed_weak_scaling == true ]]; then
+    # All
+    # for c in weak_scaling_2to20r_2t weak_scaling_2to12r_3t weak_scaling_2to10r_4t weak_scaling_2to8r_5t weak_scaling_2to6r_6t weak_scaling_2to5r_7t weak_scaling_2to5r_8t weak_scaling_2to4r_9t weak_scaling_2to4r_10t weak_scaling_2to3r_11t weak_scaling_2to3r_12t weak_scaling_2to3r_13t
+    # Even threads only
+    for c in weak_scaling_2to20r_2t weak_scaling_2to10r_4t weak_scaling_2to6r_6t weak_scaling_2to5r_8t weak_scaling_2to4r_10t
+    do
+      ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py $c --jobname=$c ${OPTS}
+    done
   fi
 
   # These take a VERY long time
@@ -99,6 +149,9 @@ LEFT JOIN
   timing_info T ON T.jobid = J.jobid
 LEFT JOIN
   file_info   F ON F.jobid = J.jobid;
+# create ranks_threads column
+ALTER TABLE raw ADD COLUMN ranks_threads VARCHAR;
+UPDATE raw SET ranks_threads = ranks || '_' || threads;
 
 .output raw.csv
 SELECT * FROM raw;
@@ -106,8 +159,8 @@ SELECT * FROM raw;
 # The last line capture custome sdl parameters
 CREATE TEMP TABLE short AS
 SELECT
-  jobname, jobid, jobtype, friend, ranks, threads, cpt_num, cpt_timestamp, sst_version,
-  disk_usage,
+  jobname, jobid, jobtype, friend, ranks, threads, ranks_threads, 
+  cpt_num, cpt_timestamp, sst_version, disk_usage,
   global_active_activities, global_current_tv_depth, global_max_io_in, global_max_io_out,
   global_max_rss, global_max_sync_data_size, global_max_tv_depth, global_mempool_size,
   global_pf, global_sync_data_size, local_max_pf, local_max_rss, max_build_time,
@@ -191,6 +244,22 @@ SELECT
   * FROM dependent
 WHERE
   jobname=='c100r2' OR jobname=='c100r13';
+
+# strong scaling mixed ranks and threads
+.output ss_mixed.csv
+SELECT
+  * FROM dependent
+WHERE
+  jobname LIKE 'strong_scaling%'
+ORDER BY ranks ASC, threads ASC;
+
+# weak scaling mixed ranks and threads
+.output ws_mixed.csv
+SELECT
+  * FROM dependent
+WHERE
+  jobname LIKE 'weak_scaling%'
+ORDER BY ranks ASC, threads ASC;;
 
 EOF
 
