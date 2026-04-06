@@ -79,13 +79,13 @@ if [ ! -e "$SQLUTIL" ]; then
 fi
 
 which sst
-if [ $? ne 0 ]; then
+if [ $? -ne 0 ]; then
     echo "[perf.slurm] error: could not locate sst"]
     exit 1
 fi
 
 sst --version
-if [ $? ne 0 ]; then
+if [ $? -ne 0 ]; then
     echo "[perf.slurm] error: failed sst --version"]
     exit 1
 fi

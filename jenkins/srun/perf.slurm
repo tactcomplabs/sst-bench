@@ -21,6 +21,8 @@
 export OMPI_MCA_orte_base_help_aggregate=0
 export OMPI_MCA_hwloc_base_binding_policy=socket
 
+export SRUN_OPTS=--cpu-bind=cores,verbose
+
 #-- module load anything you need to here
 #module load openmpi4/4.1.4
 
@@ -79,13 +81,13 @@ if [ ! -e "$SQLUTIL" ]; then
 fi
 
 which sst
-if [ $? ne 0 ]; then
+if [ $? -ne 0 ]; then
     echo "[perf.slurm] error: could not locate sst"]
     exit 1
 fi
 
 sst --version
-if [ $? ne 0 ]; then
+if [ $? -ne 0 ]; then
     echo "[perf.slurm] error: failed sst --version"]
     exit 1
 fi
@@ -102,8 +104,8 @@ fi
 cd ${RUNDIR} || exit 3
 
 # -- `srun` will execute MPI applications using the correct hosts
-echo "[perf.slurm] Launching srun $*"
-srun $* > log
+echo "[perf.slurm] Launching srun ${SRUN_OPTS} $*"
+srun ${SRUN_OPTS} $* > log
 
 if [ $? -ne 0 ]; then
     echo "[perf.slurm] FAILED"

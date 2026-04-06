@@ -27,7 +27,12 @@
     },
     "sweeps" :
     [
-        { "name"     : "sanity",
+        { "name"     : "rank-sanity",
+          "desc"     : "run 4 and 8 ranks for a fixed configuration",
+          "ranks"    : "4,9,4",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "thread-sanity",
           "desc"     : "run 4 and 8 threads for a fixed configuration",
           "ranks"    : "1",
           "threadsPerRank" : "4,9,4"
