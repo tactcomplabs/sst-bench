@@ -210,7 +210,7 @@ class JobEntry():
                 for lid in self.predecessors:
                     deps += f":{self.getsid(True, lid, norun)}"
             wait = "--wait"  # TODO this should be optional
-            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.ranks} --threads-per-core {self.threads} -J {self.jobname} {g_slurm_script} -r {g_scripts} -d {self.db} -R {self.sim_controls['tmpdir']} {sst_cmd}"
+            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.ranks} -J {self.jobname} {g_slurm_script} -r {g_scripts} -d {self.db} -R {self.sim_controls['tmpdir']} {sst_cmd}"
         return jobstring
 
 class JobManager():
