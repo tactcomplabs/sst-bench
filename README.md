@@ -28,7 +28,227 @@ statistics values for simple components.
 * *grid* : Generates a configurable 2 dimensional grid network with configurable component and data transfer parameters. Compile options are provided for testing different container data types for evaluating checkpointing performance. 
 * *noodle* : Generates randomly connected components using a configurable number of 
 ports per component and randomly sends a configurable number of message payloads per cycle.
+* *spaghetti* : Generates randomly connected components using a configurable number of 
+ports per component and randomly sends messages to adjacent components.  Similar to *noodle*, but utilizes 
+event handlers only, none of the components are clocked.
 * *hpe-phold* : Port of PHOLD benchmark from https://github.com/hpc-ai-adv-dev/sst-benchmarks based on Fujimoto's 1990 paper [Performance of Time Warp Under Synthetic Workloads](https://gdo149.llnl.gov/attachments/20776356/24674621.pdf).
+
+## Detailed Benchmark Descriptions
+
+### msg-perf
+### micro-comp
+*micro-comp* is designed to represent the smallest possible clocked component model.  There are no 
+subcomponents, ports or unnecessary variables required for serialization in this component.  The goal 
+of the *micro-comp* component is to provide a baseline to experiement with model loading performance 
+and memory footprint under strictly controlled conditions.  Note that executing *micro-comp* simulations 
+will only execute for a single clock cycle.  The only events generated will be the singular clock event 
+per component.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+### micro-comp-link
+*micro-comp-link* borrows the core component functionality from *micro-comp*.  However, this version 
+adds a subcomponent slot that contains a network interface controller (NIC) based upon the existing 
+sst-elements `SimpleNetwork`.  This allows us to construct arbitrarily complex network topologies 
+withe *micro-comp*-style endpoints.  The goal with this component configuration is similar to *micro-comp*, 
+but it does allow us to 1) experiment with sample topology configurations that are initialized during the init 
+phase and 2) experiment with model loading/partitioning in a strictly controlled environment.  The *micro-comp-link* 
+simulation component only exists for a single clock cycle and is *not* currently checkpointable.  
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| clock      | Sets the clock frequency | UnitAlgebra |  1GHz |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| nic | Network Interface | SST::MicroCompLink::MicroCompLinkNIC |
+
+#### Subcomponent Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| clock      | Sets the NIC clock frequency | UnitALgebra |  1GHz |
+| port       | Port to use if loaded anonymously | simpleNetworkExample.nicEvent | network |
+| verbose    | Sets the verbosity level | Integer  |  0 |
+
+#### Subcomponent Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| iface | SimpleNetwork interface to a network | SST::Interfaces::SimpleNetwork |
+
+
+### chkpnt
+
+The *chkpnt* component is designed to provide a known baseline for testing checkpoint 
+performance on SST 15.0+.  The component contains a set of serialized data elements, port 
+configurations and propogating events that exercise the main function of the base SST 
+serialization and checkpoint features.  The *chkpnt* component is initialized 
+with a number of external facing ports, all of which need to be connected to adjacent 
+components.  These ports do not rely upon any existing sst-element components.  The component 
+executes for a fixed number of clock cycles and initiates event data sends to all connected 
+ports using a user-defined *clockDelay*.  On each sending cycle, the component chooses a random 
+number of 64 bit values between *minData* and *maxData* and seeds these integers with random data.  
+The entire payload is then sent across the link.  Each payload for each port on each sending cycle 
+will be different, thus exercising a large degree of randomness in serializing outstanding events.  The 
+component uses a known seed as input from the user, so the component can be executed with the same set of known 
+values for reproducibility.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| numPorts   | Sets the number of external ports | Integer | 1 |
+| minData    | Minimum number of unsigned values | Integer | 1 |
+| maxData    | Maximum number of unsigned values | Integer | 2 |
+| clockDelay | Clock delay between sends | Integer | 1 |
+| clocks     | Clock cycles to execute   | Integer | 1000 |
+| rngSeed    | Mersenne RNG Seed | Integer | 1223 |
+| clockFreq  | Sets the clock frequency | UnitAlgebra |  1GHz |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| port%(num_ports)d | Ports which connect to endpoints | chkpnt.ChkpntEvent |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+### restore
+
+The *restore* component is designed to exercise the checkpoint + restart functionality in the SST core.  
+The component supports serialization of internal data structures in 4 byte increments as defined by the 
+*numBytes* parameter.  The user executes the simulation with a pre-defined number of total clock cycles 
+(*clocks*) and incrementally checkpoints the component.  The component can then be restarted and the internal 
+values can be verified as being correct.  The component utilizes a predefined random number seed such that 
+execution is reproducible across simuations.  The goal of this component is to test the restore performance 
+using a static number of internal bytes stored in a checkpoint payload.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| numBytes   | Sets the number of stored bytes (4 byte increments) | Unit Algebra | 64KB |
+| clocks     | Clock cycles to execute   | Integer | 1000 |
+| rngSeed    | Mersenne RNG Seed | Integer | 1223 |
+| clockFreq  | Sets the clock frequency | UnitAlgebra |  1GHz |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+### restart
+
+The *restart* component is very similar to the *restore* component.  The user 
+specifies the number of bytes to store in an internal data structure that are seeded 
+using a known (*baseSeed*) random number seed.  However, for each clock cycle, the *restart* 
+component verifies that the internal data structure contains the correct values element by element.  
+This ensures that the data is restored is correct regardless of the checkpoint/restart timing.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| numBytes   | Sets the number of stored bytes (4 byte increments) | Unit Algebra | 64KB |
+| clocks     | Clock cycles to execute   | Integer | 1000 |
+| baseSeed   | Base Mersenne RNG Seed | Integer | 1223 |
+| clockFreq  | Sets the clock frequency | UnitAlgebra |  1GHz |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+### large-stat
+
+The *large-stat* component is designed to examine the memory overhead of creating very large sets of 
+components.  The component is designed to execute for a single clock cycle with no interchanging events.  
+Upon startup, the component creates a user-defined number of unsigned 64 bit statistics in the form: 
+*STAT_n* where `n` is a monotonically increasing integer.  Users should execute this component with SST 
+verbosity enabled and/or profiling in order to trace the amount of virtual memory utilized.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| numStats   | Sets the number of stats to create | Integer |  1 |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| STAT_ | Basic stat handler | count |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+### grid
+### noodle
+### spaghetti
+### hpe-phold
 
 ## Parameter Sweep Automation
 
