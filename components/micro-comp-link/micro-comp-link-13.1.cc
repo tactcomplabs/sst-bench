@@ -1,5 +1,5 @@
 //
-// _micro-comp-link_cc_
+// _micro_comp_link_13_1_cc_
 //
 // Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,7 +8,7 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "micro-comp-link.h"
+#include "micro-comp-link-13.1.h"
 
 namespace SST::MicroCompLink{
 
@@ -45,7 +45,8 @@ namespace SST::MicroCompLink{
     }
 
     iFace->setNotifyOnReceive(
-      new SST_INTERFACES_SIMPLENETWORK_HANDLER<MicroCompLinkNIC, &MicroCompLinkNIC::msgNotify>(this));
+      new SST::Interfaces::SimpleNetwork::Handler<MicroCompLinkNIC>(
+        this, &MicroCompLinkNIC::msgNotify ));
 
     initBcastSent= false;
     msgHandler = nullptr;
@@ -187,7 +188,7 @@ namespace SST::MicroCompLink{
   MicroCompLink::MicroCompLink( SST::ComponentId_t id,
                                 const SST::Params& params ) :
     SST::Component( id ),
-    clockHandler(nullptr), Nic(nullptr){
+    timeConverter(nullptr), clockHandler(nullptr), Nic(nullptr){
 
     const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
     output.init(
@@ -195,7 +196,8 @@ namespace SST::MicroCompLink{
       Verbosity, 0, SST::Output::STDOUT );
 
     const std::string cpuClock = params.find< std::string >("clock", "1GHz");
-    clockHandler  = new SST_CLOCK_HANDLER< MicroCompLink, &MicroCompLink::clockTick>(this);
+    clockHandler  = new SST::Clock::Handler< MicroCompLink>(this,
+                                                      &MicroCompLink::clockTick);
     timeConverter = registerClock(cpuClock, clockHandler);
 
     // Inform SST to wait until we authorize it to exit
@@ -209,7 +211,8 @@ namespace SST::MicroCompLink{
     }
 
     Nic->setMsgHandler(
-      new SST_EVENT_HANDLER<MicroCompLink, &MicroCompLink::handleMessage>(this) );
+      new Event::Handler<MicroCompLink>( this,
+                                        &MicroCompLink::handleMessage) );
 
     output.verbose( CALL_INFO, 1, 0, "Initialization of MicroCompLink complete.\n" );
   }

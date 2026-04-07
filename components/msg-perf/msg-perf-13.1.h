@@ -1,5 +1,5 @@
 //
-// _msg-perf_h_
+// _msg_perf_13_1_h_
 //
 // Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -58,7 +58,7 @@ public:
   /// nicEvent: event serializer
   void serialize_order( SST::Core::Serialization::serializer& ser ) override {
     Event::serialize_order(ser);
-    SST_SER(data);
+    ser &data;
   }
 
   /// nicEvent: implements the NIC serializer
@@ -170,8 +170,8 @@ protected:
   SST::Output output;     ///< MsgPerfNIC: SST output object
   int verbosity;          ///< MsgPerfNIC: verbosity
 
-  TimeConverter timeConverter;   ///< SST time conversion handler
-  SST::Clock::HandlerBase* clockHandler;  ///< Clock Handler
+  TimeConverter* timeConverter;   ///< SST time conversion handler
+  SST::Clock::Handler< MsgPerfNIC >* clockHandler;  ///< Clock Handler
   SST::Interfaces::SimpleNetwork *iFace;  ///< MsgPerfNIC: SST network interface
 
   SST::Event::HandlerBase* msgHandler;    ///< MsgPerfNIC: SST message handler
@@ -264,8 +264,8 @@ private:
   unsigned recvStatPtr;     ///< recv current statistic pointer
 
   SST::Output    output;          ///< SST output handler
-  TimeConverter  timeConverter;   ///< SST time conversion handler
-  SST::Clock::HandlerBase* clockHandler;  ///< Clock Handler
+  TimeConverter* timeConverter;   ///< SST time conversion handler
+  SST::Clock::Handler< MsgPerfCPU >* clockHandler;  ///< Clock Handler
   MsgPerfAPI* Nic;                ///< Network interface controller
 
   std::vector<uint64_t> steps;    ///< size of each step

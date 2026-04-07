@@ -1,5 +1,5 @@
 //
-// _restore_cc_
+// _restore_13_1_cc_
 //
 // Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,7 +8,7 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "restore.h"
+#include "restore-13.1.h"
 
 namespace SST::Restore{
 
@@ -16,7 +16,7 @@ namespace SST::Restore{
 // Restore
 //------------------------------------------
 Restore::Restore(SST::ComponentId_t id, const SST::Params& params ) :
-  SST::Component( id ), clockHandler(nullptr),
+  SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numBytes(0), clocks(1000){
 
   const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );

@@ -7,10 +7,17 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-set(ChkpntSrcs
-  chkpnt.cc
-  chkpnt.h
-)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
+  set(ChkpntSrcs
+    chkpnt.cc
+    chkpnt.h
+  )
+else()
+  set(ChkpntSrcs
+    chkpnt-13.1.cc
+    chkpnt-13.1.h
+  )
+endif()
 
 add_library(chkpnt SHARED ${ChkpntSrcs})
 target_include_directories(chkpnt PUBLIC ${SST_INSTALL_DIR}/include)
