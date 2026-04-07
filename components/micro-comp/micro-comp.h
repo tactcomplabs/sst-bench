@@ -76,9 +76,9 @@ public:
 
 private:
   // -- internal handlers
-  SST::Output    output;                          ///< SST output handler
-  TimeConverter* timeConverter;                   ///< SST time conversion handler
-  SST::Clock::Handler<MicroComp>* clockHandler;   ///< Clock Handler
+  SST::Output    output;                    ///< SST output handler
+  TimeConverter timeConverter;              ///< SST time conversion handler
+  SST::Clock::HandlerBase* clockHandler ;   ///< Clock Handler
 
 };  // class MicroComp
 }   // namespace SST::MicroComp
