@@ -22,7 +22,7 @@ namespace SST::MicroComp{
       "MicroComp[" + getName() + ":@p:@t]: ",
       Verbosity, 0, SST::Output::STDOUT );
     output.verbose( CALL_INFO, 5, 0, "Init is complete\n" );
-    clockHandler  = new SST::Clock::Handler<MicroComp, &MicroComp::clockTick>(this);
+    clockHandler  = new SST_CLOCK_HANDLER<MicroComp, &MicroComp::clockTick>(this);
     timeConverter = registerClock("1GHz", clockHandler);
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();

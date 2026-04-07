@@ -29,7 +29,7 @@ namespace SST::MsgPerf{
       "iface", ComponentInfo::SHARE_NONE, 1 );
     
     SST::Clock::HandlerBase* clockHandler;
-    clockHandler  = new SST::Clock::Handler< MsgPerfNIC, &MsgPerfNIC::clockTick >(this);
+    clockHandler  = new SST_CLOCK_HANDLER< MsgPerfNIC, &MsgPerfNIC::clockTick >(this);
     timeConverter = registerClock(nicClock, clockHandler);
 
     if( !iFace ){
@@ -50,7 +50,7 @@ namespace SST::MsgPerf{
     }
 
     iFace->setNotifyOnReceive(
-      new SST::Interfaces::SimpleNetwork::Handler<MsgPerfNIC, &MsgPerfNIC::msgNotify>(this));
+      new SST_INTERFACES_SIMPLENETWORK_HANDLER<MsgPerfNIC, &MsgPerfNIC::msgNotify>(this));
   }
 
   MsgPerfNIC::~MsgPerfNIC(){
@@ -204,7 +204,7 @@ namespace SST::MsgPerf{
       Verbosity, 0, SST::Output::STDOUT );
 
     const std::string cpuClock = params.find< std::string >("clock", "1GHz");
-    clockHandler  = new SST::Clock::Handler< MsgPerfCPU, &MsgPerfCPU::clockTick >(this);
+    clockHandler  = new SST_CLOCK_HANDLER< MsgPerfCPU, &MsgPerfCPU::clockTick >(this);
     timeConverter = registerClock(cpuClock, clockHandler);
 
     // Inform SST to wait until we authorize it to exit
@@ -231,7 +231,7 @@ namespace SST::MsgPerf{
     }
 
     Nic->setMsgHandler(
-      new Event::Handler<MsgPerfCPU, &MsgPerfCPU::handleMessage>(this));
+      new SST_EVENT_HANDLER<MsgPerfCPU, &MsgPerfCPU::handleMessage>(this));
 
     // setup the steps
     setupSteps();

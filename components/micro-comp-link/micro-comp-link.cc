@@ -45,7 +45,7 @@ namespace SST::MicroCompLink{
     }
 
     iFace->setNotifyOnReceive(
-      new SST::Interfaces::SimpleNetwork::Handler<MicroCompLinkNIC, &MicroCompLinkNIC::msgNotify>(this));
+      new SST_INTERFACES_SIMPLENETWORK_HANDLER<MicroCompLinkNIC, &MicroCompLinkNIC::msgNotify>(this));
 
     initBcastSent= false;
     msgHandler = nullptr;
@@ -195,7 +195,7 @@ namespace SST::MicroCompLink{
       Verbosity, 0, SST::Output::STDOUT );
 
     const std::string cpuClock = params.find< std::string >("clock", "1GHz");
-    clockHandler  = new SST::Clock::Handler< MicroCompLink, &MicroCompLink::clockTick>(this);
+    clockHandler  = new SST_CLOCK_HANDLER< MicroCompLink, &MicroCompLink::clockTick>(this);
     timeConverter = registerClock(cpuClock, clockHandler);
 
     // Inform SST to wait until we authorize it to exit
@@ -209,7 +209,7 @@ namespace SST::MicroCompLink{
     }
 
     Nic->setMsgHandler(
-      new Event::Handler<MicroCompLink, &MicroCompLink::handleMessage>(this) );
+      new SST_EVENT_HANDLER<MicroCompLink, &MicroCompLink::handleMessage>(this) );
 
     output.verbose( CALL_INFO, 1, 0, "Initialization of MicroCompLink complete.\n" );
   }
