@@ -117,8 +117,8 @@ with a number of external facing ports, all of which need to be connected to adj
 components.  These ports do not rely upon any existing sst-element components.  The component 
 executes for a fixed number of clock cycles and initiates event data sends to all connected 
 ports using a user-defined *clockDelay*.  On each sending cycle, the component chooses a random 
-number of 64 bit values between *minData* and *maxData* and seeds these integers with random data.  
-The entire payload is then sent across the link.  Each payload for each port on each sending cycle 
+number of 64 bit values between *minData* and *maxData* and seeds these integers with random data.  The 
+entire payload is then sent across the link.  Each payload for each port on each sending cycle 
 will be different, thus exercising a large degree of randomness in serializing outstanding events.  The 
 component uses a known seed as input from the user, so the component can be executed with the same set of known 
 values for reproducibility.
@@ -189,8 +189,8 @@ using a static number of internal bytes stored in a checkpoint payload.
 The *restart* component is very similar to the *restore* component.  The user 
 specifies the number of bytes to store in an internal data structure that are seeded 
 using a known (*baseSeed*) random number seed.  However, for each clock cycle, the *restart* 
-component verifies that the internal data structure contains the correct values element by element.  
-This ensures that the data is restored is correct regardless of the checkpoint/restart timing.
+component verifies that the internal data structure contains the correct values element by element.  This 
+ensures that the data is restored is correct regardless of the checkpoint/restart timing.
 
 #### Parameters
 | Parameter  | Description | Values | Default |
@@ -247,7 +247,85 @@ verbosity enabled and/or profiling in order to trace the amount of virtual memor
 
 ### grid
 ### noodle
+
+The *noodle* component is very different than other components.  This component is 
+designed to find distinct slow code paths and load imbalance issues when executing 
+simulations with various degrees of ranks, threads and combinations therein.  *noodle* 
+is a relatively simple component, but can be scaled to very large simulations.  It is 
+designed to be executed in parallel (threads, ranks, etc) with a large number of 
+ports per component (numPorts).  The ports can be randomly connected such that the default 
+partitioner cannot easily assign components to threads or ranks.  On each clock cycle of simulation, 
+the component issues *msgsPerClock* event messages across *portsPerClock* ports with a payload size 
+of *bytesPerClock*.  The payloads are randomly generated using the *rngSeed*.  In this way, 
+*noodle* issues randomly generated messages across a large number of potential endpoints.  Examining 
+the performance of the SST sync manager as well as other latency sensitive core operations 
+is the goal of *noodle*.  Additional asynchrony can be induced by using the *randClockRange* 
+to randomly assign the core clock frequencies of the host components.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| clockFreq  | Sets the clock frequency | UnitAlgebra |  1GHz |
+| numPorts   | Sets the number of ports | Integer | 2 |
+| msgsPerClock | Sets the number of messages sent per clock | Integer | 8 |
+| bytesPerClock | Sets the number of bytes per clock | Integer | 8 |
+| portsPerClock | Sets the number of ports to send over per clock | Integer | 1 |
+| clocks     | Sets the number of clocks to execute | Integer | 10000 |
+| rngSeed    | Sets the RNG seed | Integer | 31337 |
+| randClockRange | Overrides clockFreq and sets randomly chosen frequency in the target range (in GHz) | String | 1-2 |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| ports%(num_ports)d | Ports which to connect to endpoints. | noodle.NoodleEvent |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| *none* |  | |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
 ### spaghetti
+
+The *spaghetti* component is similar in design to *noodle* in that it is constructed 
+to find corner case behavior in scalable simulations.  It is designed to be executed 
+in parallel with a large number of ports configured per component.  However, unlike 
+*noodle*, *spaghetti* is entirely event driven.  There are no clocked components.  When the 
+component is initialized, it builds a set of *numMsgs* for each of *numPorts* with the 
+size *bytesPerMsg*.  The component then issues the messages into the event queue 
+using a randomized delay timing.  In this way, the events are injected in order, but delivered 
+to their endpoints randomly.  The *spaghetti* component will further induce interesting behavior 
+when scaled to large component counts and ports per component.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| numPorts   | Sets the number of ports | Integer | 2 |
+| numMsgs    | Sets the number of messages sent per port to inject | Integer | 10 |
+| bytesPerMsg | Sets the number of bytes per msg | Integer | 64 |
+| rngSeed    | Sets the RNG seed | Integer | 31337 |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| ports%(num_ports)d | Ports which to connect to endpoints. | spaghetti.SpaghettiEvent |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| LATENCY_PORT_ | Histogram of latency values | latency |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
 ### hpe-phold
 
 ## Parameter Sweep Automation
