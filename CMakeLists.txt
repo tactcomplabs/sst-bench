@@ -157,7 +157,7 @@ else()
 endif()
 
 # Handle deprecated API's
-if( ${SST_VERSION} VERSION_LESS "16.0" )
+if( ${SST_VERSION} VERSION_GREATER_EQUAL "15.0" AND ${SST_VERSION} VERSION_LESS "16.0" )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_HANDLER2")
 endif()
 

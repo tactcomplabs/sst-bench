@@ -7,10 +7,17 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-set(RestartSrcs
-  restart.cc
-  restart.h
-)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
+  set(RestartSrcs
+    restart.cc
+    restart.h
+  )
+else()
+  set(RestartSrcs
+    restart-13.1.cc
+    restart-13.1.h
+  )
+endif()
 
 add_library(restart SHARED ${RestartSrcs})
 target_include_directories(restart PUBLIC ${SST_INSTALL_DIR}/include)

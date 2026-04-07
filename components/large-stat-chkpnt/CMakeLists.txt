@@ -7,10 +7,17 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-set(LargeStatChkpntSrcs
-  large-stat-chkpnt.cc
-  large-stat-chkpnt.h
-)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
+  set(LargeStatChkpntSrcs
+    large-stat-chkpnt.cc
+    large-stat-chkpnt.h
+  )
+else()
+  set(LargeStatChkpntSrcs
+    large-stat-chkpnt-13.1.cc
+    large-stat-chkpnt-13.1.h
+  )
+endif()
 
 add_library(largestatchkpnt SHARED ${LargeStatChkpntSrcs})
 target_include_directories(largestatchkpnt PUBLIC ${SST_INSTALL_DIR}/include)

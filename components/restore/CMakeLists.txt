@@ -7,10 +7,17 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-set(RestoreSrcs
-  restore.cc
-  restore.h
-)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
+  set(RestoreSrcs
+    restore.cc
+    restore.h
+  )
+else()
+  set(RestoreSrcs
+    restore-13.1.cc
+    restore-13.1.h
+  )
+endif()
 
 add_library(restore SHARED ${RestoreSrcs})
 target_include_directories(restore PUBLIC ${SST_INSTALL_DIR}/include)
