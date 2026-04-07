@@ -1,5 +1,5 @@
 //
-// _msg-perf_cc_
+// _msg_perf_13_1_cc_
 //
 // Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,7 +8,7 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "msg-perf.h"
+#include "msg-perf-13.1.h"
 
 namespace SST::MsgPerf{
 
@@ -16,7 +16,7 @@ namespace SST::MsgPerf{
   // MsgPerfNIC
   //------------------------------------------
   MsgPerfNIC::MsgPerfNIC( SST::ComponentId_t id, SST::Params& params )
-    : MsgPerfAPI(id, params), clockHandler(nullptr),
+    : MsgPerfAPI(id, params), timeConverter(nullptr), clockHandler(nullptr),
       iFace(nullptr), msgHandler(nullptr), initBcastSent(false), numDest(0) {
 
     uint32_t verbosity = params.find<uint32_t>("verbose", 0);
@@ -27,9 +27,9 @@ namespace SST::MsgPerf{
     const std::string nicClock = params.find< std::string >( "clock", "1GHz" );
     iFace = loadUserSubComponent<SST::Interfaces::SimpleNetwork>(
       "iface", ComponentInfo::SHARE_NONE, 1 );
-    
-    SST::Clock::HandlerBase* clockHandler;
-    clockHandler  = new SST_CLOCK_HANDLER< MsgPerfNIC, &MsgPerfNIC::clockTick >(this);
+
+    clockHandler  = new SST::Clock::Handler< MsgPerfNIC >(this,
+                                                      &MsgPerfNIC::clockTick);
     timeConverter = registerClock(nicClock, clockHandler);
 
     if( !iFace ){
@@ -50,7 +50,8 @@ namespace SST::MsgPerf{
     }
 
     iFace->setNotifyOnReceive(
-      new SST_INTERFACES_SIMPLENETWORK_HANDLER<MsgPerfNIC, &MsgPerfNIC::msgNotify>(this));
+      new SST::Interfaces::SimpleNetwork::Handler<MsgPerfNIC>(
+        this, &MsgPerfNIC::msgNotify ));
   }
 
   MsgPerfNIC::~MsgPerfNIC(){
@@ -196,7 +197,7 @@ namespace SST::MsgPerf{
     startSize(8), endSize(16), stepSize(8), iters(1), clockDelay(100),
     curMsg(0), msgIter(0), clockCount(0), lastCycle(0),
     sendStatPtr(0), recvStatPtr(0),
-    clockHandler(nullptr), Nic(nullptr){
+    timeConverter(nullptr), clockHandler(nullptr), Nic(nullptr){
 
     const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
     output.init(
@@ -204,7 +205,8 @@ namespace SST::MsgPerf{
       Verbosity, 0, SST::Output::STDOUT );
 
     const std::string cpuClock = params.find< std::string >("clock", "1GHz");
-    clockHandler  = new SST_CLOCK_HANDLER< MsgPerfCPU, &MsgPerfCPU::clockTick >(this);
+    clockHandler  = new SST::Clock::Handler< MsgPerfCPU >(this,
+                                                      &MsgPerfCPU::clockTick);
     timeConverter = registerClock(cpuClock, clockHandler);
 
     // Inform SST to wait until we authorize it to exit
@@ -231,7 +233,8 @@ namespace SST::MsgPerf{
     }
 
     Nic->setMsgHandler(
-      new SST_EVENT_HANDLER<MsgPerfCPU, &MsgPerfCPU::handleMessage>(this));
+      new Event::Handler<MsgPerfCPU>( this,
+                                      &MsgPerfCPU::handleMessage) );
 
     // setup the steps
     setupSteps();

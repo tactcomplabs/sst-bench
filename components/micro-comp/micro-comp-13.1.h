@@ -1,5 +1,5 @@
 //
-// _micro-comp_h_
+// _micro_comp_13_1_h_
 //
 // Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -76,9 +76,9 @@ public:
 
 private:
   // -- internal handlers
-  SST::Output    output;                    ///< SST output handler
-  TimeConverter timeConverter;              ///< SST time conversion handler
-  SST::Clock::HandlerBase* clockHandler ;   ///< Clock Handler
+  SST::Output    output;                          ///< SST output handler
+  TimeConverter* timeConverter;                   ///< SST time conversion handler
+  SST::Clock::Handler<MicroComp>* clockHandler;   ///< Clock Handler
 
 };  // class MicroComp
 }   // namespace SST::MicroComp

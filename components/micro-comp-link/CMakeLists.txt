@@ -7,10 +7,18 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-set(MicroCompLinkSrcs
-  micro-comp-link.cc
-  micro-comp-link.h
-)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
+  set(MicroCompLinkSrcs
+    micro-comp-link.cc
+    micro-comp-link.h
+  )
+else()
+  set(MicroCompLinkSrcs
+    micro-comp-link-13.1.cc
+    micro-comp-link-13.1.h
+  )
+endif()
+
 
 add_library(microcomplink SHARED ${MicroCompLinkSrcs})
 target_include_directories(microcomplink  PUBLIC ${SST_INSTALL_DIR}/include)

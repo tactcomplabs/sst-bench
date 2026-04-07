@@ -7,10 +7,17 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-set(GridSrcs
-  gridnode.cc
-  gridnode.h
-)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
+  set(GridSrcs
+    gridnode.cc
+    gridnode.h
+  )
+else()
+  set(GridSrcs
+    gridnode-13.1.cc
+    gridnode-13.1.h
+  )
+endif()
 
 add_library(grid SHARED ${GridSrcs})
 target_include_directories(grid PUBLIC ${SST_INSTALL_DIR}/include)

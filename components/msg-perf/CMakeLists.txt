@@ -7,10 +7,17 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-set(MsgPerfSrcs
-  msg-perf.cc
-  msg-perf.h
-)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
+  set(MsgPerfSrcs
+    msg-perf.cc
+    msg-perf.h
+  )
+else()
+  set(MsgPerfSrcs
+    msg-perf-13.1.cc
+    msg-perf-13.1.h
+  )
+endif()
 
 add_library(msgperf SHARED ${MsgPerfSrcs})
 target_include_directories(msgperf  PUBLIC ${SST_INSTALL_DIR}/include)

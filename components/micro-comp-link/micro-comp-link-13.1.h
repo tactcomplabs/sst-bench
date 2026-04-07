@@ -1,5 +1,5 @@
 //
-// _micro-comp-link_h_
+// _micro_comp_link_13_1_h_
 //
 // Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -57,7 +57,7 @@ public:
   /// nicEvent: event serializer
   void serialize_order( SST::Core::Serialization::serializer& ser ) override {
     Event::serialize_order(ser);
-    SST_SER(data);
+    ser &data;
   }
 
   /// nicEvent: implements the NIC serializer
@@ -237,8 +237,8 @@ public:
 private:
   // -- parameters
   SST::Output    output;          ///< SST output handler
-  TimeConverter timeConverter;    ///< SST time conversion handler
-  SST::Clock::HandlerBase* clockHandler;  ///< Clock Handler
+  TimeConverter* timeConverter;   ///< SST time conversion handler
+  SST::Clock::Handler< MicroCompLink >* clockHandler;  ///< Clock Handler
   MicroCompLinkAPI* Nic;                ///< Network interface controller
 
   // -- private methods
