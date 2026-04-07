@@ -14,6 +14,7 @@ import argparse
 import jobutils
 import json
 import os
+import platform
 import re
 import shutil
 import sqlutils
@@ -31,19 +32,25 @@ g_debug = False
 g_version = 0.0
 g_pfx = "[sst-sweeper.py]"
 g_scripts = os.path.dirname(os.path.abspath(sys.argv[0]))
-g_slurm_script = os.path.abspath(f"{g_scripts}/perf.slurm")
-g_slurm_completion = os.path.abspath(f"{g_scripts}/completion.slurm")
-g_scratchdir = os.path.abspath(".")
-g_tmpdir = g_scratchdir
+g_slurm_home = os.getenv("SST_BENCH_SLURM_HOME")
+if g_slurm_home is None:
+    g_slurm_home=f"{g_scripts}/../jenkins/prun"
+g_slurm_script = os.path.abspath(f"{g_slurm_home}/perf.slurm")
+g_slurm_completion = os.path.abspath(f"{g_slurm_home}/completion.slurm")
 g_cptpfx = "_cpt"
 g_start_time = datetime.now()
 g_id_base = (int(datetime.timestamp(datetime.now())*10) & 0xffffff) << 16
 
-g_sbatch="sbatch"
+g_mpirun = "mpirun"
+g_sbatch="sbatch --export=ALL"
+
+g_os_type = platform.system()
+if "Linux" in g_os_type:
+    g_mpirun += " --bind-to socket"
+    
 g_lid2sid = {}   # map local id to slurm id
 
-# TODO move this to json config
-# be gentle on gizmo
+# TODO move this to json config or slurm home
 g_max_nodes = 4
 g_proc_per_node = 40
 
@@ -54,14 +61,8 @@ class JobType(Enum):
     BASE = 1
     CPT  = 2
     RST  = 3
-    COMPLETION = 4
-
-# if scratch directory exists create a jobs directory
-if not os.path.isdir(g_tmpdir):
-    if os.path.isdir(g_scratchdir):
-        os.mkdir(g_tmpdir)
-    else:
-        g_tmpdir = "."
+    PLOAD = 4
+    COMPLETION = 99
 
 def is_integer(s: str) -> bool:
     try:
@@ -104,6 +105,7 @@ class JobEntry():
         self.procs = ranks * threads
         self.sst_params = copy(sst_params)
         self.sdl_params = copy(sdl_params)
+        self.sim_controls = copy(sim_control_params)
 
         self.slurm = options['slurm']
         self.db = sim_controls['db']
@@ -117,8 +119,10 @@ class JobEntry():
         self.cpt_timestamp = 0
         self.setdeps = False
 
-        self.sstopts = f"--num-threads={self.threads} --output-json=config.json"
-        self.sstopts += f" --print-timing-info --timing-info-json=timing.json"
+        self.sstopts = f"--num-threads={self.threads}"
+        self.sstopts += f" --print-timing-info=4 --timing-info-json=timing.json"
+        self.sstopts += " --output-config=config.py --parallel-output"
+        # --output-json=config.json" 
         for opt in sst_params:
             self.sstopts += f" --{opt}={sst_params[opt]}"
         
@@ -152,7 +156,7 @@ class JobEntry():
                 sys.exit(1)
     def cpt(self,simperiod, baseid):
         self.jtype = JobType.CPT
-        self.sstopts += f" --checkpoint-prefix=_cpt --checkpoint-sim-period={simperiod}ns --checkpoint-name-format=%n_%t/grid"
+        self.sstopts += f" --checkpoint-prefix=_cpt --checkpoint-sim-period={simperiod}ns --checkpoint-name-format=%n_%t/sweeper"
         self.friend = baseid  
     def rst(self, cptid, cptfile, cpt_num, cpt_timestamp):
         self.jtype = JobType.RST
@@ -164,6 +168,13 @@ class JobEntry():
         self.friend = cptid
         self.cpt_num = cpt_num
         self.cpt_timestamp = cpt_timestamp
+        self.setdeps = True
+    def pload(self, baseid):
+        self.jtype = JobType.PLOAD
+        self.sstopts += f" --parallel-load"
+        self.sdlFile = ""
+        self.friend = baseid
+        self.predecessors = [ baseid ]
         self.setdeps = True
     def completion(self):
         self.jtype = JobType.COMPLETION
@@ -177,15 +188,21 @@ class JobEntry():
     def getJobString(self, norun = False):
         # only called when submitting runs to ensure previous slurm ids are available
         if self.jtype == JobType.COMPLETION:
-            jobstring = f"{g_sbatch} --parsable --wait --dependency=singleton --job-name={self.jobname} {g_slurm_completion} -r {g_scripts} -R {g_tmpdir} -d {self.db}"
+            jobstring = f"{g_sbatch} --parsable --wait --dependency=singleton --job-name={self.jobname} {g_slurm_completion} -r {g_scripts} -R {self.sim_controls['tmpdir']} -d {self.db}"
             return jobstring
+        # Parallel load
+        if self.jtype == JobType.PLOAD:
+            sid = self.getsid(self.slurm, self.friend, norun)
+            self.sstopts += f" ../{sid}/config.py"
+        # Restart
         if self.jtype == JobType.RST:
             sid = self.getsid(self.slurm, self.cptid, norun)
             self.sstopts += f" --load-checkpoint ../{sid}/{self.cptfile}"
         sst_cmd = f"sst {self.sdlFile} {self.sstopts} {self.sdlopts}"
+        # Set dependencies
         if self.slurm == False:
             # local jobs will not be run in parallel so dependencies do not matter
-            jobstring = f"mpirun -np {self.ranks} {sst_cmd}"
+            jobstring = f"{g_mpirun} -np {self.ranks} {sst_cmd}"
         else:
             deps = ""
             if self.setdeps and len(self.predecessors) > 0:
@@ -193,13 +210,18 @@ class JobEntry():
                 for lid in self.predecessors:
                     deps += f":{self.getsid(True, lid, norun)}"
             wait = "--wait"  # TODO this should be optional
-            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.procs} -J {self.jobname} {g_slurm_script} -r {g_scripts} -d {self.db} -R {g_tmpdir} {sst_cmd}"
+            jobstring = f"{g_sbatch} --parsable {wait} {deps} -N {self.nodes} -n {self.ranks} -J {self.jobname} {g_slurm_script} -r {g_scripts} -d {self.db} -R {self.sim_controls['tmpdir']} {sst_cmd}"
         return jobstring
 
 class JobManager():
-    def __init__(self, sdl, clocks, options, sim_control_params, job_sequencer_params, sst_params: list, sdl_params: list ):
+    def __init__(self, sdl, options, sim_control_params, job_sequencer_params, sst_params: list, sdl_params: list ):
         print("\nCreating Job Manager")
-        self.clocks = clocks
+        # Ok to omit clocks which is used for calculating the number of checkpoints 
+        # when 'numcpt' is not set and checkpoint or restart is enabled
+        if 'clocks' in sdl_params:
+            self.clocks = clocks
+        else:
+            self.clocks = 0
 
         self.logging = options['logging']
         self.noprompt = options['noprompt']
@@ -214,7 +236,9 @@ class JobManager():
         seq = job_sequencer_params['seq']
         self.do_restart = seq=='BASE_CPT_RST'
         self.do_checkpoint = seq=='BASE_CPT' or self.do_restart
+        self.do_parallel_load = seq=='BASE_PLOAD'
         self.simperiod = int(job_sequencer_params['simperiod'])
+        self.numcpt = int(job_sequencer_params['numcpt']) 
 
         self.sst_params = copy(sst_params)
         self.sdl_params = copy(sdl_params)
@@ -245,22 +269,33 @@ class JobManager():
     def add_job_sequence(self, baseEntry:JobEntry):
         # base sim
         id_base = jobmgr.add_job(baseEntry)
+        # add checkpoint job
         if self.do_checkpoint:
             cptEntry=copy(baseEntry)
             cptEntry.cpt(self.simperiod, id_base)
             id_cpt = jobmgr.add_job(cptEntry)
+            # estimate number of checkpoints (TODO move to args validation)
+            numCpts = self.numcpt
+            if numCpts == 0:
+                numCpts = int(self.clocks / self.simperiod)
             # predict checkpoint file names for restart
-            numCpts = int(clocks / self.simperiod)
             period = int(self.simperiod * 1000) # ns to ps
             timestamp = (numCpts+1) * period
+            # add restart jobs
             if self.do_restart:
                 # schedule shortest restart runs first 
                 for n in range(numCpts, 0, -1):
                     timestamp = timestamp - period
-                    cpt = f"{g_cptpfx}/{n}_{timestamp}/grid.sstcpt"
+                    # TODO use a generic name
+                    cpt = f"{g_cptpfx}/{n}_{timestamp}/sweeper.sstcpt"
                     rstEntry = copy(baseEntry)
                     rstEntry.rst(id_cpt, cpt, n, timestamp)
                     jobmgr.add_job(rstEntry)
+        # add parallel load job
+        if self.do_parallel_load:
+            ploadEntry=copy(baseEntry)
+            ploadEntry.pload(id_base)
+            jobmgr.add_job(ploadEntry)
         # slurm completion creates barrier and can perform post-processing
         if self.slurm:
             compEntry=copy(baseEntry)
@@ -302,7 +337,17 @@ class JobManager():
         elif entry.jtype==JobType.COMPLETION:
             self.pp_remote(comp_id=jobid)
 
+        # sst version
+        self.jutil.exec(cmd='sst --version')
+        sst_version_string = self.jutil.res1
+        sst_version_match=re.search(r'SST-Core Version \((.+)[,\)]?.+$', sst_version_string)
+        if sst_version_match:
+            sst_version=sst_version_match.group(1).split(',')[0]
+        else:
+            sst_version="?"
+
         self.sqldb.job_info( jobid=jobid, dataDict={
+            "jobname": entry.jobname,
             "friend": friend,
             "jobtype": entry.jtype.name, 
             "jobstring": jobstr, 
@@ -311,7 +356,11 @@ class JobManager():
             "cpt_timestamp": entry.cpt_timestamp,
             "nodeclamp" : self.nodeclamp,
             "jobnodes"  : entry.nodes,
-            "cwd": cwd } )
+            "cwd": cwd,
+            "sst_version": sst_version,
+            "os_type": g_os_type,
+            "date":  datetime.now().strftime("%Y.%m.%d %H:%M") 
+        } )
         self.sqldb.commit()
     def launch(self):
         print(f"\n{g_pfx} starting {len(self.joblist)} jobs in {self.rundir}")
@@ -332,14 +381,20 @@ class JobManager():
         self.sqldb.conf_info(jobid=id, jobpath=cwd)
         self.sqldb.commit()
     def pp_remote(self, comp_id:int):
-        if g_sacct != None:
+        sacct_ok = g_sacct == None
+        if sacct_ok == True:
             for id in self.wipList:
                 if id != comp_id:
-                    rundir=f"{g_tmpdir}/{self.jobname}/{id}"
+                    rundir=f"{self.tmpdir}/{self.jobname}/{id}"
                     cmd=f"sacct -l -j {id} --json"
-                    self.jutil.exec(cmd=cmd, cwd=rundir, log="slurm.json")
-                    self.sqldb.slurm_info(jobid=id, jobpath=rundir)
-            self.sqldb.commit()
+                    rc = self.jutil.exec(cmd=cmd, cwd=rundir, log="slurm.json")
+                    if rc == 0:
+                        self.sqldb.slurm_info(jobid=id, jobpath=rundir)
+                    else:
+                        sacct_ok = False
+                        break
+            if sacct_ok:
+                self.sqldb.commit()
         self.wipList = []
 
 # The json parameter settings
@@ -348,7 +403,6 @@ class JsonParams():
     def __init__(self, jsonFile: str):
         self.json = None
         self.errors = []
-        self.sdl_required = ['clocks']
         self.sweep_required = ['name', 'desc', 'ranks', 'threadsPerRank']
         self.sweep_optional = ['depvar', 'sdl']
         self.sst_reserved = ['num-threads', 'output-json', 'print-timing-info', 'timing-info-json']
@@ -385,9 +439,6 @@ class JsonParams():
             self.errors.append('error: json missing sdl_params group')
         else:
             self.sdl_params = self.json['sdl_params']
-            for r in self.sdl_required:
-                if r not in self.sdl_params:
-                    self.errors.append(f"error: missing {r}' in sdl_params")
         
         if 'sst_params' not in self.json:
             self.errors.append('error: json missing sst_params group')
@@ -398,7 +449,7 @@ class JsonParams():
                     self.errors.append(f"error: sst param '{p}' is reserved")
                 if "checkpoint" in p and "CPT" in self.job_sequencer_params["seq"]:
                     self.errors.append(
-                        f"error: sst param '{p}' conflicts with job sequence '{self.job_sequencer_params["seq"]}'")
+                        f"error: sst param '{p}' conflicts with job sequence '{self.job_sequencer_params['seq']}'")
 
         if 'sweeps' not in self.json:
             self.errors.append('error: json missing sweeps group')
@@ -424,7 +475,7 @@ class JsonParams():
     def sweep_short_help(self) -> str:
         if self.json == None:
             return ""
-        return f"\n{", ".join(self.sweeps.keys())}"
+        return f"\n{', '.join(self.sweeps.keys())}"
     def sweep_long_help(self) -> str:
         s = f"Available sweeps [{len(self.sweeps)}]\n"
         for sweep in self.sweeps:
@@ -461,9 +512,9 @@ class JsonParams():
         return len(self.errors) > 0
     def error_string(self) -> str:
         return f"Please fix json errors in {self.abspath}:\n" + '\n'.join(self.errors)
-    def defv_str(self, group, key) -> str:
+    def defv_str(self, group, key, dflt="") -> str:
         if self.json == None:
-            return ""
+            return dflt
         if group in self.json:
             if key in self.json[group]:
                 if len(self.json[group][key])==2:
@@ -527,11 +578,14 @@ if __name__ == '__main__':
 
     # "job_sequencer" overrides
     job_seq_group = parser.add_argument_group('job sequencer overrides')
-    ALLOWED_SEQ = ['BASE', 'BASE_CPT', 'BASE_CPT_RST']
+    ALLOWED_SEQ = ['BASE', 'BASE_CPT', 'BASE_CPT_RST', 'BASE_PLOAD']
     job_seq_group.add_argument("--seq", type=str, choices=ALLOWED_SEQ,
                                help=f"Select simulation sequence {jsonParams.defv_str('job_sequencer', 'seq')}")
     job_seq_group.add_argument("--simperiod", type=int, 
                                help=f"checkpoint simulation period in ns {jsonParams.defv_str('job_sequencer', 'simperiod')}")
+    job_seq_group.add_argument("--numcpt", type=int, 
+                               help=f"Estimated number of checkpoints. When 0, calculated by sdl.clocks/simperiod {jsonParams.defv_str('job_sequencer', 'numcpt')}")
+
     
     # "sim_control" overrides
     sim_ctl_group = parser.add_argument_group('sim control overrides')
@@ -540,7 +594,7 @@ if __name__ == '__main__':
     sim_ctl_group.add_argument("--jobname", type=str,
                                help=f"name associated with all jobs {jsonParams.defv_str('sim_controls', 'jobname')}")
     sim_ctl_group.add_argument("--tmpdir", type=str,
-                               help=f"temporary area for running jobs {jsonParams.defv_str('sim_controls', 'tmpdir')}")
+                               help=f"temporary area for running jobs {jsonParams.defv_str('sim_controls', 'tmpdir', '[./]')}")
     sim_ctl_group.add_argument("--nodeclamp", type=int,
                                help=f"distribute threads evenly across specified nodes {jsonParams.defv_str('sim_controls', 'nodeclamp')}")
 
@@ -668,7 +722,7 @@ if __name__ == '__main__':
     # Resolved parameter validation
     #
     if job_sequencer_params['seq'] not in ALLOWED_SEQ:
-        print(f"error: job_sequencer.seq must be in [{"|".join(ALLOWED_SEQ)}]")
+        print(f"error: job_sequencer.seq must be in [{'|'.join(ALLOWED_SEQ)}]")
     simperiod = int(job_sequencer_params['simperiod'])
     if simperiod <= 0:
         print("error: simperiod must be greater than 0")
@@ -679,12 +733,15 @@ if __name__ == '__main__':
         if clocks <= 0:
             print("error: clocks must be greater than 0")
             sys.exit(1)
-        if simperiod >= clocks:
+        if 'CPT' in job_sequencer_params['seq'] and simperiod >= clocks:
             print("error: simperiod must be greater than clocks")
             sys.exit(1)
+
     # confirm temporary directory exists
-    if not os.path.isdir(sim_control_params['tmpdir']):
-        print(f"error: could not locate tmpdir: {sim_control_params['tmpdir']}")
+    try:
+        os.makedirs(sim_control_params['tmpdir'], exist_ok=True)
+    except OSError as e:
+        print(f"error: could not create tmpdir: {sim_control_params['tmpdir']}")
         sys.exit(1)
     # confirm timing.db containing directory exists
     dirname = os.path.dirname(sim_control_params['db'])
@@ -701,7 +758,7 @@ if __name__ == '__main__':
         else:
             depvar_base_value = int(sdl_params[depvar])
             print(f"\nFound SDL dependent variable, '{depvar}', with base value={depvar_base_value}")
-            print(f"{depvar} will be resolved as {depvar_base_value} * (ranks + threads)")
+            print(f"{depvar} will be resolved as {depvar_base_value} * (ranks * threads)")
     # SDL sweep variable check
     sdl_sweep_params = None
     sdl_sweep_var = None
@@ -717,7 +774,7 @@ if __name__ == '__main__':
                 continue
             val = sdl_sweep_params[key]
             if not is_strict_range(val):
-                print(f"sdl key in sweep section specify a range: '{key}:{val}' is not a range")
+                print(f"sdl key in sweep section must specify a range: '{key}:{val}' is not a range.")
                 errors += 1
                 continue
             if sdl_sweep_var==None:
@@ -736,7 +793,7 @@ if __name__ == '__main__':
     #
     
     # create job manager
-    jobmgr = JobManager(sdlFile, sdl_params['clocks'], options, sim_control_params, job_sequencer_params, sst_params, sdl_params)
+    jobmgr = JobManager(sdlFile, options, sim_control_params, job_sequencer_params, sst_params, sdl_params)
 
     # Generate job descriptions and add to job manager
 
@@ -759,7 +816,7 @@ if __name__ == '__main__':
                 if sdl_sweep_var:
                     local_sdl_params[sdl_sweep_var] = s
                 if depvar:
-                    local_sdl_params[depvar] = depvar_base_value * ( r + t )
+                    local_sdl_params[depvar] = depvar_base_value * ( r * t )
                 jobmgr.add_job_sequence(JobEntry(
                     sdlFile=sdlFile,
                     options=options,

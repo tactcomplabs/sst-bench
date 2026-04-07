@@ -57,7 +57,7 @@ public:
   /// nicEvent: event serializer
   void serialize_order( SST::Core::Serialization::serializer& ser ) override {
     Event::serialize_order(ser);
-    ser &data;
+    SST_SER(data);
   }
 
   /// nicEvent: implements the NIC serializer
@@ -104,7 +104,7 @@ public:
 // -------------------------------------------------------
 // MicroCompLinkNIC
 // -------------------------------------------------------
-class MicroCompLinkNIC final: public MicroCompLinkAPI {
+class MicroCompLinkNIC: public MicroCompLinkAPI {
 public:
   // register with the SST Core
   SST_ELI_REGISTER_SUBCOMPONENT( MicroCompLinkNIC,
@@ -237,8 +237,8 @@ public:
 private:
   // -- parameters
   SST::Output    output;          ///< SST output handler
-  TimeConverter* timeConverter;   ///< SST time conversion handler
-  SST::Clock::Handler< MicroCompLink >* clockHandler;  ///< Clock Handler
+  TimeConverter timeConverter;    ///< SST time conversion handler
+  SST::Clock::HandlerBase* clockHandler;  ///< Clock Handler
   MicroCompLinkAPI* Nic;                ///< Network interface controller
 
   // -- private methods

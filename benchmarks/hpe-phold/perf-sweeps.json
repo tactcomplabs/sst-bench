@@ -1,0 +1,274 @@
+{
+    "job_sequencer" :
+    {
+        "seq"       : ["BASE", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST|BASE_PLOAD"],
+        "simperiod" : ["2000","checkpoint sim period in ns used with BASE_CPT_* sequences"],
+        "numcpt"    : ["0", "Estimated number of checkpoints. When 0, count is calculated as sdl['clocks']/simperiod"]
+    },
+    "sim_controls"  :
+    {
+        "db"        : ["hpe-phold.db",    "sqlite database file to be created or updated"],
+        "jobname"   : ["hpe-phold_perf",  "name associated with all jobs"],
+        "nodeclamp" : ["0",            "distribute threads evenly across specified nodes"],
+        "tmpdir"    : ["./jobs",        "temporary area for running jobs"]
+    },
+    "sst_params"    :
+    {
+        "add-lib-path"  : "${SST_BENCH_HOME}/build/components/hpe-phold"
+    },
+    "sdl_params"   :
+    {
+        "height"             : ["10",   "Height of grid (number of rows)"],
+        "width"              : ["10",   "Width of grid (number of columns)"],
+        "clocks"             : ["10000",   "[REQUIRED] Simulation clocks assuming 1GHz clock"],
+        "numRings"           : ["2",     "Number of rings of neighbors to connect to each component"],
+        "eventDensity"       : ["2",     "How many events to transmit per component"],
+        "smallPayload"       : ["8",     "Size of small event payloads in bytes"],
+        "largePayload"       : ["1024",  "Size of large event payloads in bytes"],
+        "largeEventFraction" : ["0",     "[TODO] Fraction of events that are large"],
+        "imbalance-factor"   : ["0",     "[TODO] Imbalance factor for thread-level distribution. Value in [0,1] (0: balanced, 1: single thread does all work)"],
+        "componentSize"      : ["0",     "Size of the additional data field of the component in bytes"],
+        "verbose"            : ["0",     "Whether or not to write the recvCount to file"]
+    },
+    "sweeps" :
+    [
+        { "name"     : "rank-sanity",
+          "desc"     : "run 4 and 8 ranks for a fixed configuration",
+          "ranks"    : "4,9,4",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "thread-sanity",
+          "desc"     : "run 4 and 8 threads for a fixed configuration",
+          "ranks"    : "1",
+          "threadsPerRank" : "4,9,4"
+        },
+        { "name"     : "strong_scaling_1to12_ranks",
+          "desc"     : "sweep 1 to 12 ranks for a fixed configuration",
+          "ranks"    : "1,13,1",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "strong_scaling_1to12_threads",
+          "desc"     : "sweep 1 to 12 threads for a fixed configuration",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,13,1"
+        },
+        { "name"     : "strong_scaling_13to40_ranks",
+          "desc"     : "sweep 13 to 40 ranks for a fixed configuration",
+          "ranks"    : "13,41,1",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "strong_scaling_13to40_threads",
+          "desc"     : "sweep 13 to 40 threads for a fixed configuration",
+          "ranks"    : "1",
+          "threadsPerRank" : "13,41,1"
+        },
+        { "name"     : "strong_scaling_4nodes_12to40_ranks_per_node",
+          "desc"     : "sweep 13 to 40 ranks per node for a fixed configuration",
+          "ranks"    : "12,164,4",
+          "threadsPerRank" : "1"
+        },
+        { "name"     : "weak_scaling_1to12_ranks",
+          "desc"     : "sweep 1 to 12 ranks for a fixed configuration, numComps tied to ranks*threads",
+          "ranks"    : "1,13,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "height"
+        },
+        { "name"     : "weak_scaling_1to12_threads",
+          "desc"     : "sweep 1 to 12 threads for a fixed configuration, numComps tied to ranks*threads",
+          "ranks"    : "1",
+          "threadsPerRank" : "1,13,1",
+          "depvar"   : "height"
+        },
+        { "name"     : "weak_scaling_13to40_ranks",
+          "desc"     : "sweep 13 to 40 ranks for a fixed configuration, numComps tied to ranks*threads",
+          "ranks"    : "13,41,1",
+          "threadsPerRank" : "1",
+          "depvar"   : "height"
+        },
+        { "name"     : "weak_scaling_13to40_threads",
+          "desc"     : "sweep 13 to 40 threads for a fixed configuration, numComps tied to ranks*threads",
+          "ranks"    : "1",
+          "threadsPerRank" : "13,41,1",
+          "depvar"   : "height"
+        },
+        { "name"     : "weak_scaling_4nodes_12to40_ranks_per_node",
+          "desc"     : "sweep 13 to 40 ranks for a fixed configuration, numComps tied to ranks*threads",
+          "ranks"    : "12,164,4",
+          "threadsPerRank" : "1",
+          "depvar"   : "height"
+        },
+        { "name"     : "2to12_ranks_100to200_components",
+          "desc"     : "sweep 2 to 12 ranks, 100 to 200 components",
+          "ranks"    : "2,13,1",
+          "threadsPerRank" : "1",
+          "sdl" : {
+              "height" : "100,210,10"
+          }
+        },
+        { "name"     : "2to12_threads_100to200_components",
+          "desc"     : "sweep 2 to 12 threads, 100 to 200 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "2,13,1",
+          "sdl" : {
+              "height" : "100,210,10"
+          }
+        },
+        { "name"     : "13to40_ranks_100to200_components",
+          "desc"     : "sweep 13 to 40 ranks, 100 to 200 components",
+          "ranks"    : "13,41,1",
+          "threadsPerRank" : "1",
+          "sdl" : {
+              "height" : "100,210,10"
+          }
+        },
+        { "name"     : "13to40_threads_100to200_components",
+          "desc"     : "sweep 13 to 40 threads, 100 to 200 components",
+          "ranks"    : "1",
+          "threadsPerRank" : "13,41,1",
+          "sdl" : {
+              "height" : "100,210,10"
+          }
+        },
+        { "name"     : "4nodes_12to40_ranks_per_node_100to200_components",
+          "desc"     : "sweep 12 to 40 ranks symmetrically across 4 nodes, 100 to 200 components",
+          "ranks"    : "12,164,4",
+          "threadsPerRank" : "1",
+          "sdl" : {
+              "height" : "100,210,10"
+          }
+        },
+        { "name"     : "strong_scaling_2to20r_2t",
+          "desc"     : "sweep 2 to 20 ranks with 2 threads per rank for a fixed configuration",
+          "ranks"    : "2,21,1",
+          "threadsPerRank" : "2"
+        },
+        { "name"     : "strong_scaling_2to12r_3t",
+          "desc"     : "sweep 2 to 12 ranks with 3 threads per rank for a fixed configuration",
+          "ranks"    : "2,13,1",
+          "threadsPerRank" : "3"
+        },
+        { "name"     : "strong_scaling_2to10r_4t",
+          "desc"     : "sweep 2 to 10 ranks with 4 threads per rank for a fixed configuration",
+          "ranks"    : "2,11,1",
+          "threadsPerRank" : "4"
+        },
+        { "name"     : "strong_scaling_2to8r_5t",
+          "desc"     : "sweep 2 to 8 ranks with 5 threads per rank for a fixed configuration",
+          "ranks"    : "2,9,1",
+          "threadsPerRank" : "5"
+        },
+        { "name"     : "strong_scaling_2to6r_6t",
+          "desc"     : "sweep 2 to 6 ranks with 6 threads per rank for a fixed configuration",
+          "ranks"    : "2,7,1",
+          "threadsPerRank" : "6"
+        },
+        { "name"     : "strong_scaling_2to5r_7t",
+          "desc"     : "sweep 2 to 5 ranks with 7 threads per rank for a fixed configuration",
+          "ranks"    : "2,6,1",
+          "threadsPerRank" : "7"
+      },
+      { "name"     : "strong_scaling_2to5r_8t",
+        "desc"     : "sweep 2 to 5 ranks with 8 threads per rank for a fixed configuration",
+        "ranks"    : "2,6,1",
+        "threadsPerRank" : "8"
+      },
+      { "name"     : "strong_scaling_2to4r_9t",
+        "desc"     : "sweep 2 to 4 ranks with 9 threads per rank for a fixed configuration",
+        "ranks"    : "2,5,1",
+        "threadsPerRank" : "9"
+      },
+      { "name"     : "strong_scaling_2to4r_10t",
+        "desc"     : "sweep 2 to 4 ranks with 10 threads per rank for a fixed configuration",
+        "ranks"    : "2,5,1",
+        "threadsPerRank" : "10"
+      },
+      { "name"     : "strong_scaling_2to3r_11t",
+        "desc"     : "sweep 2 to 3 ranks with 11 threads per rank for a fixed configuration",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "11"
+      },
+      { "name"     : "strong_scaling_2to3r_12t",
+        "desc"     : "sweep 2 to 3 ranks with 12 threads per rank for a fixed configuration",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "12"
+      },
+      { "name"     : "strong_scaling_2to3r_13t",
+        "desc"     : "sweep 2 to 3 ranks with 13 threads per rank for a fixed configuration",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "13"
+      },
+      { "name"     : "weak_scaling_2to20r_2t",
+        "desc"     : "sweep 2 to 20 ranks with 2 threads per rank for a fixed configuration, numComps tied to ranks*threads",
+        "ranks"    : "2,21,1",
+        "threadsPerRank" : "2",
+        "depvar"   : "height"	  
+      },
+      { "name"     : "weak_scaling_2to12r_3t",
+        "desc"     : "sweep 2 to 12 ranks with 3 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,13,1",
+        "threadsPerRank" : "3",
+        "depvar"   : "height"	  
+      },
+      { "name"     : "weak_scaling_2to10r_4t",
+        "desc"     : "sweep 2 to 10 ranks with 4 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,11,1",
+        "threadsPerRank" : "4",
+        "depvar"   : "height"	  
+      },
+      { "name"     : "weak_scaling_2to8r_5t",
+        "desc"     : "sweep 2 to 8 ranks with 5 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,9,1",
+        "threadsPerRank" : "5",
+        "depvar"   : "height"	  
+      },
+      { "name"     : "weak_scaling_2to6r_6t",
+        "desc"     : "sweep 2 to 6 ranks with 6 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,7,1",
+        "threadsPerRank" : "6",
+        "depvar"   : "height"	  
+      },
+      { "name"     : "weak_scaling_2to5r_7t",
+        "desc"     : "sweep 2 to 5 ranks with 7 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,6,1",
+        "threadsPerRank" : "7",
+        "depvar"   : "height"	  
+      },
+      { "name"     : "weak_scaling_2to5r_8t",
+        "desc"     : "sweep 2 to 5 ranks with 8 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,6,1",
+        "threadsPerRank" : "8",
+        "depvar"   : "height"	
+      },
+      { "name"     : "weak_scaling_2to4r_9t",
+        "desc"     : "sweep 2 to 4 ranks with 9 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,5,1",
+        "threadsPerRank" : "9",
+        "depvar"   : "height"		
+      },
+      { "name"     : "weak_scaling_2to4r_10t",
+        "desc"     : "sweep 2 to 4 ranks with 10 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,5,1",
+        "threadsPerRank" : "10",
+        "depvar"   : "height"		
+      },
+      { "name"     : "weak_scaling_2to3r_11t",
+        "desc"     : "sweep 2 to 3 ranks with 11 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "11",
+        "depvar"   : "height"	
+      },
+      { "name"     : "weak_scaling_2to3r_12t",
+        "desc"     : "sweep 2 to 3 ranks with 12 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "12",
+        "depvar"   : "height"	
+      },
+      { "name"     : "weak_scaling_2to3r_13t",
+        "desc"     : "sweep 2 to 3 ranks with 13 threads per rank for a fixed configuration, height tied to ranks*threads",
+        "ranks"    : "2,4,1",
+        "threadsPerRank" : "13",
+        "depvar"   : "height"	
+      }
+    ]
+ 
+}

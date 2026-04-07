@@ -16,7 +16,7 @@ namespace SST::Chkpnt{
 // Chkpnt
 //------------------------------------------
 Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
-  SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
+  SST::Component( id ), clockHandler(nullptr),
   numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
   curCycle(0) {
 

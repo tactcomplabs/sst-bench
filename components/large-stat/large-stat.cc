@@ -16,15 +16,14 @@ namespace SST::LargeStat{
   // LargeStat
   //------------------------------------------
   LargeStat::LargeStat(SST::ComponentId_t id, const SST::Params& params ) :
-    SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
+    SST::Component( id ), clockHandler(nullptr),
     numStats(1) {
     const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
     output.init(
       "LargeStat[" + getName() + ":@p:@t]: ",
       Verbosity, 0, SST::Output::STDOUT );
     output.verbose( CALL_INFO, 5, 0, "Init is complete\n" );
-    clockHandler  = new SST::Clock::Handler<LargeStat>(this,
-                                                       &LargeStat::clockTick);
+    clockHandler  = new SST::Clock::Handler<LargeStat,&LargeStat::clockTick>(this);
     timeConverter = registerClock("1GHz", clockHandler);
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();
