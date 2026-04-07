@@ -16,7 +16,7 @@ namespace SST::Restore{
 // Restore
 //------------------------------------------
 Restore::Restore(SST::ComponentId_t id, const SST::Params& params ) :
-  SST::Component( id ), clockHandler(nullptr),
+  SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numBytes(0), clocks(1000){
 
   const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );

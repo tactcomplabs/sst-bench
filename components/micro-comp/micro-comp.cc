@@ -16,13 +16,14 @@ namespace SST::MicroComp{
   // MicroComp
   //------------------------------------------
   MicroComp::MicroComp(SST::ComponentId_t id, const SST::Params& params ) :
-    SST::Component( id ), clockHandler(nullptr) {
+    SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr) {
     const uint32_t Verbosity = params.find< uint32_t >( "verbose", 0 );
     output.init(
       "MicroComp[" + getName() + ":@p:@t]: ",
       Verbosity, 0, SST::Output::STDOUT );
     output.verbose( CALL_INFO, 5, 0, "Init is complete\n" );
-    clockHandler  = new SST::Clock::Handler<MicroComp, &MicroComp::clockTick>(this);
+    clockHandler  = new SST::Clock::Handler<MicroComp>(this,
+                                                       &MicroComp::clockTick);
     timeConverter = registerClock("1GHz", clockHandler);
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();
