@@ -17,7 +17,7 @@ namespace SST::GridNode{
 // GridNode
 //------------------------------------------
 GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
-  SST::Component( id ), clockHandler(nullptr),
+  SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(8), minData(10), maxData(256), minDelay(20), maxDelay(100), clocks(1000),
   curCycle(0), demoBug(0), dataMask(0x1ffffff), dataMax(0x1ffffff) {
   
