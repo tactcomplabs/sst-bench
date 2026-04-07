@@ -67,7 +67,8 @@ fi
 echo "STARTING SWEEPS AT: $(date +%y%m%d-%H:%M:%S)"
 
 if [[ $do_sanity_only == true ]]; then
-  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py sanity  --jobname="sanity" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py rank-sanity    --jobname="rank-sanity" ${OPTS}
+  ${SST_BENCH_HOME}/scripts/sst-sweeper.py ./perf-sweeps.json ./noodle-bench.py thread-sanity  --jobname="thread-sanity" ${OPTS}
 else
 
   if [[ $do_strong_scaling == true ]]; then
