@@ -1,5 +1,5 @@
 //
-// _gridnode_cc_
+// _gridnode_13_1_cc_
 //
 // Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,7 +8,7 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "gridnode.h"
+#include "gridnode-13.1.h"
 #include "tcldbg.h"
 
 namespace SST::GridNode{
@@ -17,7 +17,7 @@ namespace SST::GridNode{
 // GridNode
 //------------------------------------------
 GridNode::GridNode(SST::ComponentId_t id, const SST::Params& params ) :
-  SST::Component( id ), clockHandler(nullptr),
+  SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(8), minData(10), maxData(256), minDelay(20), maxDelay(100), clocks(1000),
   curCycle(0), demoBug(0), dataMask(0x1ffffff), dataMax(0x1ffffff) {
   

@@ -1,5 +1,5 @@
 //
-// _chkpnt_cc_
+// _chkpnt_13_1_cc_
 //
 // Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -8,7 +8,7 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "chkpnt.h"
+#include "chkpnt-13.1.h"
 
 namespace SST::Chkpnt{
 
@@ -16,7 +16,7 @@ namespace SST::Chkpnt{
 // Chkpnt
 //------------------------------------------
 Chkpnt::Chkpnt(SST::ComponentId_t id, const SST::Params& params ) :
-  SST::Component( id ), clockHandler(nullptr),
+  SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
   numPorts(1), minData(1), maxData(2), clockDelay(1), clocks(1000),
   curCycle(0) {
 

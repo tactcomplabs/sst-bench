@@ -7,10 +7,17 @@
 # See LICENSE in the top level directory for licensing details
 #
 
-set(MicroCompSrcs
-  micro-comp.cc
-  micro-comp.h
-)
+if( (${SST_VERSION} STREQUAL "DEV") OR (${SST_VERSION} VERSION_GREATER_EQUAL "15.0") )
+  set(MicroCompSrcs
+    micro-comp.cc
+    micro-comp.h
+  )
+else()
+  set(MicroCompSrcs
+    micro-comp-13.1.cc
+    micro-comp-13.1.h
+  )
+endif()
 
 add_library(microcomp SHARED ${MicroCompSrcs})
 target_include_directories(microcomp PUBLIC ${SST_INSTALL_DIR}/include)

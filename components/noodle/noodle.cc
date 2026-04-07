@@ -16,7 +16,7 @@ namespace SST::Noodle{
 // Noodle
 //------------------------------------------
 Noodle::Noodle(SST::ComponentId_t id, const SST::Params& params ) :
-  SST::Component( id ), timeConverter(nullptr), clockHandler(nullptr),
+  SST::Component( id ), clockHandler(nullptr),
   numPorts(2), msgsPerClock(8), bytesPerClock(8), portsPerClock(1),
   clocks(10000), rngSeed(31337) {
 
