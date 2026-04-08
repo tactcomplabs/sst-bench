@@ -3,6 +3,11 @@
 <!--ts-->
 * [sst-bench](#sst-bench)
    * [Getting Started](#getting-started)
+   * [Prerequisites](#prerequisites)
+   * [Building](#building)
+   * [Testing](#testing)
+   * [Special Runtime Notes](#special-runtime-notes)
+      * [Benchmark Scale](#benchmark-scale)
    * [Detailed Benchmark Descriptions](#detailed-benchmark-descriptions)
       * [msg-perf](#msg-perf)
          * [Parameters](#parameters)
@@ -67,17 +72,12 @@
          * [Statistics](#statistics-10)
          * [Subcomponent Slots](#subcomponent-slots-10)
    * [Parameter Sweep Automation](#parameter-sweep-automation)
-   * [Prerequisites](#prerequisites)
-   * [Building](#building)
-   * [Testing](#testing)
-   * [Special Runtime Notes](#special-runtime-notes)
-      * [Benchmark Scale](#benchmark-scale)
    * [Contributing](#contributing)
    * [License](#license)
    * [Authors](#authors)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: jleidel, at: Wed Apr  8 09:26:12 CDT 2026 -->
+<!-- Added by: jleidel, at: Wed Apr  8 09:29:45 CDT 2026 -->
 
 <!--te-->
 
@@ -113,6 +113,68 @@ ports per component and randomly sends a configurable number of message payloads
 ports per component and randomly sends messages to adjacent components.  Similar to *noodle*, but utilizes 
 event handlers only, none of the components are clocked.
 * *hpe-phold* : Port of PHOLD benchmark from https://github.com/hpc-ai-adv-dev/sst-benchmarks based on Fujimoto's 1990 paper [Performance of Time Warp Under Synthetic Workloads](https://gdo149.llnl.gov/attachments/20776356/24674621.pdf).
+
+## Prerequisites
+
+Given that this is an SST external component, the primary prerequisite is a current installation of the SST Core. Some microbenchmarks use components from SST Elements so it is recommended to install that as well. These test case are labeled 'elements' so they can easily be excluded from testing.  The sst-bench building infrastructure assumes that the `sst-config` tool is installed and can be found in the current PATH environment.
+
+*sst-bench* relies upon CMake for building the component source.  The minimum 
+required version for this is `3.19`
+
+## Building
+
+Building the *sst-bench* infrastructure from source can be performed 
+using the following steps:
+
+```
+git clone https://github.com/tactcomplabs/sst-bench.git
+cd sst-bench
+mkdir build
+cd build
+cmake ../
+make && make install
+```
+
+Additional build options include:
+* `make uninstall` : forcible uninstalls the included components/subcomponents 
+from the current version of SST
+* `cmake -DSSTBENCH_ENABLE_TESTING=ON ../` : Enables included test harness: 
+run with `make test`
+
+## Testing
+
+Utilize the included test harness to test and ensure all tests are passing 
+before opening new pull requests.  The test harness can be enabled when 
+you run the CMake configuration step as follows:
+
+```
+cmake -DSSTBENCH_ENABLE_TESTING=ON ../
+make -j
+make install
+make test
+```
+If SST Elements is not installed, the dependent tests can be excluded using:
+```
+ctest -LE elements
+```
+
+A special set of long tests that may create extremely large files and can be excluded using:
+```
+ctest -LE large
+```
+
+Currently, the checkpoint tests may generate a large number of files. To clean up after running tests use
+```
+cd ..
+git clean -f -d
+```
+
+## Special Runtime Notes
+
+### Benchmark Scale
+Be mindful of the simulation input size when scaling tests near the limits of physical memory or compute capacity.  Several benchmarks exhibit exponential memory growth.
+
+
 
 ## Detailed Benchmark Descriptions
 
@@ -561,68 +623,6 @@ These support running simulations locally on a development system or through the
 
 
 <img src="documentation/imgs/sweep-examples.png" alt="parameter sweep examples" width="600"/>
-
-
-## Prerequisites
-
-Given that this is an SST external component, the primary prerequisite is a current installation of the SST Core. Some microbenchmarks use components from SST Elements so it is recommended to install that as well. These test case are labeled 'elements' so they can easily be excluded from testing.  The sst-bench building infrastructure assumes that the `sst-config` tool is installed and can be found in the current PATH environment.
-
-*sst-bench* relies upon CMake for building the component source.  The minimum 
-required version for this is `3.19`
-
-## Building
-
-Building the *sst-bench* infrastructure from source can be performed 
-using the following steps:
-
-```
-git clone https://github.com/tactcomplabs/sst-bench.git
-cd sst-bench
-mkdir build
-cd build
-cmake ../
-make && make install
-```
-
-Additional build options include:
-* `make uninstall` : forcible uninstalls the included components/subcomponents 
-from the current version of SST
-* `cmake -DSSTBENCH_ENABLE_TESTING=ON ../` : Enables included test harness: 
-run with `make test`
-
-## Testing
-
-Utilize the included test harness to test and ensure all tests are passing 
-before opening new pull requests.  The test harness can be enabled when 
-you run the CMake configuration step as follows:
-
-```
-cmake -DSSTBENCH_ENABLE_TESTING=ON ../
-make -j
-make install
-make test
-```
-If SST Elements is not installed, the dependent tests can be excluded using:
-```
-ctest -LE elements
-```
-
-A special set of long tests that may create extremely large files and can be excluded using:
-```
-ctest -LE large
-```
-
-Currently, the checkpoint tests may generate a large number of files. To clean up after running tests use
-```
-cd ..
-git clean -f -d
-```
-
-## Special Runtime Notes
-
-### Benchmark Scale
-Be mindful of the simulation input size when scaling tests near the limits of physical memory or compute capacity.  Several benchmarks exhibit exponential memory growth.
-
 
 
 ## Contributing
