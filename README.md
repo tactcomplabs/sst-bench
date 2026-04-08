@@ -233,7 +233,7 @@ with one another and potentially poisoning the data.
 #### MsgPerfNIC Subcomponent Slots
 | Slot Name | Description | Library |
 |------------|-------------|--------|
-| iface | SimpleNetwork interface to a network | |SST::Interfaces::SimpleNetwork |
+| iface | SimpleNetwork interface to a network |SST::Interfaces::SimpleNetwork |
 
 ### micro-comp
 *micro-comp* is designed to represent the smallest possible clocked component model.  There are no 
