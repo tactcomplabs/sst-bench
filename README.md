@@ -1,5 +1,86 @@
 # sst-bench
 
+<!--ts-->
+* [sst-bench](#sst-bench)
+   * [Getting Started](#getting-started)
+   * [Detailed Benchmark Descriptions](#detailed-benchmark-descriptions)
+      * [msg-perf](#msg-perf)
+         * [Parameters](#parameters)
+         * [Ports](#ports)
+         * [Statistics](#statistics)
+         * [Subcomponent Slots](#subcomponent-slots)
+         * [MsgPerfNIC Parameters](#msgperfnic-parameters)
+         * [MsgPerfNIC Ports](#msgperfnic-ports)
+         * [MsgPerfNIC Subcomponent Slots](#msgperfnic-subcomponent-slots)
+      * [micro-comp](#micro-comp)
+         * [Parameters](#parameters-1)
+         * [Ports](#ports-1)
+         * [Statistics](#statistics-1)
+         * [Subcomponent Slots](#subcomponent-slots-1)
+      * [micro-comp-link](#micro-comp-link)
+         * [Parameters](#parameters-2)
+         * [Ports](#ports-2)
+         * [Statistics](#statistics-2)
+         * [Subcomponent Slots](#subcomponent-slots-2)
+         * [Subcomponent Parameters](#subcomponent-parameters)
+         * [Subcomponent Ports](#subcomponent-ports)
+      * [chkpnt](#chkpnt)
+         * [Parameters](#parameters-3)
+         * [Ports](#ports-3)
+         * [Statistics](#statistics-3)
+         * [Subcomponent Slots](#subcomponent-slots-3)
+      * [restore](#restore)
+         * [Parameters](#parameters-4)
+         * [Ports](#ports-4)
+         * [Statistics](#statistics-4)
+         * [Subcomponent Slots](#subcomponent-slots-4)
+      * [restart](#restart)
+         * [Parameters](#parameters-5)
+         * [Ports](#ports-5)
+         * [Statistics](#statistics-5)
+         * [Subcomponent Slots](#subcomponent-slots-5)
+      * [large-stat](#large-stat)
+         * [Parameters](#parameters-6)
+         * [Ports](#ports-6)
+         * [Statistics](#statistics-6)
+         * [Subcomponent Slots](#subcomponent-slots-6)
+      * [grid](#grid)
+         * [Parameters](#parameters-7)
+         * [Ports](#ports-7)
+         * [Statistics](#statistics-7)
+         * [Subcomponent Slots](#subcomponent-slots-7)
+      * [noodle](#noodle)
+         * [Parameters](#parameters-8)
+         * [Ports](#ports-8)
+         * [Statistics](#statistics-8)
+         * [Subcomponent Slots](#subcomponent-slots-8)
+      * [spaghetti](#spaghetti)
+         * [Parameters](#parameters-9)
+         * [Ports](#ports-9)
+         * [Statistics](#statistics-9)
+         * [Subcomponent Slots](#subcomponent-slots-9)
+      * [hpe-phold](#hpe-phold)
+         * [Base Node Parameters](#base-node-parameters)
+         * [Base Node Ports](#base-node-ports)
+         * [Exponential Node Parameters](#exponential-node-parameters)
+         * [Exponential Node Parameters](#exponential-node-parameters-1)
+         * [Statistics](#statistics-10)
+         * [Subcomponent Slots](#subcomponent-slots-10)
+   * [Parameter Sweep Automation](#parameter-sweep-automation)
+   * [Prerequisites](#prerequisites)
+   * [Building](#building)
+   * [Testing](#testing)
+   * [Special Runtime Notes](#special-runtime-notes)
+      * [Benchmark Scale](#benchmark-scale)
+   * [Contributing](#contributing)
+   * [License](#license)
+   * [Authors](#authors)
+
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
+<!-- Added by: jleidel, at: Wed Apr  8 09:26:12 CDT 2026 -->
+
+<!--te-->
+
 ## Getting Started
 
 The *sst-bench* infrastructure contains a set of specifically crafted 
@@ -36,6 +117,62 @@ event handlers only, none of the components are clocked.
 ## Detailed Benchmark Descriptions
 
 ### msg-perf
+*msg-perf* is a component infrastructure designed to test the available link bandwidth relative 
+to the hardware on which the simulation is executing.  This component allows users to specify 
+a base payload size (*startSize*) and a maximum payload size (*endSize*) as well as a step size 
+(*stepSize*) that is used to increment the size of the payload for each new phase of the 
+simulation.  For each phase of the simulation, the payload is sent to the target endpoint (specified 
+by a SimpleNetwork infrastructure) a fixed number of times (*iters*).  This ensures that the timing 
+recorded per send is normalized across inteconnect or cache warmup timing.  Additionally, users 
+can specify a delay between phases in order to avoid subsequent phased payloads interacting 
+with one another and potentially poisoning the data.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| clock      | Clock frequency for the cpu | UnitAlgebra | 1GHz |
+| startSize  | Starting sizxe of the payload (bytes) | UnitAlgebra | 8B |
+| endSize    | Ending size of the payload (bytes) | UnitAlgebra | 16B |
+| stepSize   | Step size of the payload (bytes) | UnitAlgebra | 1B |
+| iters      | Number of iterations per step | Integer | 1 |
+| clockDelay | Clock ticks between sends | Integer | 100 |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| BitsSent | Number of bits sent | count |
+| ByteSize | Byte size of the payload | size |
+| SentClock | Sent clock cycle | cycle |
+| RecvClock | Receive clock cycle | cycle |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| nic | Network interface | SST::MsgPerf::MsgPerfNIC |
+
+#### MsgPerfNIC Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| clock      | Clock frequency of the NIC | UnitAlgebra |  1GHz |
+| port       | Port to use if loaded as an anonymous subcomponent | String | network |
+| verbose    | Verbosity for output (0 = nothing) | Integer | 0 |
+
+#### MsgPerfNIC Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| network   | Port to network | simpleNetworkExample.nicEvent |
+
+#### MsgPerfNIC Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| iface | SimpleNetwork interface to a network | |SST::Interfaces::SimpleNetwork |
+
 ### micro-comp
 *micro-comp* is designed to represent the smallest possible clocked component model.  There are no 
 subcomponents, ports or unnecessary variables required for serialization in this component.  The goal 
