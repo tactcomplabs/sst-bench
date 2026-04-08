@@ -246,6 +246,45 @@ verbosity enabled and/or profiling in order to trace the amount of virtual memor
 | *none* | | |
 
 ### grid
+
+The *grid* component is designed to facilitate the construction of 
+basic mesh networks without dependencies on outside components or 
+subcomponents.  *grid* allows you to tune the number of bytes, number of external ports 
+(topology) and the delay timing of message injection across the links.  *grid* was 
+primarly utilized to test serialization of non-linear topologies but has since 
+been updated to include embedded demonstration material for the interative debugger 
+infrastructure.
+
+#### Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| verbose    | Sets the verbosity level | Integer  |  0 |
+| numBytes   | Internal state size (4 byte increments) | Integer | 16384 |
+| numPorts   | Sets the number of external ports | Integer | 8 |
+| minData    | Minimum number of unsigned values over link | Integer | 10 |
+| maxData    | Maximum number of unsigned values over link | Integer | 8192 |
+| minDelay   | Minumum clock delay between sends | Integer | 50 |
+| maxDelay   | Maximum clock delay between sends | Integer | 100 |
+| clocks     | Sets the number of clocks to execute | Integer | 1000 |
+| clockFreq  | Sets the clock frequency | UnitAlgebra |  1GHz |
+| rngSeed    | Sets the RNG seed | Integer | 1223 |
+| demoBug    | Induce a bug for debug demo | Bool | 0 |
+
+#### Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| ports%(num_ports)d | Ports which to connect to endpoints. | chkpnt.GridNodeEvent |
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| *none* |  | |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
 ### noodle
 
 The *noodle* component is very different than other components.  This component is 
@@ -327,6 +366,56 @@ when scaled to large component counts and ports per component.
 | *none* | | |
 
 ### hpe-phold
+
+*hpe-phold* is a port of PHOLD benchmark from https://github.com/hpc-ai-adv-dev/sst-benchmarks based on Fujimoto's 1990 paper [Performance of Time Warp Under Synthetic Workloads](https://gdo149.llnl.gov/attachments/20776356/24674621.pdf).  The 
+goal of *hpe-phold* is to explicitly induce particular simulation states that do not function 
+with in classic parallel discrete even simulation frameworks.  We highly recommend reading the publications referenced 
+for a better overview of the *hpe-phold* infrastructure.
+
+#### Base Node Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| numRings   | number of rings to connect to | Integer | 1 |
+| i          | My row index | Integer | -1 |
+| j          | My column index | Integer | -1 |
+| rowCount   | Total number of rows | Integer | -1 |
+| colCount   | Total number of columns | Integer | -1 |
+| timeToRun  | Time to run the simulation | UnitAlgebra | 10ns |
+| eventDensity | Number of events to start with per component | Float | 0.1 |
+| smallPayload | Size of small event payloads in bytes | Integer | 8 |
+| largePayload | Size of large event payloads in bytes | Integer | 1024 |
+| largeEventFraction | Fraction of events that are large (default: 0.1) | Float | 0.1 |
+| verbose | Whether or not to write the recvCount to file. | Integer | 0 |
+| componentSize | Additional size of components in bytes | Integer | 0 |
+
+#### Base Node Ports
+| Port Name | Description | Library |
+|------------|-------------|--------|
+| ports%d | Ports which to connect to endpoints. | |
+
+#### Exponential Node Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| multiplier | Multiplier for exponential distribution, in ns | Integer | 1 |
+
+
+#### Exponential Node Parameters
+| Parameter  | Description | Values | Default |
+|------------|-------------|--------|---------|
+| min        | Minimum value for uniform distribution, in ns, in addition to link delay | Integer | 0 |
+| max        | Maximum value for uniform distribution, in ns, in addition to link delay | Integer | 0 |
+
+
+#### Statistics
+| Stat Name | Description | Values |
+|------------|-------------|--------|
+| *none* | | |
+
+#### Subcomponent Slots
+| Slot Name | Description | Library |
+|------------|-------------|--------|
+| *none* | | |
+
 
 ## Parameter Sweep Automation
 
