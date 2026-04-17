@@ -120,7 +120,9 @@ class JobEntry():
         self.setdeps = False
 
         self.sstopts = f"--num-threads={self.threads}"
-        self.sstopts += f" --print-timing-info=4 --timing-info-json=timing.json"
+        #TODO LEGACY
+        # self.sstopts += f" --print-timing-info=4 --timing-info-json=timing.json"
+        self.sstopts += f" --print-timing-info=4 --profiling-output=timing.json"
         self.sstopts += " --output-config=config.py --parallel-output"
         # --output-json=config.json" 
         for opt in sst_params:

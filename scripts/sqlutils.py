@@ -121,6 +121,68 @@ keyDict = {
     sdlInfoTable: []
 }
 
+UNITS={
+    'B'     : 1,
+    'KB'    : 1E3,
+    'MB'    : 1E6,
+    'GB'    : 1E9,
+    'TB'    : 1E12,
+}
+
+def getFactor(unit):
+    if unit not in UNITS.keys():
+        print(f"error: {unit} not in [{UNITS}]")
+        sys.exit(1)
+    return UNITS[unit]
+
+def toB(s):
+    return round(float(s.split()[0]) * getFactor(s.split()[1]))
+
+def toKB(s):
+    return round(float(s.split()[0]) * getFactor(s.split()[1])/1E3)
+
+def toMB(s):
+    return round(float(s.split()[0]) * getFactor(s.split()[1])/1E6)
+
+def assertSeconds(s):
+    if s.split()[1] != "s":
+        print(f"error: value not in seconds: {s}")
+        sys.exit(1)
+    return float(s.split()[0])
+
+# To smooth transition from SST15 to SST16
+def convertToSST15(jsonFile):
+    with open(jsonFile) as f:
+        sst16Dict = json.load(f)
+    metadata  = sst16Dict['metadata']
+    regions   = sst16Dict['regions']
+    resources = sst16Dict['resources']
+
+    sst15Dict={ 
+        'timing-info': {
+            "local_max_rss":             toKB(resources['local_max_rss']),
+            "global_max_rss":            toKB(resources['global_max_rss']),
+            "local_max_pf":               int(resources['local_max_page_faults'].split()[0]),
+            "global_pf":                  int(resources['global_page_faults']   .split()[0]),
+            "global_max_io_in":           int(resources['global_max_io_in']     .split()[0]),
+            "global_max_io_out":          int(resources['global_max_io_out']    .split()[0]),
+            "global_max_sync_data_size":  toB(resources['global_max_sync_data_size']),
+            "global_sync_data_size":      toB(resources['global_sync_data_size']),
+            "max_mempool_size":           toB(resources['max_mempool_size']),
+            "global_mempool_size":        toB(resources['global_mempool_size']),
+            "global_active_activities":   int(resources['global_undeleted_activities']),
+            "global_current_tv_depth":    int(resources['global_current_timevortex_depth'].split()[0]),
+            "global_max_tv_depth":        int(resources['global_max_timevortex_depth'].split()[0]),
+            "ranks":                       int(metadata['ranks']),
+            "threads":                     int(metadata['threads']),
+            "max_build_time":     assertSeconds(regions['total']['build']['duration']),
+            "max_run_time":       assertSeconds(regions['total']['execute']['run']['duration']),
+            "max_total_time":     assertSeconds(regions['total']['duration']),
+            "simulated_time_ua":               metadata['simulation_time']
+        }
+    }
+    return sst15Dict
+
 def log_sql_callback(statement):
     print("Executing SQL statement:", statement)
 
@@ -158,9 +220,12 @@ class sqldb():
     def close(self):
         self.con.close()
 
-    def insertFromJSON(self, jobid, jsonFile, jsonKey, tableName):
-        with open(jsonFile) as f:
-            jsonDict = json.load(f)
+    def insertFromJSON(self, jobid, jsonFile, jsonKey, tableName, convert):
+        if convert:
+            jsonDict = convertToSST15(jsonFile)
+        else:
+            with open(jsonFile) as f:
+                jsonDict = json.load(f)
         jsonInfo = jsonDict[jsonKey]
         data = ( jobid, )
         for k in self.sortedKeyDict[tableName]:
@@ -180,7 +245,8 @@ class sqldb():
     def timing_info(self, *, jsonFile:str=None, jobpath:str, jobid:int):
         if jsonFile == None:
             jsonFile=f"{jobpath}/timing.json"
-        self.insertFromJSON(jobid, jsonFile, 'timing-info', timingInfoTable)
+        # TODO last param is True if SST version >= 16
+        self.insertFromJSON(jobid, jsonFile, 'timing-info', timingInfoTable, True)
 
     def file_info(self, *, jobpath:str, jobid:int):
         # .../_grid_perf/687804907541/_cpt/1_500000/grid_4_0.bin
