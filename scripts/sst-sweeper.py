@@ -14,6 +14,7 @@ import argparse
 import jobutils
 import json
 import os
+import perf_emit
 import re
 import shutil
 import sqlutils
@@ -223,6 +224,7 @@ class JobManager():
         self.joblist = OrderedDict()
         self.wipList = []
         self.jutil = jobutils.JobUtil("jutil")
+        self.run_id = os.environ.get("SST_BENCH_RUN_ID") or perf_emit.new_run_id()
         # determine unique job name for run directory
         rdir=f"{self.tmpdir}/{self.jobname}"
         self.rundir=rdir
@@ -304,8 +306,8 @@ class JobManager():
 
         self.sqldb.job_info( jobid=jobid, dataDict={
             "friend": friend,
-            "jobtype": entry.jtype.name, 
-            "jobstring": jobstr, 
+            "jobtype": entry.jtype.name,
+            "jobstring": jobstr,
             "slurm": self.slurm,
             "cpt_num": entry.cpt_num,
             "cpt_timestamp": entry.cpt_timestamp,
@@ -313,6 +315,30 @@ class JobManager():
             "jobnodes"  : entry.nodes,
             "cwd": cwd } )
         self.sqldb.commit()
+
+        if entry.jtype != JobType.COMPLETION:
+            if self.slurm:
+                timing_path = f"{self.tmpdir}/{self.jobname}/{jobid}/timing.json"
+            else:
+                timing_path = f"{cwd}/timing.json"
+            if os.path.isfile(timing_path):
+                try:
+                    ctx = {
+                        "run_id": self.run_id,
+                        "sweep_name": self.jobname,
+                        "sdl_file": entry.sdlFile,
+                        "jobtype": entry.jtype.name,
+                        "jobid": jobid,
+                        "ranks": entry.ranks,
+                        "threads": entry.threads,
+                        "nodes": entry.nodes,
+                        "sdl_params": entry.sdl_params,
+                        "sst_params": entry.sst_params,
+                    }
+                    record = perf_emit.build_perf_record(timing_path, ctx)
+                    perf_emit.emit(record)
+                except Exception as e:
+                    print(f"{g_pfx} warn: perf_emit failed for job {jobid}: {e}")
     def launch(self):
         print(f"\n{g_pfx} starting {len(self.joblist)} jobs in {self.rundir}")
         if self.noprompt == False:
