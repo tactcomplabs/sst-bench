@@ -193,6 +193,12 @@ function(add_perf_sweep testName sdl sweep tier)
   endif()
   # sweeper requires its tmpdir to exist; create at configure time.
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/run)
+  # Derive the benchmark's component name from the test directory
+  # (test/<bench>/CMakeLists.txt) so we can point SST at the built .so.
+  # sweep.json's sst_params.add-lib-path resolves to the *source* tree via
+  # ${SST_BENCH_HOME}, but the built libraries live in the binary tree at
+  # ${CMAKE_BINARY_DIR}/components/<bench>. We override it on the CLI.
+  get_filename_component(_bench ${CMAKE_CURRENT_SOURCE_DIR} NAME)
   # The sweeper allows at most one 'range' in a sweep entry's sdl block, so
   # clocks (a per-tier scalar) is passed as a CLI override instead of living
   # inside sweep.json.
@@ -210,7 +216,8 @@ function(add_perf_sweep testName sdl sweep tier)
            --jobname=${testName}
            --seq=BASE
            --simperiod=1
-           --noprompt)
+           --noprompt
+           --add-lib-path=${CMAKE_BINARY_DIR}/components/${_bench})
   if(APS_CLOCKS)
     list(APPEND _cmd --clocks=${APS_CLOCKS})
   endif()
