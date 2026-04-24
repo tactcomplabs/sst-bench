@@ -67,9 +67,9 @@ if(SSTBENCH_ENABLE_TESTING)
   #     TIMEOUT 10)
   # endif()
 
-  add_perf_sweep(grid_ci_fast   2d.py ci_fast   fast)
-  add_perf_sweep(grid_ci_medium 2d.py ci_medium medium)
-  add_perf_sweep(grid_ci_heavy  2d.py ci_heavy  heavy)
+  add_perf_sweep(grid_ci_fast   2d.py ci_fast   fast   CLOCKS 10000)
+  add_perf_sweep(grid_ci_medium 2d.py ci_medium medium CLOCKS 50000)
+  add_perf_sweep(grid_ci_heavy  2d.py ci_heavy  heavy  CLOCKS 100000)
 
 endif()
 

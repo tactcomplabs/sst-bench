@@ -49,9 +49,9 @@ if(SSTBENCH_ENABLE_TESTING)
   #   LABELS "perf;clean"
   #   TIMEOUT 10)
 
-  add_perf_sweep(noodle_ci_fast   noodle-2d.py ci_fast   fast)
-  add_perf_sweep(noodle_ci_medium noodle-2d.py ci_medium medium)
-  add_perf_sweep(noodle_ci_heavy  noodle-2d.py ci_heavy  heavy)
+  add_perf_sweep(noodle_ci_fast   noodle-2d.py ci_fast   fast   CLOCKS 2000)
+  add_perf_sweep(noodle_ci_medium noodle-2d.py ci_medium medium CLOCKS 5000)
+  add_perf_sweep(noodle_ci_heavy  noodle-2d.py ci_heavy  heavy  CLOCKS 10000)
 
 endif()
 

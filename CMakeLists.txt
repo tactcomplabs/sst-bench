@@ -181,7 +181,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
 # unique per (build, bench, tier). Local devs get a deterministic id.
 # ---------------------------------------------------
 function(add_perf_sweep testName sdl sweep tier)
-  cmake_parse_arguments(APS "" "TIMEOUT" "" ${ARGN})
+  cmake_parse_arguments(APS "" "TIMEOUT;CLOCKS" "" ${ARGN})
   if(NOT APS_TIMEOUT)
     if("${tier}" STREQUAL "fast")
       set(APS_TIMEOUT 180)
@@ -191,21 +191,36 @@ function(add_perf_sweep testName sdl sweep tier)
       set(APS_TIMEOUT 3600)
     endif()
   endif()
+  # sweeper requires its tmpdir to exist; create at configure time.
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/run)
+  # The sweeper allows at most one 'range' in a sweep entry's sdl block, so
+  # clocks (a per-tier scalar) is passed as a CLI override instead of living
+  # inside sweep.json.
+  # --simperiod=1 keeps the sweeper's clocks > simperiod invariant satisfied
+  # for every tier; it is only used by BASE_CPT/BASE_CPT_RST sequences which
+  # we don't run in CI.
+  set(_cmd ${CMAKE_COMMAND} -E env
+           "SST_BENCH_HOME=${CMAKE_SOURCE_DIR}"
+           "SST_BENCH_RUN_ID=$ENV{BUILD_TAG}-${testName}"
+           ${SCRIPTS}/sst-sweeper.py
+           ${CMAKE_CURRENT_SOURCE_DIR}/sweep.json
+           ${CMAKE_CURRENT_SOURCE_DIR}/${sdl}
+           ${sweep}
+           --tmpdir ${CMAKE_CURRENT_SOURCE_DIR}/run
+           --jobname=${testName}
+           --seq=BASE
+           --simperiod=1
+           --noprompt)
+  if(APS_CLOCKS)
+    list(APPEND _cmd --clocks=${APS_CLOCKS})
+  endif()
   add_test(NAME ${testName}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${SCRIPTS}/sst-sweeper.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/sweep.json
-            ${CMAKE_CURRENT_SOURCE_DIR}/${sdl}
-            ${sweep}
-            --tmpdir ${CMAKE_CURRENT_SOURCE_DIR}/run
-            --jobname=${testName}
-            --seq=BASE
-            --noprompt)
+    COMMAND ${_cmd})
   set_tests_properties(${testName} PROPERTIES
     TIMEOUT ${APS_TIMEOUT}
     LABELS "perf-${tier}"
-    PASS_REGULAR_EXPRESSION "###SST_BENCH_PERF_V1###"
-    ENVIRONMENT "SST_BENCH_RUN_ID=$ENV{BUILD_TAG}-${testName};SST_BENCH_HOME=${CMAKE_SOURCE_DIR}")
+    PASS_REGULAR_EXPRESSION "###SST_BENCH_PERF_V1###")
 endfunction()
 
 #-- Testing Options

@@ -103,33 +103,27 @@
           }
         },
         { "name"     : "ci_fast",
-          "desc"     : "CI fast tier — small rank/thread scan, reduced clocks",
+          "desc"     : "CI fast tier — small rank/thread scan",
           "ranks"    : "1,5,2",
           "threadsPerRank" : "1,5,2",
           "sdl"      : {
-            "clocks" : "2000",
-            "x"      : "10,30,10"
+            "x" : "10,30,10"
           }
         },
         { "name"     : "ci_medium",
-          "desc"     : "CI medium tier — broader scaling with bytesPerClock sweep",
+          "desc"     : "CI medium tier — broader rank/thread scan with x range",
           "ranks"    : "1,9,2",
           "threadsPerRank" : "1,9,2",
-          "depvar"   : "x",
           "sdl"      : {
-            "clocks"        : "5000",
-            "x"             : "10,110,20",
-            "bytesPerClock" : "100,500,200"
+            "x" : "10,110,20"
           }
         },
         { "name"     : "ci_heavy",
-          "desc"     : "CI heavy tier — deep parameter sweep",
+          "desc"     : "CI heavy tier — deep rank/thread/x sweep",
           "ranks"    : "1,9,1",
           "threadsPerRank" : "1,5,2",
           "sdl"      : {
-            "clocks"        : "10000",
-            "x"             : "10,110,20",
-            "bytesPerClock" : "100,1100,200"
+            "x" : "10,210,20"
           }
         }
     ]
