@@ -424,7 +424,7 @@ class JsonParams():
                     self.errors.append(f"error: sst param '{p}' is reserved")
                 if "checkpoint" in p and "CPT" in self.job_sequencer_params["seq"]:
                     self.errors.append(
-                        f"error: sst param '{p}' conflicts with job sequence '{self.job_sequencer_params["seq"]}'")
+                        f"error: sst param '{p}' conflicts with job sequence '{self.job_sequencer_params['seq']}'")
 
         if 'sweeps' not in self.json:
             self.errors.append('error: json missing sweeps group')
@@ -450,7 +450,7 @@ class JsonParams():
     def sweep_short_help(self) -> str:
         if self.json == None:
             return ""
-        return f"\n{", ".join(self.sweeps.keys())}"
+        return f"\n{', '.join(self.sweeps.keys())}"
     def sweep_long_help(self) -> str:
         s = f"Available sweeps [{len(self.sweeps)}]\n"
         for sweep in self.sweeps:
@@ -694,7 +694,7 @@ if __name__ == '__main__':
     # Resolved parameter validation
     #
     if job_sequencer_params['seq'] not in ALLOWED_SEQ:
-        print(f"error: job_sequencer.seq must be in [{"|".join(ALLOWED_SEQ)}]")
+        print(f"error: job_sequencer.seq must be in [{'|'.join(ALLOWED_SEQ)}]")
     simperiod = int(job_sequencer_params['simperiod'])
     if simperiod <= 0:
         print("error: simperiod must be greater than 0")
