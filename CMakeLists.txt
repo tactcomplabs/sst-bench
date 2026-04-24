@@ -166,6 +166,48 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
 #   set(ENABLE_SSTDBG "ON")
 # endif()
 
+# ---------------------------------------------------
+# add_perf_sweep(<test_name> <sdl_file> <sweep_name> <tier>
+#                [TIMEOUT <seconds>])
+#
+# Registers a CTest that invokes scripts/sst-sweeper.py with --seq=BASE
+# and the named sweep entry from the benchmark's sweep.json. The test is
+# labeled perf-<tier> so Jenkins can filter via `ctest -L perf-<tier>`.
+# The sweeper emits ###SST_BENCH_PERF_V1###...###END### markers to stdout;
+# PASS_REGULAR_EXPRESSION fails the test if no marker is emitted.
+#
+# SST_BENCH_RUN_ID baked into the test env uses $ENV{BUILD_TAG} captured
+# at configure time; Jenkins re-configures per build so the run_id is
+# unique per (build, bench, tier). Local devs get a deterministic id.
+# ---------------------------------------------------
+function(add_perf_sweep testName sdl sweep tier)
+  cmake_parse_arguments(APS "" "TIMEOUT" "" ${ARGN})
+  if(NOT APS_TIMEOUT)
+    if("${tier}" STREQUAL "fast")
+      set(APS_TIMEOUT 180)
+    elseif("${tier}" STREQUAL "medium")
+      set(APS_TIMEOUT 900)
+    else()
+      set(APS_TIMEOUT 3600)
+    endif()
+  endif()
+  add_test(NAME ${testName}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${SCRIPTS}/sst-sweeper.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/sweep.json
+            ${CMAKE_CURRENT_SOURCE_DIR}/${sdl}
+            ${sweep}
+            --tmpdir ${CMAKE_CURRENT_SOURCE_DIR}/run
+            --jobname=${testName}
+            --seq=BASE
+            --noprompt)
+  set_tests_properties(${testName} PROPERTIES
+    TIMEOUT ${APS_TIMEOUT}
+    LABELS "perf-${tier}"
+    PASS_REGULAR_EXPRESSION "###SST_BENCH_PERF_V1###"
+    ENVIRONMENT "SST_BENCH_RUN_ID=$ENV{BUILD_TAG}-${testName};SST_BENCH_HOME=${CMAKE_SOURCE_DIR}")
+endfunction()
+
 #-- Testing Options
 option(SSTBENCH_ENABLE_TESTING "Enable Testing" OFF)
 if(SSTBENCH_ENABLE_TESTING)

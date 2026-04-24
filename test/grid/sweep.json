@@ -96,7 +96,36 @@
           "sdl" : {
             "numBytes" : "1000,66000,5000"
           }
+        },
+        { "name"     : "ci_fast",
+          "desc"     : "CI fast tier — small rank/thread scan, reduced clocks",
+          "ranks"    : "1,5,2",
+          "threadsPerRank" : "1,5,2",
+          "sdl"      : {
+            "clocks" : "10000",
+            "x"      : "10,30,10"
+          }
+        },
+        { "name"     : "ci_medium",
+          "desc"     : "CI medium tier — weak-scaling sweep",
+          "ranks"    : "1,9,2",
+          "threadsPerRank" : "1,5,2",
+          "depvar"   : "x",
+          "sdl"      : {
+            "clocks" : "50000",
+            "x"      : "10,110,20"
+          }
+        },
+        { "name"     : "ci_heavy",
+          "desc"     : "CI heavy tier — size/rank permutation",
+          "ranks"    : "1,9,2",
+          "threadsPerRank" : "1,5,2",
+          "sdl"      : {
+            "clocks"   : "100000",
+            "x"        : "10,110,20",
+            "numBytes" : "512,2560,1024"
+          }
         }
     ]
- 
+
 }
