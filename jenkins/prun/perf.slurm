@@ -113,7 +113,7 @@ fi
 #-- generate file_info table
 $SQLUTIL file-info --jobpath=${RUNDIR} --jobid=${SLURM_JOB_ID} --db=${DB}
 
-#-- Generate timing_info table using --timing-info-json
+#-- Generate timing_info table using sst generated timing.json file
 if [ -e timing.json ]; then
     $SQLUTIL timing-info --jobpath=${RUNDIR} --jobid=${SLURM_JOB_ID} --db=${DB}
 fi

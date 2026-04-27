@@ -11,6 +11,7 @@
 #
 
 import argparse
+import jobutils
 import json
 import os
 import re
@@ -429,7 +430,7 @@ if __name__ == '__main__':
     # timing_info table                   
     parser_json = subparsers.add_parser(
         'timing-info', 
-        help='update timing_info table using json file generated with "sst --timing-info-json"',
+        help='update timing_info table using sst generated "timing.json" file',
         parents=[parent_parser])
     parser_json.set_defaults(func=_timing_info)
     parser_json.add_argument("--jsonFile", type=str, help="name of JSON file [{jobpath}/timing.json]")
@@ -463,9 +464,27 @@ if __name__ == '__main__':
         for arg in vars(args):
             print("\t", arg, " = ", getattr(args, arg))
 
+    # json file formats are sst version specific
+    jutil = jobutils.JobUtil("jutil")
+    jutil.exec(cmd='sst --version')
+    sst_version_string = jutil.res1
+    sst_version_match=re.search(r'SST-Core Version \((.+)[,\)]?.+$', sst_version_string)
+    if sst_version_match:
+        sst_version=sst_version_match.group(1).split(',')[0]
+    else:
+        sst_version="?"
+    print(f"sst {sst_version}")
+    major=sst_version.split('.')[0]
+    sst16plus = True
+    try:
+        if int(major) < 16:
+            sst16plus = False 
+    except:
+            sst16plus = True  
+
     # Create or open database file
     sdl_params = { "sdl_param0" : "0", "sdl_param1" : "1"}
-    db = sqldb(args.db, sdl_params, args.logging)
+    db = sqldb(args.db, sdl_params, sst16plus, args.logging)
 
     # Invoke selection
     args.func(db, args)

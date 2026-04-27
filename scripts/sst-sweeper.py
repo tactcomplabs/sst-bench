@@ -414,7 +414,7 @@ class JsonParams():
         self.errors = []
         self.sweep_required = ['name', 'desc', 'ranks', 'threadsPerRank']
         self.sweep_optional = ['depvar', 'sdl']
-        self.sst_reserved = ['num-threads', 'output-json', 'print-timing-info', 'timing-info-json']
+        self.sst_reserved = ['num-threads', 'output-json', 'print-timing-info', 'timing-info-json', 'profiling-output']
         self.re_env_var = r"\$\{.+?}"
         if jsonFile == None:
             return
