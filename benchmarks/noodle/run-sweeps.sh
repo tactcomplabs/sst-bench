@@ -20,7 +20,7 @@
 /bin/rm -rf jobs/* noodle.db noodle.csv noodle.sql
 mkdir -p jobs || exit 1
 
-OPTS="--noprompt $1"
+OPTS="--noprompt $@"
 
 # default
 do_sanity_only=true

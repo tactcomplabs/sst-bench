@@ -20,7 +20,7 @@
 /bin/rm -rf jobs/* hpe-phold.db hpe-phold.csv hpe-phold.sql
 mkdir -p jobs || exit 1
 
-OPTS="--noprompt $1"
+OPTS="--noprompt $@"
 
 # default
 do_sanity_only=true
