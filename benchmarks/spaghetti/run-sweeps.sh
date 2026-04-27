@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 # Copyright (C) 2017-2026 Tactical Computing Laboratories, LLC
 # All Rights Reserved
@@ -20,7 +20,7 @@
 /bin/rm -rf jobs/* spaghetti.db spaghetti.csv spaghetti.sql
 mkdir -p jobs || exit 1
 
-OPTS="--noprompt $1"
+OPTS="--noprompt $@"
 
 # default
 do_sanity_only=true
