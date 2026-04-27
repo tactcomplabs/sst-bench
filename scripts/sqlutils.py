@@ -188,8 +188,9 @@ def log_sql_callback(statement):
 
 class sqldb():
     
-    def __init__(self, dbFile, sdl_params: dict, logging):
+    def __init__(self, dbFile, sdl_params: dict, sst16plus: bool, logging):
         self.con = sqlite3.connect(dbFile)
+        self.sst16plus = sst16plus
         if logging==True:
             self.con.set_trace_callback(log_sql_callback)
         self.cur = self.con.cursor()
@@ -220,8 +221,8 @@ class sqldb():
     def close(self):
         self.con.close()
 
-    def insertFromJSON(self, jobid, jsonFile, jsonKey, tableName, convert):
-        if convert:
+    def insertFromJSON(self, jobid, jsonFile, jsonKey, tableName, sst16plus):
+        if sst16plus:
             jsonDict = convertToSST15(jsonFile)
         else:
             with open(jsonFile) as f:
@@ -245,8 +246,7 @@ class sqldb():
     def timing_info(self, *, jsonFile:str=None, jobpath:str, jobid:int):
         if jsonFile == None:
             jsonFile=f"{jobpath}/timing.json"
-        # TODO last param is True if SST version >= 16
-        self.insertFromJSON(jobid, jsonFile, 'timing-info', timingInfoTable, True)
+        self.insertFromJSON(jobid, jsonFile, 'timing-info', timingInfoTable, self.sst16plus)
 
     def file_info(self, *, jobpath:str, jobid:int):
         # .../_grid_perf/687804907541/_cpt/1_500000/grid_4_0.bin

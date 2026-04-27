@@ -96,7 +96,7 @@ def range_from_str(s: str) -> range:
     return range(*values)
 
 class JobEntry():
-    def __init__(self, *, sdlFile:str, options:list, sim_controls:list, ranks:int, threads:int, sst_params:list, sdl_params:list, predecessors:list = []):
+    def __init__(self, *, sdlFile:str, options:list, sim_controls:list, sst16plus:bool, ranks:int, threads:int, sst_params:list, sdl_params:list, predecessors:list = []):
         
         self.jtype = JobType.BASE
         self.predecessors = predecessors
@@ -120,11 +120,11 @@ class JobEntry():
         self.setdeps = False
 
         self.sstopts = f"--num-threads={self.threads}"
-        #TODO LEGACY
-        # self.sstopts += f" --print-timing-info=4 --timing-info-json=timing.json"
-        self.sstopts += f" --print-timing-info=4 --profiling-output=timing.json"
+        if sst16plus:
+            self.sstopts += f" --print-timing-info=4 --profiling-output=timing.json"
+        else:
+            self.sstopts += f" --print-timing-info=4 --timing-info-json=timing.json"
         self.sstopts += " --output-config=config.py --parallel-output"
-        # --output-json=config.json" 
         for opt in sst_params:
             self.sstopts += f" --{opt}={sst_params[opt]}"
         
@@ -216,7 +216,7 @@ class JobEntry():
         return jobstring
 
 class JobManager():
-    def __init__(self, sdl, options, sim_control_params, job_sequencer_params, sst_params: list, sdl_params: list ):
+    def __init__(self, sdl, options, sim_control_params, job_sequencer_params, sst_params: list, sdl_params: list):
         print("\nCreating Job Manager")
         # Ok to omit clocks which is used for calculating the number of checkpoints 
         # when 'numcpt' is not set and checkpoint or restart is enabled
@@ -261,8 +261,24 @@ class JobManager():
             self.rundir=f"{rdir}.{i}"
         os.makedirs(self.rundir)
         # print(f"{g_pfx} Jobs will run in: {self.rundir}")
+        # sst version
+        self.jutil.exec(cmd='sst --version')
+        sst_version_string = self.jutil.res1
+        sst_version_match=re.search(r'SST-Core Version \((.+)[,\)]?.+$', sst_version_string)
+        if sst_version_match:
+            self.sst_version=sst_version_match.group(1).split(',')[0]
+        else:
+            self.sst_version="?"
+        print(f"sst {self.sst_version}")
+        major=self.sst_version.split('.')[0]
+        self.sst16plus = True
+        try:
+            if int(major) < 16:
+                self.sst16plus = False 
+        except:
+            self.sst16plus = True           
         # database
-        self.sqldb = sqlutils.sqldb(self.db, self.sdl_params, self.logging)
+        self.sqldb = sqlutils.sqldb(self.db, self.sdl_params, self.sst16plus, self.logging)
     def add_job(self, entry:JobEntry):
         id = self.next_id
         self.joblist[id] = entry
@@ -339,15 +355,6 @@ class JobManager():
         elif entry.jtype==JobType.COMPLETION:
             self.pp_remote(comp_id=jobid)
 
-        # sst version
-        self.jutil.exec(cmd='sst --version')
-        sst_version_string = self.jutil.res1
-        sst_version_match=re.search(r'SST-Core Version \((.+)[,\)]?.+$', sst_version_string)
-        if sst_version_match:
-            sst_version=sst_version_match.group(1).split(',')[0]
-        else:
-            sst_version="?"
-
         self.sqldb.job_info( jobid=jobid, dataDict={
             "jobname": entry.jobname,
             "friend": friend,
@@ -359,7 +366,7 @@ class JobManager():
             "nodeclamp" : self.nodeclamp,
             "jobnodes"  : entry.nodes,
             "cwd": cwd,
-            "sst_version": sst_version,
+            "sst_version": self.sst_version,
             "os_type": g_os_type,
             "date":  datetime.now().strftime("%Y.%m.%d %H:%M") 
         } )
@@ -823,6 +830,7 @@ if __name__ == '__main__':
                     sdlFile=sdlFile,
                     options=options,
                     sim_controls=sim_control_params,
+                    sst16plus=jobmgr.sst16plus,
                     ranks=r,
                     threads=t,
                     sst_params=sst_params,
