@@ -205,9 +205,15 @@ function(add_perf_sweep testName sdl sweep tier)
   # --simperiod=1 keeps the sweeper's clocks > simperiod invariant satisfied
   # for every tier; it is only used by BASE_CPT/BASE_CPT_RST sequences which
   # we don't run in CI.
+  # OMPI_MCA_rmaps_base_oversubscribe=1 lets mpirun -np N succeed even when
+  # the SLURM allocation has fewer than N slots. CI tiers prioritize trend
+  # detection over absolute timing accuracy, so oversubscribed runs are
+  # acceptable here. Without this, every config with ranks > available
+  # slots silently drops out of the sweep.
   set(_cmd ${CMAKE_COMMAND} -E env
            "SST_BENCH_HOME=${CMAKE_SOURCE_DIR}"
            "SST_BENCH_RUN_ID=$ENV{BUILD_TAG}-${testName}"
+           "OMPI_MCA_rmaps_base_oversubscribe=1"
            ${SCRIPTS}/sst-sweeper.py
            ${CMAKE_CURRENT_SOURCE_DIR}/sweep.json
            ${CMAKE_CURRENT_SOURCE_DIR}/${sdl}
