@@ -11,6 +11,7 @@
 #
 
 import argparse
+import jobutils
 import json
 import os
 import re
@@ -121,13 +122,76 @@ keyDict = {
     sdlInfoTable: []
 }
 
+UNITS={
+    'B'     : 1,
+    'KB'    : 1E3,
+    'MB'    : 1E6,
+    'GB'    : 1E9,
+    'TB'    : 1E12,
+}
+
+def getFactor(unit):
+    if unit not in UNITS.keys():
+        print(f"error: {unit} not in [{UNITS}]")
+        sys.exit(1)
+    return UNITS[unit]
+
+def toB(s):
+    return round(float(s.split()[0]) * getFactor(s.split()[1]))
+
+def toKB(s):
+    return round(float(s.split()[0]) * getFactor(s.split()[1])/1E3)
+
+def toMB(s):
+    return round(float(s.split()[0]) * getFactor(s.split()[1])/1E6)
+
+def assertSeconds(s):
+    if s.split()[1] != "s":
+        print(f"error: value not in seconds: {s}")
+        sys.exit(1)
+    return float(s.split()[0])
+
+# To smooth transition from SST15 to SST16
+def convertToSST15(jsonFile):
+    with open(jsonFile) as f:
+        sst16Dict = json.load(f)
+    metadata  = sst16Dict['metadata']
+    regions   = sst16Dict['regions']
+    resources = sst16Dict['resources']
+
+    sst15Dict={ 
+        'timing-info': {
+            "local_max_rss":             toKB(resources['local_max_rss']),
+            "global_max_rss":            toKB(resources['global_max_rss']),
+            "local_max_pf":               int(resources['local_max_page_faults'].split()[0]),
+            "global_pf":                  int(resources['global_page_faults']   .split()[0]),
+            "global_max_io_in":           int(resources['global_max_io_in']     .split()[0]),
+            "global_max_io_out":          int(resources['global_max_io_out']    .split()[0]),
+            "global_max_sync_data_size":  toB(resources['global_max_sync_data_size']),
+            "global_sync_data_size":      toB(resources['global_sync_data_size']),
+            "max_mempool_size":           toB(resources['max_mempool_size']),
+            "global_mempool_size":        toB(resources['global_mempool_size']),
+            "global_active_activities":   int(resources['global_undeleted_activities']),
+            "global_current_tv_depth":    int(resources['global_current_timevortex_depth'].split()[0]),
+            "global_max_tv_depth":        int(resources['global_max_timevortex_depth'].split()[0]),
+            "ranks":                       int(metadata['ranks']),
+            "threads":                     int(metadata['threads']),
+            "max_build_time":     assertSeconds(regions['total']['build']['duration']),
+            "max_run_time":       assertSeconds(regions['total']['execute']['run']['duration']),
+            "max_total_time":     assertSeconds(regions['total']['duration']),
+            "simulated_time_ua":               metadata['simulation_time']
+        }
+    }
+    return sst15Dict
+
 def log_sql_callback(statement):
     print("Executing SQL statement:", statement)
 
 class sqldb():
     
-    def __init__(self, dbFile, sdl_params: dict, logging):
+    def __init__(self, dbFile, sdl_params: dict, sst16plus: bool, logging):
         self.con = sqlite3.connect(dbFile)
+        self.sst16plus = sst16plus
         if logging==True:
             self.con.set_trace_callback(log_sql_callback)
         self.cur = self.con.cursor()
@@ -158,9 +222,12 @@ class sqldb():
     def close(self):
         self.con.close()
 
-    def insertFromJSON(self, jobid, jsonFile, jsonKey, tableName):
-        with open(jsonFile) as f:
-            jsonDict = json.load(f)
+    def insertFromJSON(self, jobid, jsonFile, jsonKey, tableName, sst16plus):
+        if sst16plus:
+            jsonDict = convertToSST15(jsonFile)
+        else:
+            with open(jsonFile) as f:
+                jsonDict = json.load(f)
         jsonInfo = jsonDict[jsonKey]
         data = ( jobid, )
         for k in self.sortedKeyDict[tableName]:
@@ -180,7 +247,7 @@ class sqldb():
     def timing_info(self, *, jsonFile:str=None, jobpath:str, jobid:int):
         if jsonFile == None:
             jsonFile=f"{jobpath}/timing.json"
-        self.insertFromJSON(jobid, jsonFile, 'timing-info', timingInfoTable)
+        self.insertFromJSON(jobid, jsonFile, 'timing-info', timingInfoTable, self.sst16plus)
 
     def file_info(self, *, jobpath:str, jobid:int):
         # .../_grid_perf/687804907541/_cpt/1_500000/grid_4_0.bin
@@ -363,7 +430,7 @@ if __name__ == '__main__':
     # timing_info table                   
     parser_json = subparsers.add_parser(
         'timing-info', 
-        help='update timing_info table using json file generated with "sst --timing-info-json"',
+        help='update timing_info table using sst generated "timing.json" file',
         parents=[parent_parser])
     parser_json.set_defaults(func=_timing_info)
     parser_json.add_argument("--jsonFile", type=str, help="name of JSON file [{jobpath}/timing.json]")
@@ -397,9 +464,27 @@ if __name__ == '__main__':
         for arg in vars(args):
             print("\t", arg, " = ", getattr(args, arg))
 
+    # json file formats are sst version specific
+    jutil = jobutils.JobUtil("jutil")
+    jutil.exec(cmd='sst --version')
+    sst_version_string = jutil.res1
+    sst_version_match=re.search(r'SST-Core Version \((.+)[,\)]?.+$', sst_version_string)
+    if sst_version_match:
+        sst_version=sst_version_match.group(1).split(',')[0]
+    else:
+        sst_version="?"
+    print(f"sst {sst_version}")
+    major=sst_version.split('.')[0]
+    sst16plus = True
+    try:
+        if int(major) < 16:
+            sst16plus = False 
+    except:
+            sst16plus = True  
+
     # Create or open database file
     sdl_params = { "sdl_param0" : "0", "sdl_param1" : "1"}
-    db = sqldb(args.db, sdl_params, args.logging)
+    db = sqldb(args.db, sdl_params, sst16plus, args.logging)
 
     # Invoke selection
     args.func(db, args)

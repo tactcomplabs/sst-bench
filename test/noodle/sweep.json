@@ -2,7 +2,8 @@
     "job_sequencer" :
     {
         "seq"       : ["BASE_CPT_RST", "Select simulation sequence: BASE|BASE_CPT|BASE_CPT_RST"],
-        "simperiod" : ["1000",        "checkpoint sim period in ns"]
+        "simperiod" : ["1000",        "checkpoint sim period in ns"],
+        "numcpt"    : ["0", "Estimated number of checkpoints. When 0, count is calculated as sdl['clocks']/simperiod"]	
     },
     "sim_controls"  :
     {
